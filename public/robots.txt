@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /download/
+Disallow: /thank-you
+
+Sitemap: https://uncomplicated.guides/sitemap-index.xml

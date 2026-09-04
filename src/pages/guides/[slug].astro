@@ -1,0 +1,388 @@
+---
+import Base from '../../layouts/Base.astro';
+import GuideCover from '../../components/GuideCover.astro';
+import BuyButton from '../../components/BuyButton.astro';
+import PartsList from '../../components/PartsList.astro';
+import WhoFor from '../../components/WhoFor.astro';
+import SignupForm from '../../components/SignupForm.astro';
+import { site, formatPrice } from '../../data/site';
+import { guides, upcomingGuides } from '../../data/guides';
+
+export function getStaticPaths() {
+  return guides.map((g) => ({ params: { slug: g.slug }, props: { guide: g } }));
+}
+
+const { guide } = Astro.props;
+const sellable = guide.status === 'available';
+const price = formatPrice(guide.price, guide.currency);
+const others = upcomingGuides.filter((g) => g.slug !== guide.slug);
+const metaLine = [guide.pages && `${guide.pages} pages`, 'PDF', guide.edition].filter(Boolean).join(' · ');
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: guide.title,
+  description: guide.short,
+  image: guide.cover ? new URL(guide.cover.src, Astro.site).href : undefined,
+  brand: { '@type': 'Brand', name: site.name },
+  author: { '@type': 'Person', name: site.author.name },
+  offers: sellable
+    ? {
+        '@type': 'Offer',
+        price: (guide.price / 100).toFixed(2),
+        priceCurrency: guide.currency,
+        availability: 'https://schema.org/InStock',
+        url: new URL(Astro.url.pathname, Astro.site).href,
+      }
+    : undefined,
+};
+---
+
+<Base title={guide.title} description={guide.short} current="Library" image={guide.cover} jsonLd={jsonLd}>
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="container hero-grid">
+      <div>
+        <a href="/guides" class="back">← All guides</a>
+        <h1 class="display">{guide.title}</h1>
+        <p class="sub">{guide.subtitle}</p>
+        <p class="desc">{guide.description}</p>
+        <div class="meta">
+          {sellable ? <span class="price-badge">{price}</span> : <span class="soon-badge">Soon</span>}
+          <span class="small">{metaLine}</span>
+        </div>
+        <div class="cta">
+          {
+            sellable ? (
+              <BuyButton guide={guide} label="Buy the guide →" />
+            ) : (
+              <a href="#notify" class="btn btn-accent">Tell me when it's out →</a>
+            )
+          }
+        </div>
+      </div>
+      <GuideCover guide={guide} />
+    </div>
+  </section>
+
+  <section class="section-alt inside">
+    <div class="container inside-grid">
+      <div class="sticky">
+        <p class="eyebrow">What's inside</p>
+        <h2 class="display">Four parts, in the order the work happens</h2>
+        <p>Not by topic, but by the flow of the job. Each part ends where the next one begins.</p>
+      </div>
+      <PartsList parts={guide.parts} />
+    </div>
+  </section>
+
+  {
+    guide.outcomes && (
+      <section class="section-dark outcomes">
+        <div class="container">
+          <p class="eyebrow">After the guide</p>
+          <h2 class="display">What you will be able to do that you can't today</h2>
+          <ul>
+            {guide.outcomes.map((o) => (
+              <li>
+                <span aria-hidden="true">→</span>
+                {o}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <WhoFor forWho={guide.forWho} notFor={guide.notFor} />
+
+  {
+    guide.authorNote && (
+      <section class="section-alt author-note">
+        <div class="container">
+          <div class="inner">
+            <p class="eyebrow">Who wrote it</p>
+            {guide.authorNote.map((p) => <p class="note">{p}</p>)}
+            <p class="imprint">
+              Published under the <strong>{site.imprint}</strong> imprint — same author, same text.
+              That is the name you will see in the copyright line inside the file.
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    sellable ? (
+      <section id="buy" class="section">
+        <div class="container">
+          <div class="panel buy-panel">
+            <div>
+              <h2 class="display">{price}, once.</h2>
+              <p class="p">
+                {guide.pages}-page PDF in English. Payment goes through Stripe — your card never
+                enters this site. The file arrives right after payment and again by email, so it
+                does not get lost.
+              </p>
+              <p class="small">
+                Current as of {guide.currentAsOf}. Read and print on all your devices, use the
+                templates with your own clients; only the file itself is not shared or resold.
+              </p>
+            </div>
+            <div class="buy-action">
+              <BuyButton guide={guide} />
+            </div>
+          </div>
+        </div>
+      </section>
+    ) : (
+      <section id="notify" class="section">
+        <div class="container">
+          <div class="panel buy-panel">
+            <div>
+              <h2 class="display">Not on sale yet.</h2>
+              <p class="p">
+                This guide is in progress. Leave an email and I will write on the day it comes out
+                — once, no list, nothing after that.
+              </p>
+            </div>
+            <SignupForm guide={guide.slug} redirect={`/guides/${guide.slug}?signup=ok#notify`} />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    others.length > 0 && (
+      <section class="next">
+        <div class="container">
+          <h2 class="display">Coming next</h2>
+          <ul>
+            {others.map((g) => (
+              <li>
+                <a href={`/guides/${g.slug}`}>
+                  <span class="t">{g.title}</span>
+                  <span class="d">{g.short}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .hero {
+    padding: clamp(40px, 6vw, 80px) 0 clamp(64px, 9vw, 120px);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 55% at 78% 42%, rgba(226, 84, 43, 0.14), transparent 70%),
+      radial-gradient(45% 40% at 88% 70%, rgba(226, 84, 43, 0.07), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(36px, 6vw, 88px);
+    align-items: center;
+  }
+  .back {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 18px;
+  }
+  .back:hover {
+    color: var(--accent);
+  }
+  .hero h1 {
+    font-size: clamp(36px, 6.4vw, 76px);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    margin: 0;
+  }
+  .sub {
+    font-size: clamp(17px, 2vw, 21px);
+    line-height: 1.45;
+    color: var(--ink);
+    font-weight: 500;
+    margin: 20px 0 0;
+    max-width: 30ch;
+  }
+  .desc {
+    font-size: 16.5px;
+    line-height: 1.62;
+    color: var(--text);
+    margin: 18px 0 0;
+    max-width: 44ch;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .cta {
+    margin-top: 26px;
+  }
+  .inside {
+    padding: clamp(72px, 10vw, 132px) 0;
+  }
+  .inside-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: clamp(40px, 6vw, 88px);
+    align-items: start;
+  }
+  .sticky {
+    position: sticky;
+    top: 95px;
+  }
+  .sticky h2 {
+    font-size: clamp(28px, 4.2vw, 48px);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    margin: 14px 0 0;
+  }
+  .sticky p:not(.eyebrow) {
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 18px 0 0;
+    max-width: 34ch;
+  }
+  .outcomes {
+    padding: clamp(72px, 10vw, 128px) 0;
+  }
+  .outcomes h2 {
+    font-size: clamp(28px, 4.6vw, 54px);
+    line-height: 1.03;
+    letter-spacing: -0.045em;
+    margin: 16px 0 0;
+    max-width: 16em;
+  }
+  .outcomes ul {
+    list-style: none;
+    margin: clamp(36px, 5vw, 56px) 0 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+    max-width: 900px;
+  }
+  .outcomes li {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 20px 0;
+    font-size: clamp(16px, 1.7vw, 19px);
+    line-height: 1.5;
+    border-top: 1px solid var(--border-dark);
+  }
+  .outcomes li span {
+    flex: none;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .author-note {
+    padding: clamp(60px, 8vw, 104px) 0;
+  }
+  .author-note .inner {
+    max-width: 720px;
+  }
+  .note {
+    font-size: clamp(17px, 1.9vw, 20px);
+    line-height: 1.62;
+    color: var(--text);
+    margin: 18px 0 0;
+  }
+  .imprint {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+    margin: 28px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .buy-panel {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+  }
+  .buy-panel h2 {
+    font-size: clamp(26px, 3.6vw, 40px);
+    letter-spacing: -0.04em;
+    margin: 0;
+  }
+  .buy-panel .p {
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 16px 0 0;
+    max-width: 46ch;
+  }
+  .buy-panel .small {
+    margin: 16px 0 0;
+  }
+  .buy-action {
+    display: grid;
+    justify-items: start;
+  }
+  .next {
+    padding: clamp(48px, 7vw, 88px) 0;
+    border-top: 1px solid var(--border);
+  }
+  .next h2 {
+    font-size: 24px;
+    margin: 0 0 22px;
+  }
+  .next ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .next a {
+    display: block;
+    color: inherit;
+  }
+  .next .t {
+    display: block;
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .next a:hover .t {
+    color: var(--accent);
+  }
+  .next .d {
+    font-size: 15px;
+    color: var(--text-2);
+  }
+  @media (max-width: 860px) {
+    .hero-grid,
+    .inside-grid,
+    .buy-panel {
+      grid-template-columns: 1fr;
+    }
+    .hero-grid > :global(.cover-wrap) {
+      order: -1;
+    }
+    .sticky {
+      position: static;
+    }
+  }
+</style>

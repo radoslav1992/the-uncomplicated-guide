@@ -1,0 +1,115 @@
+---
+import { site } from '../data/site';
+import { availableGuides } from '../data/guides';
+
+const year = new Date().getFullYear();
+const nav = [
+  { label: 'Library', href: '/guides' },
+  ...availableGuides.map((g) => ({ label: g.title, href: `/guides/${g.slug}` })),
+  { label: 'About', href: '/#author' },
+  { label: 'Contact', href: '/contact' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container cols">
+    <div class="col">
+      <p class="brand">
+        <img src="/brand/logo-mark-96.webp" alt="" width="26" height="26" />
+        <span>{site.name}</span>
+      </p>
+      <p class="muted">{site.legalName}</p>
+      <p class="muted">{site.reach}</p>
+    </div>
+    <div class="col">
+      <p class="heading">Contact</p>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+    </div>
+    <nav class="col" aria-label="Footer navigation">
+      <p class="heading">Navigation</p>
+      {nav.map((it) => <a href={it.href}>{it.label}</a>)}
+    </nav>
+    <div class="col">
+      <p class="heading">Terms</p>
+      {site.legalNav.map((it) => <a href={it.href}>{it.label}</a>)}
+      <p class="muted">{site.footerPromise}</p>
+    </div>
+  </div>
+  <div class="container bottom">
+    <p class="muted">© {year} {site.name}. All rights reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+    background: var(--bg-alt);
+    margin-top: auto;
+  }
+  .cols {
+    padding-top: 48px;
+    padding-bottom: 28px;
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 1.2fr;
+    gap: 32px;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 14px;
+  }
+  .col a {
+    color: var(--text-2);
+    transition: color 0.16s ease;
+  }
+  .col a:hover {
+    color: var(--ink);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .brand img {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    display: block;
+    border-radius: 6px;
+  }
+  .heading {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    margin: 0 0 4px;
+  }
+  .muted {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--muted);
+    margin: 0;
+  }
+  .bottom {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    border-top: 1px solid var(--border);
+  }
+  @media (max-width: 860px) {
+    .cols {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 520px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

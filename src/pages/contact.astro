@@ -1,0 +1,135 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { site } from '../data/site';
+---
+
+<Base
+  title="Contact"
+  description="A download that did not arrive, a receipt you need, a question before you buy. I read every message and reply within one working day."
+  current="Contact"
+>
+  <div class="container wrap">
+    <div>
+      <p class="eyebrow">Contact</p>
+      <h1 class="display">Write to me.</h1>
+      <p class="intro">
+        A download that did not arrive, a receipt you need for the books, a question before you
+        buy, or something you think a guide got wrong. I read every message myself and reply
+        within one working day.
+      </p>
+      <ContactForm />
+    </div>
+
+    <aside>
+      <div class="card">
+        <p class="display t">What happens next</p>
+        <p>I reply within one working day. Download problems are usually fixed the same day: the link is reissued to the email you paid with.</p>
+        <p>Refund requests are handled as written in the <a href="/refunds">refund policy</a> — no forms, one email.</p>
+      </div>
+      <div class="card dark">
+        <p class="display t">Prefer email directly?</p>
+        <p class="label">Everything about the guides</p>
+        <a href={`mailto:${site.email}`} class="mail">{site.email}</a>
+        <p class="fine">Send purchase questions from the address you paid with — it saves a round trip.</p>
+      </div>
+      <div class="card">
+        <p class="legal-note">
+          The Uncomplicated Guides are written and sold by {site.author.name}, {site.author.city}.<br />
+          Legal details are in the <a href="/imprint">imprint</a>.
+        </p>
+      </div>
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .wrap {
+    padding-top: 76px;
+    padding-bottom: 96px;
+    display: grid;
+    grid-template-columns: 1fr 0.85fr;
+    gap: 56px;
+    align-items: start;
+  }
+  h1 {
+    font-size: clamp(32px, 5.5vw, 48px);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    margin: 12px 0 14px;
+  }
+  .intro {
+    font-size: 18px;
+    color: var(--text-2);
+    margin: 0 0 34px;
+    max-width: 520px;
+  }
+  aside {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 24px;
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-2);
+    margin: 0 0 16px;
+  }
+  .card p:last-child {
+    margin-bottom: 0;
+  }
+  .t {
+    font-size: 18px;
+    color: var(--ink);
+    margin: 0 0 10px !important;
+  }
+  .dark {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .dark .t {
+    color: #fff;
+    margin-bottom: 16px !important;
+  }
+  .label {
+    font-size: 12.5px !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.6) !important;
+    margin: 0 0 4px !important;
+  }
+  .mail {
+    display: block;
+    font-size: 16px;
+    color: #fff;
+    word-break: break-word;
+  }
+  .mail:hover {
+    color: var(--accent-tint);
+    text-decoration: underline;
+  }
+  .fine {
+    font-size: 13px !important;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.55) !important;
+    margin: 8px 0 0 !important;
+  }
+  .legal-note {
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+  }
+  @media (max-width: 860px) {
+    .wrap {
+      grid-template-columns: 1fr;
+      gap: 32px;
+      padding-top: 48px;
+      padding-bottom: 64px;
+    }
+    aside {
+      padding-top: 0;
+    }
+  }
+</style>

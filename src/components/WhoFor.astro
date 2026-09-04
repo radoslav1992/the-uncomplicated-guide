@@ -1,0 +1,46 @@
+---
+interface Props {
+  forWho: string[];
+  notFor: string[];
+  forTitle?: string;
+  notTitle?: string;
+}
+const {
+  forWho,
+  notFor,
+  forTitle = 'Who it’s for',
+  notTitle = 'Who it’s not for',
+} = Astro.props;
+---
+
+<section class="section">
+  <div class="container grid-2">
+    <div>
+      <h2 class="display h">{forTitle}</h2>
+      <ul class="dash-list">{forWho.map((t) => <li>{t}</li>)}</ul>
+    </div>
+    <div>
+      <h2 class="display h">{notTitle}</h2>
+      <ul class="dash-list accent">{notFor.map((t) => <li>{t}</li>)}</ul>
+      <p class="why">
+        A guide bought by someone it is not for costs more than one not sold. That is why this
+        column exists.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .h {
+    font-size: clamp(21px, 2.6vw, 28px);
+    margin: 0 0 20px;
+  }
+  .why {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+    margin: 24px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+</style>

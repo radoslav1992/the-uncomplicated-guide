@@ -1,0 +1,21 @@
+---
+import type { GuidePart } from '../data/guides';
+interface Props {
+  parts: GuidePart[];
+}
+const { parts } = Astro.props;
+---
+
+<ol class="parts">
+  {
+    parts.map((p, i) => (
+      <li>
+        <span class="num">{String(i + 1).padStart(2, '0')}</span>
+        <div>
+          <h3>{p.title}</h3>
+          <p>{p.text}</p>
+        </div>
+      </li>
+    ))
+  }
+</ol>

@@ -1,0 +1,31 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../data/site';
+---
+
+<Legal title="Terms of sale" description="How the guides are sold, delivered and licensed.">
+  <h2>Who is selling</h2>
+  <p>The guides on this site are written and sold by {site.author.name}, trading as {site.name}, {site.author.city}. Contact: <a href={`mailto:${site.email}`}>{site.email}</a>. Full details are in the <a href="/imprint">imprint</a>.</p>
+
+  <h2>What you are buying</h2>
+  <p>Each guide is a digital file (PDF) delivered by download. The page of each guide states its title, edition, page count, language and the date it is current as of. That description is the whole offer — there is no subscription, no membership and no recurring charge.</p>
+
+  <h2>Price and payment</h2>
+  <p>Prices are shown in euro and include applicable VAT. Payment is processed by Stripe; card details are entered on Stripe's pages and never reach this site. Stripe issues the receipt. The price shown at checkout is the price charged.</p>
+
+  <h2>Delivery</h2>
+  <p>After payment you are returned to a page that issues a download link immediately. The same link is sent to the email address given at checkout. The link is valid for {site.downloadLinkDays} days and can be reissued at any time by reopening the page Stripe returned you to, or by writing to the address above.</p>
+
+  <h2>Licence</h2>
+  <p>The purchase grants you a personal, non-transferable licence to read, store and print the guide on any of your own devices. The checklists, prompts and templates inside may be used in your own work and with your own clients.</p>
+  <p>You may not share, publish, resell or redistribute the file or substantial parts of it, or remove the copyright notice. A team licence is available on request.</p>
+
+  <h2>Right of withdrawal and refunds</h2>
+  <p>Under EU consumer law the fourteen-day right of withdrawal for digital content ends once the download has started, and you agree to that at checkout. Separately from that, if a guide is not what its page described, write within fourteen days of purchase and it will be refunded. The details are in the <a href="/refunds">refund policy</a>.</p>
+
+  <h2>Accuracy</h2>
+  <p>The guides describe tools, prices and services as they were on the stated date. They change. The guides are practical advice, not legal, tax or financial advice, and the results you get depend on how you apply them. Liability is limited to the price paid, except where the law does not allow that limitation.</p>
+
+  <h2>Applicable law</h2>
+  <p>These terms are governed by Bulgarian law. Consumers in the EU keep the protections of the law of their own country of residence. The EU online dispute resolution platform is available at ec.europa.eu/consumers/odr.</p>
+</Legal>

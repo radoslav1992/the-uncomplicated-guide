@@ -1,0 +1,110 @@
+---
+import { Image } from 'astro:assets';
+import type { Guide } from '../data/guides';
+
+interface Props {
+  guide: Guide;
+  /** Rendered width of the cover in px (used for srcset sizing). */
+  width?: number;
+  /** Large hero cover vs small shelf thumbnail. */
+  size?: 'hero' | 'shelf';
+  href?: string;
+  class?: string;
+}
+const { guide, size = 'hero', href, class: className } = Astro.props;
+const alt = `Cover of ${guide.title} — ${guide.subtitle.toLowerCase()}`;
+const Tag = href ? 'a' : 'div';
+---
+
+<div class:list={['cover-wrap', size, className]}>
+  <div class="glow" aria-hidden="true"></div>
+  <Tag href={href} class="cover">
+    {
+      guide.cover ? (
+        <Image
+          src={guide.cover}
+          alt={alt}
+          widths={size === 'hero' ? [380, 760, 1140] : [200, 400]}
+          sizes={size === 'hero' ? '(max-width: 860px) 78vw, 380px' : '200px'}
+          loading={size === 'hero' ? 'eager' : 'lazy'}
+          fetchpriority={size === 'hero' ? 'high' : undefined}
+        />
+      ) : (
+        <div class="placeholder" aria-hidden="true">
+          {guide.title}
+        </div>
+      )
+    }
+  </Tag>
+  <slot />
+</div>
+
+<style>
+  .cover-wrap {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+  }
+  .glow {
+    position: absolute;
+    inset: -6%;
+    background: radial-gradient(closest-side, rgba(226, 84, 43, 0.22), transparent 78%);
+    pointer-events: none;
+  }
+  .cover {
+    position: relative;
+    display: block;
+    transform: rotate(-2.2deg);
+    filter: drop-shadow(0 26px 44px rgba(22, 19, 15, 0.3));
+    transition: transform 0.2s ease;
+    color: inherit;
+  }
+  a.cover:hover {
+    transform: rotate(-1deg) translateY(-4px);
+  }
+  .cover img,
+  .placeholder {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+  }
+  .hero {
+    padding: 16px 0;
+  }
+  .hero .cover {
+    width: min(380px, 78%);
+  }
+  .shelf {
+    padding: 8px;
+  }
+  .shelf .glow {
+    inset: -14%;
+  }
+  .shelf .cover {
+    width: clamp(120px, 20vw, 200px);
+    transform: rotate(-2deg);
+    filter: drop-shadow(0 16px 28px rgba(22, 19, 15, 0.28));
+  }
+  .shelf .cover img,
+  .shelf .placeholder {
+    border-radius: 8px;
+  }
+  .placeholder {
+    aspect-ratio: 2 / 3;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    text-align: center;
+    background: var(--ink);
+    color: var(--dark-text);
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: -0.02em;
+  }
+  .hero .placeholder {
+    font-size: clamp(18px, 2.4vw, 26px);
+    padding: 28px;
+  }
+</style>

@@ -1,0 +1,83 @@
+---
+/**
+ * Release-notification signup. Posts to /api/notify; works without JS via redirect.
+ */
+interface Props {
+  /** Optional guide slug so the notification can be scoped to one guide. */
+  guide?: string;
+  redirect?: string;
+  buttonLabel?: string;
+}
+const { guide, redirect = Astro.url.pathname, buttonLabel = 'Tell me' } = Astro.props;
+const done = Astro.url.searchParams.get('signup') === 'ok';
+---
+
+<form method="post" action="/api/notify" class="signup" data-signup-form>
+  <input type="hidden" name="redirect" value={redirect} />
+  {guide && <input type="hidden" name="guide" value={guide} />}
+  <label class="honeypot" aria-hidden="true">
+    Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" />
+  </label>
+  <div class="fields" data-fields hidden={done}>
+    <label class="field">
+      <span class="label">Email</span>
+      <input class="input" type="email" name="email" required autocomplete="email" placeholder="you@yourcompany.com" />
+    </label>
+    <button type="submit" class="btn btn-accent">{buttonLabel}</button>
+  </div>
+  <p class="notice" data-done hidden={!done} role="status">
+    Done. You will hear from me on the day the next guide ships — once, and nothing else.
+  </p>
+  <p class="notice-error" data-error hidden role="alert"></p>
+</form>
+
+<style>
+  .signup,
+  .fields {
+    display: grid;
+    gap: 14px;
+  }
+  .label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-3);
+  }
+  .input {
+    font-size: 16px;
+  }
+  .btn {
+    justify-self: start;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-signup-form]').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector<HTMLButtonElement>('button[type=submit]');
+      const fields = form.querySelector<HTMLElement>('[data-fields]');
+      const done = form.querySelector<HTMLElement>('[data-done]');
+      const err = form.querySelector<HTMLElement>('[data-error]');
+      if (btn) btn.setAttribute('aria-busy', 'true');
+      if (err) err.hidden = true;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        const data = (await res.json()) as { ok: boolean; error?: string };
+        if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong.');
+        if (fields) fields.hidden = true;
+        if (done) done.hidden = false;
+      } catch (ex) {
+        if (err) {
+          err.textContent = ex instanceof Error ? ex.message : 'Something went wrong.';
+          err.hidden = false;
+        }
+      } finally {
+        if (btn) btn.removeAttribute('aria-busy');
+      }
+    });
+  });
+</script>

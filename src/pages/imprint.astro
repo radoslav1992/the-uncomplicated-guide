@@ -1,0 +1,25 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../data/site';
+---
+
+<Legal title="Imprint" description="Publisher and seller details for The Uncomplicated Guides.">
+  <h2>Publisher and seller</h2>
+  <p>{site.author.name}<br />trading as {site.name}<br />{site.author.city}</p>
+  <p>Email: <a href={`mailto:${site.email}`}>{site.email}</a></p>
+
+  <h2>Responsible for content</h2>
+  <p>{site.author.name}, at the address above.</p>
+
+  <h2>Imprint of the guides</h2>
+  <p>The guides are published under the <strong>{site.imprint}</strong> imprint. Same author, same text — that is the name in the copyright line inside each file.</p>
+
+  <h2>VAT</h2>
+  <p>Prices include VAT where applicable. VAT is collected and remitted through Stripe Tax. Business buyers needing an invoice with a VAT number should write to the address above after purchase.</p>
+
+  <h2>Dispute resolution</h2>
+  <p>The European Commission provides an online dispute resolution platform at ec.europa.eu/consumers/odr. I am willing to resolve any dispute directly by email first.</p>
+
+  <h2>Copyright</h2>
+  <p>All text, covers and templates on this site and in the guides are © {site.author.name}. Use within the licence in the <a href="/terms">terms of sale</a>; anything beyond that requires written permission.</p>
+</Legal>

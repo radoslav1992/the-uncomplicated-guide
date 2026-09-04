@@ -1,0 +1,716 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import GuideCover from '../components/GuideCover.astro';
+import BuyButton from '../components/BuyButton.astro';
+import PartsList from '../components/PartsList.astro';
+import WhoFor from '../components/WhoFor.astro';
+import Faq from '../components/Faq.astro';
+import SignupForm from '../components/SignupForm.astro';
+import portrait from '../assets/portrait.webp';
+import { site, formatPrice } from '../data/site';
+import { featuredGuide as guide, upcomingGuides } from '../data/guides';
+
+const price = formatPrice(guide.price, guide.currency);
+const guideHref = `/guides/${guide.slug}`;
+
+const FAQ = [
+  {
+    q: 'What exactly do I get?',
+    a: `A ${guide.pages}-page PDF, ${guide.edition.replace(' — ', ', ')}. It reads on any device and prints cleanly. The download link arrives on the page right after payment and again by email.`,
+  },
+  {
+    q: 'How is payment handled?',
+    a: 'Through Stripe. Your card details go to Stripe, never to this site. You get a Stripe receipt, and the price shown is the price you pay — tax is included.',
+  },
+  {
+    q: 'Can I get a refund?',
+    a: 'The guide is a digital file, so the usual 14-day right of withdrawal does not apply once it has been downloaded. If the guide is not what its page described, write within 14 days and I will refund it. The full terms are in the refund policy.',
+  },
+  {
+    q: 'Is it kept up to date?',
+    a: `Every guide carries the date it is current as of — on the cover and on its page. The first one is current as of ${guide.currentAsOf}. If a tool or price inside changes materially, a revised file replaces the old one and buyers are told by email.`,
+  },
+  {
+    q: 'Can I use it with my own clients?',
+    a: 'Yes. The checklists, prompts and pricing templates are meant to be used in your own projects and with your clients. Only the file itself is not to be shared or resold.',
+  },
+  {
+    q: 'Will there be more guides?',
+    a: 'Three are in progress: vibe coding for non-developers, working with AI coding agents such as Claude Code, and social media content with AI. The library shows what is coming, and the signup above tells you the day one ships.',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: site.name,
+    url: Astro.site?.href,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: site.author.name,
+    jobTitle: 'Software and AI engineer',
+    url: new URL('/#author', Astro.site).href,
+  },
+];
+---
+
+<Base
+  title={`${site.name} — practical guides on AI, vibe coding and social media`}
+  description={site.description}
+  current="Home"
+  image={guide.cover}
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="container">
+      <p class="eyebrow hero-eyebrow">Practical guides · AI, vibe coding, social media</p>
+      <h1 class="display hero-title">Hard things, made <span>uncomplicated</span>.</h1>
+
+      <div class="hero-grid">
+        <div>
+          <p class="hero-lead">
+            Each guide is one procedure from start to finish: when it is worth doing, how to build
+            it, where it breaks and how to charge for it. Including the parts other guides skip
+            because they are boring.
+          </p>
+          <div class="hero-actions">
+            <a href="/guides" class="btn btn-accent">Browse the library</a>
+            <a href={guideHref} class="btn btn-outline">Read about the first guide</a>
+          </div>
+          <ul class="hero-points">
+            <li><span class="n">01</span><span>One procedure per guide, start to finish — not a collection of tips</span></li>
+            <li><span class="n">02</span><span>Written from things that were actually shipped and sold</span></li>
+            <li><span class="n">03</span><span>Every guide says who it is not for, before you pay</span></li>
+          </ul>
+        </div>
+
+        <GuideCover guide={guide} href={guideHref} class="hero-cover">
+          <div class="hero-badge">
+            <span class="price-badge sm">{price}</span>
+            <span>First guide · out now</span>
+          </div>
+        </GuideCover>
+      </div>
+
+      <div class="cue" aria-hidden="true"><span><i></i></span></div>
+    </div>
+  </section>
+
+  <!-- Manifesto -->
+  <section class="section-dark manifesto">
+    <div class="container">
+      <p class="eyebrow">Why these guides</p>
+      <h2 class="display">
+        <span>Most guides stop</span>
+        <span class="accent">at the demo.</span>
+        <span>These start where</span>
+        <span class="accent">the demo breaks.</span>
+      </h2>
+      <p>
+        The phone number. The invoice. The price. The moment you have to tell a client where the
+        thing will fail. Those are the parts that stop projects two-thirds of the way in, and they
+        are the parts each guide is built around.
+      </p>
+    </div>
+  </section>
+
+  <!-- Featured guide -->
+  <section id="first-guide" class="section-alt featured">
+    <div class="container featured-grid">
+      <div class="featured-intro">
+        <p class="eyebrow">The first guide</p>
+        <h2 class="display">{guide.title}</h2>
+        <p class="sub">{guide.subtitle}.</p>
+        <p class="desc">{guide.description}</p>
+        <div class="meta">
+          <span class="price-badge">{price}</span>
+          <span class="small">{guide.pages} pages · PDF · {guide.edition.replace(' — ', ', ')}</span>
+        </div>
+        <div class="actions">
+          <BuyButton guide={guide} label="Buy the guide →" />
+          <a href={guideHref} class="text-link">What's inside →</a>
+        </div>
+      </div>
+      <PartsList parts={guide.parts} />
+    </div>
+  </section>
+
+  <WhoFor
+    forTitle="Who the guides are for"
+    notTitle="Who they are not for"
+    forWho={[
+      'Developers and studios who want to sell what they build, not only build it',
+      'Business owners who are thinking of doing it themselves instead of hiring it out',
+      'People who have tried already and got stuck on the unglamorous part',
+    ]}
+    notFor={[
+      'Anyone looking for a template to copy without understanding it — the guides explain why, not only how',
+      'Anyone expecting AI to replace a person. It takes the repetitive part; judgement stays human',
+      'Anyone who wants theory about large language models — these are guides for putting one to work',
+    ]}
+  />
+
+  <!-- Author -->
+  <section id="author" class="author">
+    <div class="container author-grid">
+      <figure>
+        <div class="backdrop" aria-hidden="true"></div>
+        <Image
+          src={portrait}
+          alt={site.author.name}
+          widths={[480, 760, 1100]}
+          sizes="(max-width: 860px) 90vw, 520px"
+          loading="lazy"
+        />
+        <figcaption>
+          <p class="name">{site.author.name}</p>
+          <p class="role">{site.author.role}</p>
+        </figcaption>
+      </figure>
+      <div>
+        <p class="eyebrow">Who writes these</p>
+        <h2 class="display">Hello — I'm Radoslav.</h2>
+        <p class="bio">
+          I teach generative AI and natural language processing at university and I am a PhD
+          candidate in computer science. The guides are not from the lectures. They are written
+          from things I have shipped: voice agents that answer real phone lines and book real
+          appointments, internal systems for companies, and the software studio I run in Sofia.
+        </p>
+        <p class="bio">
+          The telephony chapter in the first guide exists for one reason: it is boring, so nobody
+          writes it, and it is exactly where most projects stop.
+        </p>
+        <div class="stats">
+          <div><p class="big">6+</p><p>years as a software engineer</p></div>
+          <div><p class="big mid">PhD candidate</p><p>in computer science, university lecturer in generative AI</p></div>
+        </div>
+        <ul class="skills">
+          <li>AI agents</li><li>Voice assistants</li><li>Automation</li><li>Generative AI</li><li>Vibe coding</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Signup -->
+  <section id="signup" class="signup-section">
+    <div class="container">
+      <div class="panel signup-panel">
+        <div>
+          <h2 class="display">Hear when the next one ships.</h2>
+          <p class="lead-text">
+            {upcomingGuides.length} guides are in progress: {upcomingGuides.map((g) => g.title.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1')}. Leave an email and you get one message per guide, on the day it comes out. Nothing else.
+          </p>
+          <p class="small">No list, no sequence, no “last chance”. One message per guide.</p>
+        </div>
+        <SignupForm redirect="/?signup=ok#signup" />
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section faq-section">
+    <div class="container faq-grid">
+      <div>
+        <p class="eyebrow">Questions</p>
+        <h2 class="display">The things people ask before buying</h2>
+        <p class="lead-text">
+          If yours is not here, <a href="/contact" class="inline-link">write to me</a>. I answer within one working day.
+        </p>
+      </div>
+      <Faq items={FAQ} />
+    </div>
+  </section>
+
+  <!-- Buy banner -->
+  <section class="banner-section">
+    <div class="container">
+      <div class="banner">
+        <div>
+          <h2 class="display">{price}, once. The whole procedure.</h2>
+          <p>
+            A {guide.pages}-page PDF. Payment goes through Stripe — your card never touches this
+            site. The file arrives right after payment, and again by email so it does not get lost.
+          </p>
+        </div>
+        <div class="banner-actions">
+          <BuyButton guide={guide} label={`Buy ${guide.title} →`} class="btn btn-dark btn-block" />
+          <a href="/guides" class="btn btn-ghost btn-block">Browse the library</a>
+          <p class="fine">
+            Current as of {guide.currentAsOf}. Read and print on all your devices; only the file
+            itself is not shared or resold.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Hero */
+  @keyframes hero-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes title-in {
+    from { opacity: 0; clip-path: inset(0 0 105% 0); transform: translateY(0.14em); }
+    to { opacity: 1; clip-path: inset(0 0 -20% 0); transform: none; }
+  }
+  @keyframes cue-fall {
+    0% { transform: translateY(-100%); }
+    60%, 100% { transform: translateY(250%); }
+  }
+  .hero {
+    position: relative;
+    isolation: isolate;
+    padding: clamp(44px, 6vw, 84px) 0 clamp(28px, 4vw, 48px);
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: -30% 0 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(52% 46% at 16% 12%, rgba(226, 84, 43, 0.11), transparent 68%),
+      radial-gradient(46% 44% at 88% 34%, rgba(226, 84, 43, 0.05), transparent 70%),
+      radial-gradient(70% 60% at 62% 0%, #efe7db, transparent 72%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 62%, transparent 100%);
+  }
+  .hero-eyebrow {
+    margin-bottom: 18px;
+  }
+  .hero-title {
+    font-size: clamp(28px, 6.6vw, 80px);
+    line-height: 1.01;
+    letter-spacing: -0.045em;
+    margin: 0;
+    overflow-wrap: break-word;
+    animation: title-in 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 60ms;
+  }
+  .hero-title span {
+    color: var(--accent);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: clamp(32px, 5vw, 72px);
+    align-items: start;
+    margin-top: clamp(30px, 4vw, 54px);
+  }
+  .hero-lead {
+    font-size: clamp(17px, 1.8vw, 20px);
+    line-height: 1.55;
+    color: var(--text);
+    max-width: 44ch;
+    margin: 0;
+    animation: hero-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 140ms;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+    animation: hero-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 210ms;
+  }
+  .hero-points {
+    margin: 38px 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+    max-width: 52ch;
+    animation: hero-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 280ms;
+  }
+  .hero-points li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: baseline;
+    padding: 15px 2px;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-3);
+  }
+  .hero-points .n {
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--faint);
+    letter-spacing: 0.04em;
+  }
+  :global(.hero-cover) {
+    animation: hero-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: 200ms;
+  }
+  .hero-badge {
+    position: absolute;
+    right: 4%;
+    bottom: 6%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-shadow: var(--shadow-card);
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .cue {
+    margin-top: clamp(28px, 4vw, 44px);
+    height: 46px;
+    display: flex;
+    justify-content: center;
+  }
+  .cue span {
+    position: relative;
+    width: 1px;
+    height: 100%;
+    background: var(--border-2);
+    overflow: hidden;
+    display: block;
+  }
+  .cue i {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 40%;
+    background: var(--accent);
+    display: block;
+    animation: cue-fall 2.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  }
+
+  /* Manifesto */
+  .manifesto {
+    padding: clamp(88px, 12vw, 160px) 0;
+  }
+  .manifesto .eyebrow {
+    margin-bottom: clamp(20px, 4vw, 44px);
+  }
+  .manifesto h2 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.04em;
+    margin: 0;
+    font-size: clamp(34px, 8vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+  .manifesto .accent {
+    color: var(--accent);
+  }
+  .manifesto p:not(.eyebrow) {
+    margin: clamp(32px, 5vw, 56px) 0 0;
+    max-width: 54ch;
+    font-size: clamp(16.5px, 1.7vw, 19px);
+    line-height: 1.6;
+    color: var(--dark-body);
+  }
+
+  /* Featured */
+  .featured {
+    padding: clamp(72px, 10vw, 132px) 0;
+  }
+  .featured-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: clamp(40px, 6vw, 88px);
+    align-items: start;
+  }
+  .featured-intro {
+    position: sticky;
+    top: 95px;
+  }
+  .featured-intro h2 {
+    font-size: clamp(28px, 4.2vw, 48px);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    margin: 14px 0 0;
+  }
+  .featured-intro .sub {
+    font-size: clamp(16px, 1.6vw, 19px);
+    line-height: 1.45;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 14px 0 0;
+    max-width: 30ch;
+  }
+  .featured-intro .desc {
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 18px 0 0;
+    max-width: 38ch;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 26px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 18px;
+    margin-top: 24px;
+  }
+
+  /* Author */
+  .author {
+    background: var(--bg-author);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .author-grid {
+    padding-top: 88px;
+    padding-bottom: 88px;
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: 60px;
+    align-items: center;
+  }
+  figure {
+    margin: 0;
+    position: relative;
+    min-width: 0;
+  }
+  .backdrop {
+    position: absolute;
+    inset: 12% -6% -2% 4%;
+    background: var(--border);
+    border-radius: 28px;
+  }
+  figure img {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 24px 40px rgba(22, 19, 15, 0.14));
+  }
+  figcaption {
+    position: absolute;
+    left: -12px;
+    bottom: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-shadow: var(--shadow-card);
+  }
+  figcaption p {
+    margin: 0;
+  }
+  figcaption .name {
+    font-weight: 700;
+    font-size: 13.5px;
+  }
+  figcaption .role {
+    font-size: 12px;
+    color: var(--text-2);
+    margin-top: 2px;
+  }
+  .author h2 {
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.12;
+    margin: 12px 0 0;
+  }
+  .bio {
+    font-size: 17.5px;
+    line-height: 1.62;
+    color: var(--text-3);
+    margin: 16px 0 0;
+  }
+  .bio:first-of-type {
+    margin-top: 20px;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .stats > div {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 18px;
+  }
+  .stats p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-2);
+  }
+  .stats .big {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .stats .mid {
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .skills li {
+    font-size: 13px;
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    padding: 6px 13px;
+    color: var(--text);
+  }
+
+  /* Signup */
+  .signup-section {
+    padding: clamp(72px, 10vw, 128px) 0 0;
+  }
+  .signup-panel {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+  }
+  .signup-panel h2 {
+    font-size: clamp(26px, 3.6vw, 40px);
+    letter-spacing: -0.04em;
+    margin: 0;
+  }
+  .lead-text {
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 16px 0 0;
+    max-width: 46ch;
+  }
+  .signup-panel .small {
+    margin: 16px 0 0;
+  }
+
+  /* FAQ */
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: clamp(40px, 6vw, 88px);
+    align-items: start;
+  }
+  .faq-grid h2 {
+    font-size: clamp(28px, 4.2vw, 44px);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    margin: 14px 0 0;
+  }
+  .faq-grid .lead-text {
+    margin-top: 18px;
+    max-width: 34ch;
+  }
+  .inline-link {
+    font-weight: 600;
+    border-bottom: 1px solid var(--accent-tint);
+  }
+
+  /* Banner */
+  .banner-section {
+    padding: 0 0 clamp(72px, 10vw, 120px);
+  }
+  .banner {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 36px;
+    padding: clamp(40px, 6vw, 84px) clamp(28px, 4.5vw, 72px);
+    display: grid;
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: clamp(32px, 4vw, 56px);
+    align-items: center;
+  }
+  .banner h2 {
+    font-size: clamp(27px, 4.4vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    margin: 0;
+    color: #fff;
+  }
+  .banner > div > p {
+    font-size: 17.5px;
+    line-height: 1.55;
+    margin: 22px 0 0;
+    color: var(--accent-tint);
+    max-width: 48ch;
+  }
+  .banner-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .banner-actions :global(form) {
+    display: block;
+  }
+  .banner-actions :global(.btn) {
+    padding: 17px 28px;
+  }
+  .btn-ghost {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.26);
+    color: #fff;
+  }
+  .fine {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--accent-tint);
+    margin: 2px 0 0;
+    text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    .hero-grid,
+    .featured-grid,
+    .author-grid,
+    .signup-panel,
+    .faq-grid,
+    .banner {
+      grid-template-columns: 1fr;
+    }
+    .featured-intro {
+      position: static;
+    }
+    .author-grid {
+      padding-top: 64px;
+      padding-bottom: 64px;
+      gap: 40px;
+    }
+    figcaption {
+      left: 8px;
+    }
+    .hero-badge {
+      right: 0;
+      bottom: 0;
+    }
+    .banner {
+      border-radius: 28px;
+    }
+  }
+</style>

@@ -1,0 +1,57 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../data/site';
+const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
+---
+
+<Legal title="Cookie policy" description="Which cookies this site uses and how to change your choice.">
+  <h2>Which cookies this site uses</h2>
+  <ul>
+    <li><strong>Technical cookies</strong> — the infrastructure the site runs on (Cloudflare) and the payment provider (Stripe, on its own pages) may set cookies needed for security and performance. They are not used for profiling.</li>
+    <li><strong>Analytics cookies (Google Analytics 4)</strong> — set <strong>only after consent</strong> in the cookie banner. Used for aggregate statistics on which pages are visited (<code>_ga</code>-type cookies). Data is processed by Google; see <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>. The script loads in Consent Mode: before consent, or after refusal, no cookies are set and no identifiers are used.{!gaId && ' Analytics is currently switched off entirely.'}</li>
+  </ul>
+  <p>The site uses no marketing cookies and no advertising networks.</p>
+
+  <h2>Changing your choice</h2>
+  <p>Your choice is stored on your device. You can change it any time with the button below — the banner will appear again.</p>
+  <p>
+    <button type="button" class="change" id="change-consent" disabled={!gaId}>Change my choice</button>
+  </p>
+
+  <h2>Questions</h2>
+  <p>Questions about cookies and personal data go to <a href={`mailto:${site.email}`}>{site.email}</a>. See also the <a href="/privacy">privacy policy</a>.</p>
+</Legal>
+
+<style>
+  .change {
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 11px 20px;
+    border-radius: 999px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+      background-color 0.16s ease,
+      color 0.16s ease;
+  }
+  .change:hover:not([disabled]) {
+    background: var(--ink);
+    color: #fff;
+  }
+  .change[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
+
+<script>
+  document.getElementById('change-consent')?.addEventListener('click', () => {
+    try {
+      localStorage.removeItem('cookie-consent');
+    } catch {}
+    window.dispatchEvent(new Event('cookie-consent:open'));
+  });
+</script>

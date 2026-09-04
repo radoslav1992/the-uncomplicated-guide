@@ -1,0 +1,54 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "the-uncomplicated-guides",
+  // Custom entry: Astro's fetch handler + an `email` handler for Cloudflare Email Routing.
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Static pages are built as `page.html`; serve `/page` and redirect `/page/` → `/page`.
+  // No `not_found_handling`: unmatched paths must fall through to the Worker (on-demand routes, 404 page).
+  "assets": { "binding": "ASSETS", "html_handling": "drop-trailing-slash" },
+
+  // ─── Plain configuration (not secret) ────────────────────────────────────
+  "vars": {
+    // Public URL of the deployed site (used for absolute links in emails and Stripe redirects).
+    "SITE_URL": "https://uncomplicated.guides",
+    // Sender for all outgoing mail. The domain must be verified in Cloudflare Email Service.
+    "EMAIL_FROM": "hello@uncomplicated.guides",
+    "EMAIL_FROM_NAME": "The Uncomplicated Guides",
+    // Where contact-form messages and forwarded inbound mail go.
+    // Must be a verified destination address in Cloudflare Email Routing.
+    "CONTACT_TO": "hello@uncomplicated.guides",
+    // Optional: Google Analytics 4 id. Leave empty to ship without analytics and without the cookie banner.
+    "PUBLIC_GA_MEASUREMENT_ID": "",
+    // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
+    "PUBLIC_TURNSTILE_SITE_KEY": "",
+    // Set to "true" once Stripe Tax is enabled on your Stripe account.
+    "STRIPE_AUTOMATIC_TAX": "false"
+  },
+
+  // ─── Secrets (set with `wrangler secret put NAME`, locally in `.dev.vars`) ──
+  // STRIPE_SECRET_KEY        sk_live_... / sk_test_...
+  // STRIPE_WEBHOOK_SECRET    whsec_... (from the webhook endpoint pointing at /api/stripe/webhook)
+  // TURNSTILE_SECRET_KEY     optional, pairs with PUBLIC_TURNSTILE_SITE_KEY
+  // DOWNLOAD_TOKEN_SECRET    optional; any long random string. Used to sign unsubscribe links.
+
+  // ─── Storage ─────────────────────────────────────────────────────────────
+  // Without `id`, wrangler provisions the namespace/bucket on first deploy
+  // and writes the ids back here. You can also create them yourself and paste the ids.
+  "kv_namespaces": [
+    { "binding": "PURCHASES" },
+    { "binding": "SIGNUPS" }
+  ],
+  "r2_buckets": [
+    { "binding": "GUIDE_FILES", "bucket_name": "uncomplicated-guides-files" }
+  ],
+
+  // ─── Email (Cloudflare Email Service, beta) ───────────────────────────────
+  // Sending: the binding below. Receiving: in the dashboard, Email → Email Routing →
+  // route hello@yourdomain to this Worker; `src/worker.ts` forwards it to CONTACT_TO.
+  "send_email": [
+    { "name": "SEND_EMAIL" }
+  ]
+}

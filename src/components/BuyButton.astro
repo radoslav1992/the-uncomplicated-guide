@@ -1,0 +1,41 @@
+---
+/**
+ * Progressive-enhancement buy button: a plain form POST to /api/checkout that
+ * redirects to Stripe Checkout. Works without JavaScript.
+ */
+import type { Guide } from '../data/guides';
+import { formatPrice } from '../data/site';
+
+interface Props {
+  guide: Guide;
+  label?: string;
+  class?: string;
+}
+const { guide, label, class: className = 'btn btn-accent' } = Astro.props;
+const text = label ?? `Buy for ${formatPrice(guide.price, guide.currency)} →`;
+---
+
+<form method="post" action="/api/checkout" class="buy-form" data-buy-form>
+  <input type="hidden" name="guide" value={guide.slug} />
+  <button type="submit" class={className}>{text}</button>
+</form>
+
+<style>
+  .buy-form {
+    display: inline-block;
+    margin: 0;
+  }
+</style>
+
+<script>
+  // Disable the button while Stripe Checkout is being created, to avoid double sessions.
+  document.querySelectorAll<HTMLFormElement>('[data-buy-form]').forEach((form) => {
+    form.addEventListener('submit', () => {
+      const btn = form.querySelector('button');
+      if (btn) {
+        btn.setAttribute('aria-busy', 'true');
+        btn.textContent = 'Opening checkout…';
+      }
+    });
+  });
+</script>

@@ -1,0 +1,25 @@
+---
+import Legal from '../layouts/Legal.astro';
+import { site } from '../data/site';
+---
+
+<Legal title="Refund policy" description="If a guide is not what its page said it was, you get your money back. One email, no form.">
+  <p>Short version: if a guide is not what its page said it was, you get your money back. One email, no form.</p>
+
+  <h2>The legal position</h2>
+  <p>A guide is digital content delivered by download. Under EU consumer rules the fourteen-day right of withdrawal ends when you start the download, and the checkout asks you to confirm that. So there is no automatic right to return a guide you have downloaded.</p>
+
+  <h2>What I do anyway</h2>
+  <ul>
+    <li><strong>Not as described.</strong> If the guide does not cover what its page and table of contents promised, write within fourteen days of purchase and it is refunded in full.</li>
+    <li><strong>Bought twice.</strong> Duplicate purchases are refunded as soon as I see them, whether or not you write.</li>
+    <li><strong>Download never worked.</strong> First I fix the link. If it cannot be fixed within two working days, you are refunded.</li>
+    <li><strong>Changed your mind.</strong> If you have not downloaded the file, write within fourteen days and it is refunded without questions.</li>
+  </ul>
+
+  <h2>What is not refunded</h2>
+  <p>A guide that was read, found to be as described, and then requested back. The "who it is not for" section on every guide page exists so that this happens rarely.</p>
+
+  <h2>How</h2>
+  <p>Write to <a href={`mailto:${site.email}`}>{site.email}</a> from the address you paid with. Refunds go back to the original payment method through Stripe, usually within five to ten working days depending on your bank.</p>
+</Legal>
