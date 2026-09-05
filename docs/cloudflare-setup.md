@@ -27,8 +27,8 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
 
 - [ ] **R2 object storage → Create bucket** — name `uncomplicated-guides-files`, location automatic.
       Keep it private (no public access, no custom domain): the Worker streams files itself.
-- [ ] Upload each guide PDF with the object key from `src/data/guides.ts` → `fileKey`
-      (for the first guide: `ai-assistants-en-v1.1.pdf`). Drag and drop in the bucket's
+- [ ] Upload each guide PDF with the object key from `src/data/guides.ts` → `fileKey`:
+      `ai-assistants-en-v1.1.pdf` and `ai-video-ads-ugc-en-v1.0.pdf`. Drag and drop in the bucket's
       **Objects** tab works; so does `npx wrangler r2 object put uncomplicated-guides-files/<fileKey> --file <local file> --remote`.
 
 ## 4. Worker deployed from GitHub

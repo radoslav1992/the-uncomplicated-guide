@@ -12,3 +12,4 @@ Current files:
 | fileKey                      | Guide              |
 | ---------------------------- | ------------------ |
 | `ai-assistants-en-v1.1.pdf`  | 24/7 AI Assistants |
+| `ai-video-ads-ugc-en-v1.0.pdf` | AI Video Ads & UGC |

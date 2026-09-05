@@ -545,6 +545,38 @@ textarea.input {
   color: var(--ink);
 }
 
+/* ───────────────────────────── Scroll-driven motion ─────────────────────────────
+   All movement is CSS: `animation-timeline` runs an animation from the scroll
+   position instead of the clock. No JavaScript, off the main thread, stops when
+   the finger stops. Everything sits behind @supports and prefers-reduced-motion,
+   and the base state is always the FINAL state, so browsers without support
+   (and readers who prefer no motion) see the finished page, never a blank one. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.reveal {
+  --i: 0;
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      /* Each sibling with a higher --i starts a little later. */
+      animation-range: entry calc(4% + var(--i) * 3%) cover calc(30% + var(--i) * 3%);
+    }
+  }
+}
+
 /* ───────────────────────────── Utilities ───────────────────────────── */
 .visually-hidden {
   position: absolute !important;

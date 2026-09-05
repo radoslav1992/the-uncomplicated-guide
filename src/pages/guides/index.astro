@@ -30,8 +30,8 @@ const countLabel = `${availableGuides.length} guide${availableGuides.length === 
   <section id="shelf" class="shelf">
     <div class="container list">
       {
-        availableGuides.map((g) => (
-          <a href={`/guides/${g.slug}`} class="row available">
+        availableGuides.map((g, i) => (
+          <a href={`/guides/${g.slug}`} class="row available reveal" style={`--i: ${i}`}>
             <GuideCover guide={g} size="shelf" />
             <div>
               <div class="meta">
@@ -48,8 +48,8 @@ const countLabel = `${availableGuides.length} guide${availableGuides.length === 
         ))
       }
       {
-        upcomingGuides.map((g) => (
-          <div class="row">
+        upcomingGuides.map((g, i) => (
+          <div class="row reveal" style={`--i: ${i + 1}`}>
             <GuideCover guide={g} size="shelf" />
             <div>
               <div class="meta">
@@ -72,17 +72,17 @@ const countLabel = `${availableGuides.length} guide${availableGuides.length === 
 
   <section class="promises">
     <div class="container cols">
-      <div>
+      <div class="reveal">
         <h2 class="display">Pay once</h2>
         <p>Checkout runs on Stripe. Card, Apple Pay or Google Pay; the price you see includes tax. You get a Stripe receipt by email.</p>
         <a href="/terms" class="arrow-link sm">Terms of sale →</a>
       </div>
-      <div class="mid">
+      <div class="mid reveal" style="--i: 1">
         <h2 class="display">Download right away</h2>
         <p>The link appears the moment payment clears and is sent to your inbox too. It stays valid for a week and can be reissued from the same page any time.</p>
         <a href="/contact" class="arrow-link sm">Problem with a download? →</a>
       </div>
-      <div>
+      <div class="reveal" style="--i: 2">
         <h2 class="display">Keep it</h2>
         <p>Read and print on all your devices, use the templates with your own clients. Only the file itself is not shared or resold.</p>
         <a href="/refunds" class="arrow-link sm">Refund policy →</a>

@@ -22,18 +22,18 @@ import { site } from '../data/site';
     </div>
 
     <aside>
-      <div class="card">
+      <div class="card reveal">
         <p class="display t">What happens next</p>
         <p>I reply within one working day. Download problems are usually fixed the same day: the link is reissued to the email you paid with.</p>
         <p>Refund requests are handled as written in the <a href="/refunds">refund policy</a> — no forms, one email.</p>
       </div>
-      <div class="card dark">
+      <div class="card dark reveal" style="--i: 1">
         <p class="display t">Prefer email directly?</p>
         <p class="label">Everything about the guides</p>
         <a href={`mailto:${site.email}`} class="mail">{site.email}</a>
         <p class="fine">Send purchase questions from the address you paid with — it saves a round trip.</p>
       </div>
-      <div class="card">
+      <div class="card reveal" style="--i: 2">
         <p class="legal-note">
           The Uncomplicated Guides are written and sold by {site.author.name}, {site.author.city}.<br />
           Legal details are in the <a href="/imprint">imprint</a>.

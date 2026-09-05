@@ -44,14 +44,14 @@ const jsonLd = {
     <div class="container hero-grid">
       <div>
         <a href="/guides" class="back">← All guides</a>
-        <h1 class="display">{guide.title}</h1>
-        <p class="sub">{guide.subtitle}</p>
-        <p class="desc">{guide.description}</p>
-        <div class="meta">
+        <h1 class="display hero-title">{guide.title}</h1>
+        <p class="sub hero-in" style="--s: 1">{guide.subtitle}</p>
+        <p class="desc hero-in" style="--s: 2">{guide.description}</p>
+        <div class="meta hero-in" style="--s: 3">
           {sellable ? <span class="price-badge">{price}</span> : <span class="soon-badge">Soon</span>}
           <span class="small">{metaLine}</span>
         </div>
-        <div class="cta">
+        <div class="cta hero-in" style="--s: 4">
           {
             sellable ? (
               <BuyButton guide={guide} label="Buy the guide →" />
@@ -61,13 +61,13 @@ const jsonLd = {
           }
         </div>
       </div>
-      <GuideCover guide={guide} />
+      <GuideCover guide={guide} class="hero-in" />
     </div>
   </section>
 
   <section class="section-alt inside">
     <div class="container inside-grid">
-      <div class="sticky">
+      <div class="sticky reveal">
         <p class="eyebrow">What's inside</p>
         <h2 class="display">Four parts, in the order the work happens</h2>
         <p>Not by topic, but by the flow of the job. Each part ends where the next one begins.</p>
@@ -83,8 +83,8 @@ const jsonLd = {
           <p class="eyebrow">After the guide</p>
           <h2 class="display">What you will be able to do that you can't today</h2>
           <ul>
-            {guide.outcomes.map((o) => (
-              <li>
+            {guide.outcomes.map((o, i) => (
+              <li class="reveal" style={`--i: ${i}`}>
                 <span aria-hidden="true">→</span>
                 {o}
               </li>
@@ -101,7 +101,7 @@ const jsonLd = {
     guide.authorNote && (
       <section class="section-alt author-note">
         <div class="container">
-          <div class="inner">
+          <div class="inner reveal">
             <p class="eyebrow">Who wrote it</p>
             {guide.authorNote.map((p) => <p class="note">{p}</p>)}
             <p class="imprint">
@@ -177,6 +177,23 @@ const jsonLd = {
 </Base>
 
 <style>
+  @keyframes hero-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes title-in {
+    from { opacity: 0; clip-path: inset(0 0 105% 0); transform: translateY(0.14em); }
+    to { opacity: 1; clip-path: inset(0 0 -20% 0); transform: none; }
+  }
+  .hero-title {
+    animation: title-in 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 60ms;
+  }
+  .hero-in,
+  :global(.cover-wrap.hero-in) {
+    animation: hero-in 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(140ms + var(--s, 1) * 70ms);
+  }
   .hero {
     padding: clamp(40px, 6vw, 80px) 0 clamp(64px, 9vw, 120px);
     position: relative;
@@ -315,6 +332,27 @@ const jsonLd = {
     margin: 28px 0 0;
     padding-top: 20px;
     border-top: 1px solid var(--border);
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .buy-panel {
+        animation: unfold linear both;
+        animation-timeline: view();
+        animation-range: entry 8% cover 42%;
+      }
+    }
+  }
+  @keyframes unfold {
+    from {
+      transform: scale(0.95);
+      border-radius: 48px;
+      opacity: 0.6;
+    }
+    to {
+      transform: none;
+      border-radius: 26px;
+      opacity: 1;
+    }
   }
   .buy-panel {
     display: grid;
