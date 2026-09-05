@@ -8,7 +8,8 @@ import { env } from 'cloudflare:workers';
 import Base from '../../layouts/Base.astro';
 import { getGuide } from '../../data/guides';
 import { site } from '../../data/site';
-import { getPurchaseByToken, linkExpired, recordDownload } from '../../lib/purchases';
+import { getPurchaseByToken, linkExpired } from '../../lib/purchases';
+import { insertDownload } from '../../lib/db';
 
 export const prerender = false;
 
@@ -28,7 +29,9 @@ if (purchase && purchase.token === token && guide) {
   } else if (guide.fileKey) {
     const object = await env.GUIDE_FILES.get(guide.fileKey);
     if (object) {
-      Astro.locals.cfContext?.waitUntil(recordDownload(env, purchase));
+      Astro.locals.cfContext?.waitUntil(
+        insertDownload(env, { guide: guide.slug, email: purchase.email, source: 'purchase', ref: purchase.session_id }),
+      );
       const headers = new Headers();
       object.writeHttpMetadata(headers);
       headers.set('content-type', 'application/pdf');
@@ -51,7 +54,7 @@ if (purchase && purchase.token === token && guide) {
 if (state === 'missing-file') Astro.response.status = 503;
 if (state === 'invalid') Astro.response.status = 404;
 
-const thankYou = purchase ? `/thank-you?session_id=${encodeURIComponent(purchase.sessionId)}` : '';
+const thankYou = purchase ? `/thank-you?session_id=${encodeURIComponent(purchase.session_id)}` : '';
 ---
 
 <Base title="Download" noindex>

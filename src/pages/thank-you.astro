@@ -8,8 +8,10 @@ import { env } from 'cloudflare:workers';
 import Base from '../layouts/Base.astro';
 import { getGuide } from '../data/guides';
 import { site, formatPrice } from '../data/site';
-import { stripeConfigured, retrieveSession } from '../lib/stripe';
+import { stripeConfigured, retrieveSession, retrieveSubscription } from '../lib/stripe';
 import { ensurePurchase, getPurchase, linkExpired, linkExpiresAt, reissueToken, type Purchase } from '../lib/purchases';
+import { getSubscription, syncSubscription, upsertCustomer } from '../lib/subscriptions';
+import { setSessionCookie } from '../lib/session';
 import { formatDate } from '../lib/http';
 
 export const prerender = false;
@@ -36,8 +38,23 @@ if (sessionId) {
       state = 'ok';
     } else if (stripeConfigured(env)) {
       const session = await retrieveSession(env, sessionId);
-      purchase = await ensurePurchase(env, session);
-      state = purchase ? 'ok' : 'unpaid';
+      if (session.mode === 'subscription') {
+        // Membership checkout: mirror the subscription, sign the member in, send them to their account.
+        const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+        const subId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
+        const email = (session.customer_details?.email ?? session.customer_email ?? '').toLowerCase();
+        if (customerId && email) await upsertCustomer(env, { id: customerId, email, name: session.customer_details?.name ?? null });
+        if (subId && email) {
+          const existing = await getSubscription(env, subId);
+          if (!existing) await syncSubscription(env, await retrieveSubscription(env, subId));
+          await setSessionCookie(Astro, env, email);
+          return Astro.redirect('/account?welcome=1', 303);
+        }
+        state = 'unpaid';
+      } else {
+        purchase = await ensurePurchase(env, session);
+        state = purchase ? 'ok' : 'unpaid';
+      }
     } else {
       state = 'unavailable';
     }
@@ -64,7 +81,7 @@ const title = state === 'ok' ? 'Thank you — your guide is ready' : 'Your purch
             <p class="lead">
               <strong>{guide?.title ?? purchase.guide}</strong>
               {guide?.pages && ` · ${guide.pages} pages · PDF`}
-              {purchase.amountTotal > 0 && ` · ${formatPrice(purchase.amountTotal, purchase.currency)}`}
+              {purchase.amount_total > 0 && ` · ${formatPrice(purchase.amount_total, purchase.currency)}`}
             </p>
             <a href={downloadHref} class="btn btn-accent dl" download>Download the PDF →</a>
             <p class="small validity">
@@ -75,11 +92,11 @@ const title = state === 'ok' ? 'Thank you — your guide is ready' : 'Your purch
             <div class="card next">
               <p class="h">The same link is on its way by email</p>
               <p>
-                Sent to <strong>{purchase.email}</strong>{purchase.emailedAt ? '' : ' shortly'}. If it does not arrive
+                Sent to <strong>{purchase.email}</strong>{purchase.emailed_at ? '' : ' shortly'}. If it does not arrive
                 within a few minutes, check the spam folder or send it again:
               </p>
               <form method="post" action="/api/resend-link" class="resend">
-                <input type="hidden" name="session_id" value={purchase.sessionId} />
+                <input type="hidden" name="session_id" value={purchase.session_id} />
                 <button type="submit" class="btn btn-outline">Send the link again</button>
                 {resent && <span class="notice-ok">Sent. Give it a minute.</span>}
                 {error && <span class="notice-error">{error}</span>}

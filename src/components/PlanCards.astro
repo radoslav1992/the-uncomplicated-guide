@@ -1,0 +1,132 @@
+---
+/**
+ * Membership plan tiles with buy buttons (form POST to /api/checkout with plan=…).
+ */
+import { plans, membership } from '../data/plans';
+import { formatPrice } from '../data/site';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+---
+
+<div class:list={['plans', { compact }]}>
+  {
+    plans.map((p) => (
+      <form method="post" action="/api/checkout" class:list={['plan', { highlight: p.highlight }]} data-buy-form>
+        <input type="hidden" name="plan" value={p.id} />
+        <p class="name">{p.name}</p>
+        <p class="price">
+          <span class="amount">{formatPrice(p.price, p.currency)}</span>
+          <span class="per">/ {p.interval}</span>
+        </p>
+        <p class="note">{p.note}</p>
+        <button type="submit" class:list={['btn', p.highlight ? 'btn-accent' : 'btn-dark', 'btn-block']}>
+          Start {p.name.toLowerCase()} →
+        </button>
+      </form>
+    ))
+  }
+  {
+    !compact && (
+      <ul class="perks">
+        {membership.perks.map((perk) => (
+          <li>{perk}</li>
+        ))}
+      </ul>
+    )
+  }
+</div>
+
+<style>
+  .plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .plan {
+    margin: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .plan.highlight {
+    border-color: var(--ink);
+    box-shadow: var(--shadow-card);
+  }
+  .name {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .price {
+    margin: 6px 0 0;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .amount {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(28px, 3vw, 36px);
+    letter-spacing: -0.04em;
+  }
+  .per {
+    font-size: 14px;
+    color: var(--text-2);
+  }
+  .note {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-2);
+    flex: 1;
+  }
+  .perks {
+    grid-column: 1 / -1;
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .perks li {
+    position: relative;
+    padding-left: 26px;
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .perks li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  @media (max-width: 560px) {
+    .plans {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('.plan[data-buy-form]').forEach((form) => {
+    form.addEventListener('submit', () => {
+      const btn = form.querySelector('button');
+      if (btn) {
+        btn.setAttribute('aria-busy', 'true');
+        btn.textContent = 'Opening checkout…';
+      }
+    });
+  });
+</script>

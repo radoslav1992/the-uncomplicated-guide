@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { base64urlDecode, signingSecret, verify } from '../../lib/tokens';
+import { deleteSignup } from '../../lib/db';
 
 export const prerender = false;
 
@@ -23,6 +24,6 @@ export const GET: APIRoute = async ({ url }) => {
   if (!email || !(await verify(signingSecret(env), email.toLowerCase(), t))) {
     return page('Invalid link', 'This unsubscribe link is not valid or has been altered.', 400);
   }
-  await env.SIGNUPS.delete(`signup:${email.toLowerCase()}`);
+  await deleteSignup(env, email);
   return page('Unsubscribed', `${email} will not receive release notifications. Sorry to see you go — the library is still open whenever you need it.`);
 };

@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { getPurchase, linkExpired, reissueToken, sendDeliveryEmail } from '../../lib/purchases';
+import { claimResend, getPurchase, linkExpired, reissueToken, sendDeliveryEmail } from '../../lib/purchases';
 import { formResult, siteOrigin, str } from '../../lib/http';
 
 export const prerender = false;
@@ -15,12 +15,9 @@ export const POST: APIRoute = async (ctx) => {
   let purchase = await getPurchase(env, sessionId);
   if (!purchase) return formResult(ctx, false, { redirect: back, error: 'Purchase not found.', status: 404 });
 
-  // Simple throttle: one resend per minute per purchase.
-  const throttleKey = `resend:${sessionId}`;
-  if (await env.PURCHASES.get(throttleKey)) {
+  if (!(await claimResend(env, purchase))) {
     return formResult(ctx, false, { redirect: back, error: 'Already sent a moment ago. Check your inbox and spam folder.', status: 429 });
   }
-  await env.PURCHASES.put(throttleKey, '1', { expirationTtl: 60 });
 
   if (linkExpired(purchase)) purchase = await reissueToken(env, purchase);
   const r = await sendDeliveryEmail(env, siteOrigin(env, ctx.request), purchase);

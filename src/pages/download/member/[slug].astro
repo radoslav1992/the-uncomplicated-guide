@@ -1,0 +1,82 @@
+---
+/**
+ * GET /download/member/<slug>
+ * Streams a guide from R2 for a signed-in member with an active membership.
+ */
+import { env } from 'cloudflare:workers';
+import Base from '../../../layouts/Base.astro';
+import { getGuide } from '../../../data/guides';
+import { site } from '../../../data/site';
+import { getSessionEmail } from '../../../lib/session';
+import { findActiveSubscription } from '../../../lib/subscriptions';
+import { insertDownload } from '../../../lib/db';
+
+export const prerender = false;
+
+Astro.response.headers.set('cache-control', 'private, no-store');
+
+const guide = getGuide(Astro.params.slug);
+const email = await getSessionEmail(Astro, env);
+if (!email) return Astro.redirect(`/account?next=${encodeURIComponent(Astro.url.pathname)}`, 303);
+
+const sub = await findActiveSubscription(env, email);
+let state: 'inactive' | 'missing-file' = 'inactive';
+
+if (sub && guide?.status === 'available' && guide.fileKey) {
+  const object = await env.GUIDE_FILES.get(guide.fileKey);
+  if (object) {
+    Astro.locals.cfContext?.waitUntil(
+      insertDownload(env, { guide: guide.slug, email, source: 'membership', ref: sub.stripe_subscription_id }),
+    );
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('content-type', 'application/pdf');
+    headers.set('content-length', String(object.size));
+    headers.set('etag', object.httpEtag);
+    headers.set('cache-control', 'private, no-store');
+    headers.set('x-robots-tag', 'noindex');
+    headers.set('content-disposition', `attachment; filename="${(guide.fileName ?? guide.fileKey).replace(/["\\]/g, '')}"`);
+    return new Response(object.body, { headers });
+  }
+  state = 'missing-file';
+}
+if (!guide) return Astro.redirect('/account', 303);
+Astro.response.status = state === 'inactive' ? 403 : 503;
+---
+
+<Base title="Download" noindex>
+  <div class="container wrap">
+    <p class="eyebrow">Download</p>
+    {
+      state === 'inactive' ? (
+        <Fragment>
+          <h1 class="display">This needs an active membership.</h1>
+          <p class="lead">
+            Your membership is not active right now, or this guide is not on sale yet. Renew from your
+            account, or buy the guide on its own.
+          </p>
+          <div class="actions">
+            <a href="/account" class="btn btn-accent">Your account</a>
+            <a href={`/guides/${guide.slug}`} class="btn btn-outline">{guide.title}</a>
+          </div>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <h1 class="display">The file is not available right now.</h1>
+          <p class="lead">
+            Your membership is fine — the file is temporarily unavailable on this side. Please try again in
+            a little while, or write to <a href={`mailto:${site.email}`}>{site.email}</a>.
+          </p>
+          <a href="/account" class="btn btn-outline">Back to your account</a>
+        </Fragment>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .wrap { padding-top: 96px; padding-bottom: 120px; max-width: 720px; }
+  h1 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -0.035em; margin: 12px 0 16px; }
+  .lead { margin: 0 0 28px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+</style>

@@ -25,22 +25,30 @@
     // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
     "PUBLIC_TURNSTILE_SITE_KEY": "",
     // Set to "true" once Stripe Tax is enabled on your Stripe account.
-    "STRIPE_AUTOMATIC_TAX": "false"
+    "STRIPE_AUTOMATIC_TAX": "false",
+    // Membership: Stripe Price ids (price_...) for the recurring plans. Recommended.
+    // Leave empty to create the prices inline from src/data/plans.ts (works, but each
+    // checkout creates a new Product in Stripe, which clutters the dashboard).
+    "STRIPE_PRICE_MONTHLY": "",
+    "STRIPE_PRICE_YEARLY": ""
   },
 
   // ─── Secrets (set with `wrangler secret put NAME`, locally in `.dev.vars`) ──
   // STRIPE_SECRET_KEY        sk_live_... / sk_test_...
   // STRIPE_WEBHOOK_SECRET    whsec_... (from the webhook endpoint pointing at /api/stripe/webhook)
+  // AUTH_SECRET              required; a long random string. Signs member sessions, magic links
+  //                          and unsubscribe links. Generate with: openssl rand -base64 48
   // TURNSTILE_SECRET_KEY     optional, pairs with PUBLIC_TURNSTILE_SITE_KEY
-  // DOWNLOAD_TOKEN_SECRET    optional; any long random string. Used to sign unsubscribe links.
 
   // ─── Storage ─────────────────────────────────────────────────────────────
-  // Without `id`, wrangler provisions the namespace/bucket on first deploy
-  // and writes the ids back here. You can also create them yourself and paste the ids.
-  "kv_namespaces": [
-    { "binding": "PURCHASES" },
-    { "binding": "SIGNUPS" }
+  // D1: create the database in the dashboard (Storage & Databases → D1 → Create),
+  // then paste its id into `database_id`. Apply `migrations/` with
+  //   npx wrangler d1 migrations apply guides-db --remote
+  // (the deploy command in the Workers Builds settings does this automatically).
+  "d1_databases": [
+    { "binding": "DB", "database_name": "guides-db", "database_id": "REPLACE_WITH_D1_DATABASE_ID", "migrations_dir": "migrations" }
   ],
+  // R2: create the bucket in the dashboard (R2 → Create bucket) with this exact name.
   "r2_buckets": [
     { "binding": "GUIDE_FILES", "bucket_name": "uncomplicated-guides-files" }
   ],

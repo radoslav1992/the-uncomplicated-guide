@@ -6,6 +6,8 @@ const year = new Date().getFullYear();
 const nav = [
   { label: 'Library', href: '/guides' },
   ...availableGuides.map((g) => ({ label: g.title, href: `/guides/${g.slug}` })),
+  { label: 'Membership', href: '/membership' },
+  { label: 'Your account', href: '/account' },
   { label: 'About', href: '/#author' },
   { label: 'Contact', href: '/contact' },
 ];

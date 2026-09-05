@@ -26,6 +26,7 @@ export const site = {
   nav: [
     { label: 'Home', href: '/' },
     { label: 'Library', href: '/guides' },
+    { label: 'Membership', href: '/membership' },
     { label: 'About', href: '/#author' },
     { label: 'Contact', href: '/contact' },
   ],

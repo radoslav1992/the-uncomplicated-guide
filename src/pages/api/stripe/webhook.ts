@@ -1,8 +1,9 @@
 import type { APIRoute } from 'astro';
 import type Stripe from 'stripe';
 import { env } from 'cloudflare:workers';
-import { constructWebhookEvent, retrieveSession } from '../../../lib/stripe';
-import { ensurePurchase, getPurchase, savePurchase, sendDeliveryEmail } from '../../../lib/purchases';
+import { constructWebhookEvent, retrieveSession, retrieveSubscription } from '../../../lib/stripe';
+import { ensurePurchase, findPurchaseByPaymentIntent, markRefunded, sendDeliveryEmail } from '../../../lib/purchases';
+import { sendWelcomeEmail, syncSubscription, upsertCustomer } from '../../../lib/subscriptions';
 import { json, siteOrigin } from '../../../lib/http';
 
 export const prerender = false;
@@ -10,7 +11,8 @@ export const prerender = false;
 /**
  * POST /api/stripe/webhook
  * Stripe → Developers → Webhooks → add endpoint <SITE_URL>/api/stripe/webhook with events:
- *   checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded
+ *   checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded,
+ *   customer.subscription.created, customer.subscription.updated, customer.subscription.deleted
  */
 export const POST: APIRoute = async ({ request }) => {
   const signature = request.headers.get('stripe-signature');
@@ -32,43 +34,67 @@ export const POST: APIRoute = async ({ request }) => {
       case 'checkout.session.completed':
       case 'checkout.session.async_payment_succeeded': {
         let session = event.data.object as Stripe.Checkout.Session;
-        // The event payload may lack customer_details in some API versions; refresh to be safe.
         if (!session.customer_details?.email) session = await retrieveSession(env, session.id);
+
+        if (session.mode === 'subscription') {
+          const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+          const subId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
+          const email = session.customer_details?.email ?? session.customer_email;
+          if (customerId && email) {
+            await upsertCustomer(env, { id: customerId, email, name: session.customer_details?.name ?? null });
+          }
+          if (subId) {
+            const sub = await syncSubscription(env, await retrieveSubscription(env, subId));
+            if (sub && !sub.welcomed_at) {
+              const r = await sendWelcomeEmail(env, origin, sub);
+              console.info('[webhook] welcome email', sub.stripe_subscription_id, r.ok ? 'sent' : 'NOT sent');
+            }
+          }
+          break;
+        }
+
         const purchase = await ensurePurchase(env, session);
         if (!purchase) {
           console.warn('[webhook] session not paid or incomplete', session.id, session.payment_status);
           break;
         }
-        if (!purchase.emailedAt) {
+        if (!purchase.emailed_at) {
           const r = await sendDeliveryEmail(env, origin, purchase);
-          console.info('[webhook] delivery email', purchase.sessionId, r.ok ? 'sent' : 'NOT sent');
+          console.info('[webhook] delivery email', purchase.session_id, r.ok ? 'sent' : 'NOT sent');
         }
         break;
       }
+
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted':
+      case 'customer.subscription.paused':
+      case 'customer.subscription.resumed': {
+        const sub = event.data.object as Stripe.Subscription;
+        await syncSubscription(env, sub);
+        break;
+      }
+
       case 'charge.refunded': {
         const charge = event.data.object as Stripe.Charge;
         const pi = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
-        // Purchases are keyed by session; find it via the session list for this payment intent.
         if (pi) {
-          const { getStripe } = await import('../../../lib/stripe');
-          const sessions = await getStripe(env).checkout.sessions.list({ payment_intent: pi, limit: 1 });
-          const s = sessions.data[0];
-          const purchase = s ? await getPurchase(env, s.id) : null;
+          const purchase = await findPurchaseByPaymentIntent(env, pi);
           if (purchase) {
-            purchase.refundedAt = new Date().toISOString();
-            await savePurchase(env, purchase);
-            console.info('[webhook] marked refunded', purchase.sessionId);
+            await markRefunded(env, purchase.session_id);
+            console.info('[webhook] marked refunded', purchase.session_id);
           }
         }
         break;
       }
+
       default:
         // Unhandled event types are acknowledged so Stripe does not retry them.
         break;
     }
   } catch (err) {
     console.error('[webhook] handler failed', event.type, err);
-    // 500 makes Stripe retry, which is what we want for transient KV/email failures.
+    // 500 makes Stripe retry, which is what we want for transient D1/email failures.
     return json({ error: 'Handler failed' }, { status: 500 });
   }
 

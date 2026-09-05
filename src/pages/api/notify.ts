@@ -4,7 +4,8 @@ import { getGuide } from '../../data/guides';
 import { site } from '../../data/site';
 import { sendEmail } from '../../lib/email';
 import { formResult, isEmail, safeRedirect, siteOrigin, str } from '../../lib/http';
-import { signupKey as key, unsubscribeUrl, type Signup } from '../../lib/signups';
+import { getSignup, upsertSignup } from '../../lib/db';
+import { unsubscribeUrl } from '../../lib/signups';
 
 export const prerender = false;
 
@@ -16,22 +17,14 @@ export const POST: APIRoute = async (ctx) => {
   if (!form) return fail('Invalid form submission.');
   if (str(form.get('website'))) return formResult(ctx, true, { redirect });
 
-  const email = str(form.get('email'), 254);
+  const email = str(form.get('email'), 254).toLowerCase();
   if (!isEmail(email)) return fail('That email address does not look right.');
-  const guideSlug = str(form.get('guide'), 80);
-  const guide = getGuide(guideSlug);
+  const guide = getGuide(str(form.get('guide'), 80));
 
-  const existing = await env.SIGNUPS.get<Signup>(key(email), 'json');
-  const now = new Date().toISOString();
-  const guides = new Set(existing?.guides ?? []);
+  const existing = await getSignup(env, email);
+  const guides = new Set<string>(existing ? (JSON.parse(existing.guides) as string[]) : []);
   guides.add(guide?.slug ?? '*');
-  const record: Signup = {
-    email: email.toLowerCase(),
-    guides: [...guides],
-    createdAt: existing?.createdAt ?? now,
-    updatedAt: now,
-  };
-  await env.SIGNUPS.put(key(email), JSON.stringify(record));
+  await upsertSignup(env, email, [...guides]);
 
   // One confirmation so the person knows it worked, with an unsubscribe link.
   if (!existing) {

@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import GuideCover from '../../components/GuideCover.astro';
 import { formatPrice } from '../../data/site';
 import { availableGuides, upcomingGuides } from '../../data/guides';
+import { membership, plans } from '../../data/plans';
 
 const countLabel = `${availableGuides.length} guide${availableGuides.length === 1 ? '' : 's'} available · ${upcomingGuides.length} in progress`;
 ---
@@ -67,6 +68,19 @@ const countLabel = `${availableGuides.length} guide${availableGuides.length === 
           </div>
         ))
       }
+      <a href="/membership" class="row member">
+        <div class="member-mark" aria-hidden="true">∞</div>
+        <div>
+          <div class="meta">
+            <span class="price-badge sm">from {formatPrice(plans[0]!.price, plans[0]!.currency)} / month</span>
+            <span class="small member-small">or {formatPrice(plans[1]!.price, plans[1]!.currency)} a year</span>
+          </div>
+          <h2 class="display">{membership.name}</h2>
+          <p class="sub member-sub">{membership.tagline}</p>
+          <p class="short member-short">{membership.description}</p>
+          <span class="arrow-link more member-more">See the membership →</span>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -189,6 +203,34 @@ const countLabel = `${availableGuides.length} guide${availableGuides.length === 
   .more {
     margin-top: 22px;
   }
+  .member {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--dark-text);
+    transition: transform 0.2s ease;
+  }
+  .member:hover {
+    transform: translateY(-2px);
+    color: var(--dark-text);
+  }
+  .member-mark {
+    width: clamp(120px, 20vw, 200px);
+    aspect-ratio: 2 / 3;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: clamp(48px, 7vw, 84px);
+    transform: rotate(-2deg);
+    margin: 8px;
+    filter: drop-shadow(0 16px 28px rgba(22, 19, 15, 0.28));
+  }
+  .member-small { color: var(--dark-muted); }
+  .member-sub { color: var(--dark-text); }
+  .member-short { color: var(--dark-body); }
+  .member-more { color: var(--accent-tint); }
   .promises {
     background: var(--bg-alt);
     border-top: 1px solid var(--border);

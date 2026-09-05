@@ -1,0 +1,215 @@
+---
+/**
+ * Member area. Signed in: membership status, every available guide with a download
+ * button, one-off purchases with their links, billing portal, sign out.
+ * Signed out: magic-link form.
+ */
+import { env } from 'cloudflare:workers';
+import Base from '../layouts/Base.astro';
+import GuideCover from '../components/GuideCover.astro';
+import { availableGuides, upcomingGuides, getGuide } from '../data/guides';
+import { membership, getPlan } from '../data/plans';
+import { site, formatPrice } from '../data/site';
+import { getSessionEmail } from '../lib/session';
+import { findSubscriptionByEmail, isActive } from '../lib/subscriptions';
+import { listPurchasesByEmail, linkExpired, reissueToken } from '../lib/purchases';
+import { formatDate } from '../lib/http';
+
+export const prerender = false;
+Astro.response.headers.set('cache-control', 'private, no-store');
+
+const email = await getSessionEmail(Astro, env);
+const q = Astro.url.searchParams;
+const sent = q.get('sent') === '1';
+const welcome = q.get('welcome') === '1';
+const error = q.get('error');
+const next = q.get('next');
+
+const sub = email ? await findSubscriptionByEmail(env, email) : null;
+const active = sub ? isActive(sub) : false;
+const plan = sub ? getPlan(sub.plan) : undefined;
+
+// One-off purchases: make sure every link on this page is valid.
+let purchases = email ? await listPurchasesByEmail(env, email) : [];
+purchases = await Promise.all(purchases.map((p) => (linkExpired(p) ? reissueToken(env, p) : p)));
+
+const statusLabel = !sub
+  ? 'No membership'
+  : sub.status === 'active' && sub.cancel_at_period_end
+    ? 'Cancelled — access until period end'
+    : sub.status === 'past_due'
+      ? 'Payment overdue'
+      : sub.status.charAt(0).toUpperCase() + sub.status.slice(1).replace('_', ' ');
+---
+
+<Base title="Your account" noindex current="">
+  <div class="container wrap">
+    {
+      !email ? (
+        <div class="signin">
+          <p class="eyebrow">Account</p>
+          <h1 class="display">Sign in with a link.</h1>
+          <p class="lead">
+            No password. Enter the email you paid with and a sign-in link arrives within a minute. It
+            works for 20 minutes; afterwards your browser stays signed in for a month.
+          </p>
+          <form method="post" action="/api/access/request" class="card form">
+            <label class="honeypot" aria-hidden="true">
+              Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            {next && <input type="hidden" name="next" value={next} />}
+            <label class="field">
+              Email
+              <input class="input" type="email" name="email" required autocomplete="email" placeholder="you@yourcompany.com" />
+            </label>
+            <button type="submit" class="btn btn-accent">Send me a link</button>
+            {sent && <p class="notice-ok" role="status">If that address has a membership or a purchase, the link is on its way. Check spam if it takes more than a minute.</p>}
+            {error === 'link' && <p class="notice-error" role="alert">That sign-in link is not valid any more. Request a fresh one.</p>}
+            {error && error !== 'link' && <p class="notice-error" role="alert">{error}</p>}
+          </form>
+          <p class="small">
+            Not a member yet? <a href="/membership">See the membership</a> — every guide, current and future.
+          </p>
+        </div>
+      ) : (
+        <div class="grid">
+          <div>
+            <p class="eyebrow">Account</p>
+            <h1 class="display">{welcome ? 'Welcome in.' : 'Your guides.'}</h1>
+            <p class="lead">
+              Signed in as <strong>{email}</strong>.
+              {welcome && ' Your membership is active — everything below is yours to download.'}
+            </p>
+            {error && <p class="notice-error" role="alert">{error}</p>}
+
+            {active ? (
+              <section class="block">
+                <h2 class="display h2">Included in your membership</h2>
+                <ul class="guides">
+                  {availableGuides.map((g) => (
+                    <li class="card guide">
+                      <GuideCover guide={g} size="shelf" />
+                      <div>
+                        <p class="t">{g.title}</p>
+                        <p class="s">{g.pages} pages · PDF · {g.edition}</p>
+                        <a href={`/download/member/${g.slug}`} class="btn btn-accent sm" download>Download →</a>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                {upcomingGuides.length > 0 && (
+                  <p class="small">
+                    Coming to this list the day they ship: {upcomingGuides.map((g) => g.title).join(', ')}.
+                  </p>
+                )}
+              </section>
+            ) : (
+              <section class="block card cta">
+                <h2 class="display h2">{sub ? 'Your membership is not active.' : 'No membership on this address.'}</h2>
+                <p>
+                  {sub
+                    ? 'Renew it to download every guide again, including the ones that shipped since.'
+                    : `The ${membership.name.toLowerCase()} gives you every guide, current and future, for one price.`}
+                </p>
+                <a href="/membership" class="btn btn-accent">See the membership →</a>
+              </section>
+            )}
+
+            {purchases.length > 0 && (
+              <section class="block">
+                <h2 class="display h2">Guides you bought</h2>
+                <ul class="guides">
+                  {purchases.map((p) => {
+                    const g = getGuide(p.guide);
+                    return (
+                      <li class="card guide">
+                        {g && <GuideCover guide={g} size="shelf" />}
+                        <div>
+                          <p class="t">{g?.title ?? p.guide}</p>
+                          <p class="s">Bought {formatDate(p.created_at)} · {formatPrice(p.amount_total, p.currency)}</p>
+                          <a href={`/download/${p.token}`} class="btn btn-dark sm" download>Download →</a>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            )}
+          </div>
+
+          <aside>
+            <div class="card">
+              <p class="h">Membership</p>
+              <dl>
+                <dt>Status</dt>
+                <dd><span class:list={['dot', { on: active }]} />{statusLabel}</dd>
+                {plan && <Fragment><dt>Plan</dt><dd>{plan.name} · {formatPrice(plan.price, plan.currency)} / {plan.interval}</dd></Fragment>}
+                {sub?.current_period_end && (
+                  <Fragment>
+                    <dt>{sub.cancel_at_period_end ? 'Access until' : 'Renews on'}</dt>
+                    <dd>{formatDate(sub.current_period_end)}</dd>
+                  </Fragment>
+                )}
+              </dl>
+              {sub ? (
+                <form method="post" action="/api/portal">
+                  <button type="submit" class="btn btn-outline sm">Manage or cancel</button>
+                </form>
+              ) : (
+                <a href="/membership" class="btn btn-outline sm">Join</a>
+              )}
+              <p class="fine">Payments, invoices and the card on file are handled by Stripe's billing portal.</p>
+            </div>
+            <div class="card">
+              <p class="h">Need help?</p>
+              <p class="p">Write to <a href={`mailto:${site.email}`}>{site.email}</a> from this address. Download problems are fixed the same day.</p>
+              <form method="post" action="/api/access/logout">
+                <button type="submit" class="link-btn">Sign out</button>
+              </form>
+            </div>
+          </aside>
+        </div>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .wrap { padding-top: 76px; padding-bottom: 96px; }
+  h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; margin: 12px 0 14px; }
+  .lead { margin: 0 0 26px; max-width: 56ch; }
+  .signin { max-width: 640px; }
+  .form { display: grid; gap: 16px; }
+  .form .btn { justify-self: start; }
+  .signin .small { margin-top: 18px; }
+  .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: start; }
+  .block { margin-top: 32px; }
+  .h2 { font-size: clamp(20px, 2.4vw, 26px); letter-spacing: -0.03em; margin: 0 0 16px; }
+  .guides { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .guide { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; padding: 18px 22px; }
+  .guide :global(.cover-wrap.shelf .cover) { width: 84px; }
+  .guide .t { margin: 0; font-weight: 600; font-size: 17px; }
+  .guide .s { margin: 4px 0 12px; font-size: 13.5px; color: var(--muted); }
+  .btn.sm { padding: 11px 18px; font-size: 14.5px; }
+  .block .small { margin-top: 14px; }
+  .cta p { font-size: 15.5px; line-height: 1.6; color: var(--text); margin: 0 0 18px; }
+  aside { display: grid; gap: 14px; padding-top: 24px; }
+  .card .h { font-family: var(--font-display); font-weight: 600; font-size: 17px; margin: 0 0 12px; }
+  .card .p { font-size: 15px; line-height: 1.6; color: var(--text-2); margin: 0 0 14px; }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; margin: 0 0 18px; font-size: 14.5px; }
+  dt { color: var(--muted); }
+  dd { margin: 0; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--faint); display: inline-block; }
+  .dot.on { background: #34a853; }
+  .fine { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 14px 0 0; }
+  .link-btn { background: none; border: 0; padding: 0; color: var(--text-2); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .link-btn:hover { color: var(--ink); }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+    .wrap { padding-top: 48px; padding-bottom: 64px; }
+    aside { padding-top: 0; }
+  }
+  @media (max-width: 520px) {
+    .guide { grid-template-columns: 1fr; }
+  }
+</style>

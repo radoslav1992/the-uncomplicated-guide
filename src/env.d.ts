@@ -6,8 +6,7 @@
  */
 interface Env {
   // Storage
-  PURCHASES: KVNamespace;
-  SIGNUPS: KVNamespace;
+  DB: D1Database;
   GUIDE_FILES: R2Bucket;
   // Cloudflare Email Service
   SEND_EMAIL?: SendEmail;
@@ -22,12 +21,14 @@ interface Env {
   PUBLIC_GA_MEASUREMENT_ID?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
   STRIPE_AUTOMATIC_TAX?: string;
+  STRIPE_PRICE_MONTHLY?: string;
+  STRIPE_PRICE_YEARLY?: string;
 
   // Secrets
   STRIPE_SECRET_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
   TURNSTILE_SECRET_KEY?: string;
-  DOWNLOAD_TOKEN_SECRET?: string;
+  AUTH_SECRET?: string;
 }
 
 declare namespace Cloudflare {

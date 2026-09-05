@@ -8,6 +8,7 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
   <h2>Which cookies this site uses</h2>
   <ul>
     <li><strong>Technical cookies</strong> — the infrastructure the site runs on (Cloudflare) and the payment provider (Stripe, on its own pages) may set cookies needed for security and performance. They are not used for profiling.</li>
+    <li><strong>Sign-in cookie (<code>ug_session</code>)</strong> — set only when you sign in to your account. Keeps you signed in for thirty days and holds nothing but your email address and an expiry time. Strictly necessary; no consent needed. Signing out removes it.</li>
     <li><strong>Analytics cookies (Google Analytics 4)</strong> — set <strong>only after consent</strong> in the cookie banner. Used for aggregate statistics on which pages are visited (<code>_ga</code>-type cookies). Data is processed by Google; see <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>. The script loads in Consent Mode: before consent, or after refusal, no cookies are set and no identifiers are used.{!gaId && ' Analytics is currently switched off entirely.'}</li>
   </ul>
   <p>The site uses no marketing cookies and no advertising networks.</p>
