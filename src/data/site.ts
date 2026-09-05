@@ -30,6 +30,7 @@ export const site = {
     { label: 'About', href: '/#author' },
     { label: 'Contact', href: '/contact' },
   ],
+  newsletterBlurb: 'One email when a guide ships, now and then a short note. Nothing else.',
   legalNav: [
     { label: 'Terms of sale', href: '/terms' },
     { label: 'Refund policy', href: '/refunds' },

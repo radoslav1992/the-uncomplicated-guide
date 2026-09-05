@@ -1,6 +1,7 @@
 ---
 import { site } from '../data/site';
 import { availableGuides } from '../data/guides';
+import SignupForm from './SignupForm.astro';
 
 const year = new Date().getFullYear();
 const nav = [
@@ -22,6 +23,11 @@ const nav = [
       </p>
       <p class="muted">{site.legalName}</p>
       <p class="muted">{site.reach}</p>
+      <div class="newsletter">
+        <p class="heading">Newsletter</p>
+        <p class="muted">{site.newsletterBlurb}</p>
+        <SignupForm compact source="footer" />
+      </div>
     </div>
     <div class="col">
       <p class="heading">Contact</p>
@@ -98,6 +104,16 @@ const nav = [
     line-height: 1.55;
     color: var(--muted);
     margin: 0;
+  }
+  .newsletter {
+    margin-top: 14px;
+    width: 100%;
+    max-width: 340px;
+    display: grid;
+    gap: 8px;
+  }
+  .newsletter .heading {
+    margin-top: 6px;
   }
   .bottom {
     padding-top: 18px;

@@ -6,6 +6,8 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  // Newsletter delivery runs in batches; the cron continues any letter still sending.
+  "triggers": { "crons": ["*/5 * * * *"] },
   // Static pages are built as `page.html`; serve `/page` and redirect `/page/` → `/page`.
   // No `not_found_handling`: unmatched paths must fall through to the Worker (on-demand routes, 404 page).
   "assets": { "binding": "ASSETS", "html_handling": "drop-trailing-slash" },
@@ -38,6 +40,7 @@
   // STRIPE_WEBHOOK_SECRET    whsec_... (from the webhook endpoint pointing at /api/stripe/webhook)
   // AUTH_SECRET              required; a long random string. Signs member sessions, magic links
   //                          and unsubscribe links. Generate with: openssl rand -base64 48
+  // ADMIN_TOKEN              required to use /admin/newsletter; any long random string.
   // TURNSTILE_SECRET_KEY     optional, pairs with PUBLIC_TURNSTILE_SITE_KEY
 
   // ─── Storage ─────────────────────────────────────────────────────────────

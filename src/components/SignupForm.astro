@@ -1,32 +1,41 @@
 ---
 /**
- * Release-notification signup. Posts to /api/notify; works without JS via redirect.
+ * Newsletter signup (double opt-in). Posts to /api/newsletter/subscribe; works without JS via redirect.
  */
 interface Props {
-  /** Optional guide slug so the notification can be scoped to one guide. */
+  /** Optional guide slug to record what the person is interested in. */
   guide?: string;
   redirect?: string;
   buttonLabel?: string;
+  source?: string;
+  /** Single-line layout for the footer. */
+  compact?: boolean;
 }
-const { guide, redirect = Astro.url.pathname, buttonLabel = 'Tell me' } = Astro.props;
-const done = Astro.url.searchParams.get('signup') === 'ok';
+const {
+  guide,
+  redirect = '/newsletter?status=check',
+  buttonLabel = 'Subscribe',
+  source = Astro.url.pathname,
+  compact = false,
+} = Astro.props;
 ---
 
-<form method="post" action="/api/notify" class="signup" data-signup-form>
+<form method="post" action="/api/newsletter/subscribe" class:list={['signup', { compact }]} data-signup-form>
   <input type="hidden" name="redirect" value={redirect} />
+  <input type="hidden" name="source" value={source} />
   {guide && <input type="hidden" name="guide" value={guide} />}
   <label class="honeypot" aria-hidden="true">
     Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" />
   </label>
-  <div class="fields" data-fields hidden={done}>
+  <div class="fields" data-fields>
     <label class="field">
-      <span class="label">Email</span>
+      <span class:list={['label', { 'visually-hidden': compact }]}>Email</span>
       <input class="input" type="email" name="email" required autocomplete="email" placeholder="you@yourcompany.com" />
     </label>
     <button type="submit" class="btn btn-accent">{buttonLabel}</button>
   </div>
-  <p class="notice" data-done hidden={!done} role="status">
-    Done. You will hear from me on the day the next guide ships — once, and nothing else.
+  <p class="notice" data-done hidden role="status">
+    One more click: a confirmation email is on its way. Nothing is sent until you open it.
   </p>
   <p class="notice-error" data-error hidden role="alert"></p>
 </form>
@@ -48,6 +57,23 @@ const done = Astro.url.searchParams.get('signup') === 'ok';
   .btn {
     justify-self: start;
   }
+  .compact .fields {
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+  }
+  .compact .input {
+    font-size: 14.5px;
+    padding: 11px 13px;
+  }
+  .compact .btn {
+    padding: 12px 18px;
+    font-size: 14.5px;
+  }
+  .compact .notice,
+  .compact .notice-error {
+    font-size: 13.5px;
+  }
 </style>
 
 <script>
@@ -66,10 +92,13 @@ const done = Astro.url.searchParams.get('signup') === 'ok';
           body: new FormData(form),
           headers: { Accept: 'application/json' },
         });
-        const data = (await res.json()) as { ok: boolean; error?: string };
+        const data = (await res.json()) as { ok: boolean; error?: string; status?: string };
         if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong.');
         if (fields) fields.hidden = true;
-        if (done) done.hidden = false;
+        if (done) {
+          if (data.status === 'already-confirmed') done.textContent = 'You are already on the list — nothing more to do.';
+          done.hidden = false;
+        }
       } catch (ex) {
         if (err) {
           err.textContent = ex instanceof Error ? ex.message : 'Something went wrong.';

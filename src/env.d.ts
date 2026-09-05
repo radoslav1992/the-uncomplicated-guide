@@ -29,6 +29,7 @@ interface Env {
   STRIPE_WEBHOOK_SECRET?: string;
   TURNSTILE_SECRET_KEY?: string;
   AUTH_SECRET?: string;
+  ADMIN_TOKEN?: string;
 }
 
 declare namespace Cloudflare {

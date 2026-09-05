@@ -13,3 +13,6 @@ TURNSTILE_SECRET_KEY=
 # Required: a long random string. Signs member sessions, magic links and unsubscribe links.
 # Generate with: openssl rand -base64 48
 AUTH_SECRET=change-me-to-a-long-random-string
+
+# Required for /admin/newsletter. Any long random string.
+ADMIN_TOKEN=change-me-too

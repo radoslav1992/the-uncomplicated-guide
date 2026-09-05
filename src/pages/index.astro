@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Will there be more guides?',
-    a: 'Three are in progress: vibe coding for non-developers, working with AI coding agents such as Claude Code, and social media content with AI. The library shows what is coming, and the signup above tells you the day one ships.',
+    a: 'Three are in progress: vibe coding for non-developers, working with AI coding agents such as Claude Code, and social media content with AI. The library shows what is coming, and the newsletter tells you the day one ships.',
   },
 ];
 
@@ -206,11 +206,11 @@ const jsonLd = [
         <div>
           <h2 class="display">Hear when the next one ships.</h2>
           <p class="lead-text">
-            {upcomingGuides.length} guides are in progress: {upcomingGuides.map((g) => g.title.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1')}. Leave an email and you get one message per guide, on the day it comes out. Nothing else.
+            {upcomingGuides.length} guides are in progress: {upcomingGuides.map((g) => g.title.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1')}. Subscribe and you get one email on the day a guide comes out, and now and then a short note on something learned building or selling one. Never more than a couple a month.
           </p>
-          <p class="small">No list, no sequence, no “last chance”. One message per guide.</p>
+          <p class="small">No sequences, no “last chance”. Unsubscribe in one click, from every email.</p>
         </div>
-        <SignupForm redirect="/?signup=ok#signup" />
+        <SignupForm source="home" />
       </div>
     </div>
   </section>

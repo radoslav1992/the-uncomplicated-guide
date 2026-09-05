@@ -148,11 +148,11 @@ const jsonLd = {
             <div>
               <h2 class="display">Not on sale yet.</h2>
               <p class="p">
-                This guide is in progress. Leave an email and I will write on the day it comes out
-                — once, no list, nothing after that.
+                This guide is in progress. Subscribe and I will write on the day it comes out —
+                plus the occasional short note; never more than a couple of emails a month.
               </p>
             </div>
-            <SignupForm guide={guide.slug} redirect={`/guides/${guide.slug}?signup=ok#notify`} />
+            <SignupForm guide={guide.slug} buttonLabel="Tell me" source={`guide:${guide.slug}`} />
           </div>
         </div>
       </section>

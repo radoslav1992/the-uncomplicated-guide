@@ -1,0 +1,78 @@
+---
+/**
+ * Newsletter landing + status page (?status=check|confirmed|unsubscribed|invalid).
+ */
+import Base from '../../layouts/Base.astro';
+import SignupForm from '../../components/SignupForm.astro';
+import { site } from '../../data/site';
+import { upcomingGuides } from '../../data/guides';
+
+export const prerender = false;
+Astro.response.headers.set('cache-control', 'private, no-store');
+
+const status = Astro.url.searchParams.get('status') ?? '';
+const messages: Record<string, { title: string; text: string }> = {
+  check: {
+    title: 'One more click.',
+    text: 'A confirmation email is on its way. Open it and click the link — nothing is sent until you do. If it does not arrive within a few minutes, check the spam folder.',
+  },
+  confirmed: {
+    title: 'You are on the list.',
+    text: 'Thank you. You will hear from me when a guide ships or a revised edition replaces the old file, and now and then with a short note. Every email has an unsubscribe link.',
+  },
+  unsubscribed: {
+    title: 'Unsubscribed.',
+    text: 'Your address has been removed. Nothing more will be sent. The library stays open whenever you need it.',
+  },
+  invalid: {
+    title: 'That link is not valid.',
+    text: 'It may have been altered or it belongs to an address that is no longer on the list. Subscribe again below if you want to be.',
+  },
+};
+const msg = messages[status];
+---
+
+<Base title="Newsletter" description="One email when a guide ships, and now and then a short note. Nothing else." noindex={Boolean(msg)}>
+  <div class="container wrap">
+    <p class="eyebrow">Newsletter</p>
+    {
+      msg ? (
+        <Fragment>
+          <h1 class="display">{msg.title}</h1>
+          <p class="lead">{msg.text}</p>
+          {(status === 'invalid' || status === 'unsubscribed') && (
+            <div class="panel form-panel">
+              <SignupForm redirect="/newsletter?status=check" source="newsletter-page" />
+            </div>
+          )}
+          <p class="small links">
+            <a href="/guides">Browse the library →</a>
+          </p>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <h1 class="display">Hear when the next one ships.</h1>
+          <p class="lead">
+            {upcomingGuides.length} guides are in progress. Subscribe and you get one email on the day a guide comes out or a
+            revised edition replaces the old file, plus the occasional short note about something learned
+            building or selling one of these. Never more than a couple a month.
+          </p>
+          <div class="panel form-panel">
+            <SignupForm redirect="/newsletter?status=check" source="newsletter-page" />
+          </div>
+          <p class="small links">
+            No sequences, no “last chance”. Questions: <a href={`mailto:${site.email}`}>{site.email}</a>.
+          </p>
+        </Fragment>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .wrap { padding-top: 96px; padding-bottom: 120px; max-width: 720px; }
+  h1 { font-size: clamp(32px, 5.5vw, 52px); letter-spacing: -0.04em; margin: 12px 0 16px; }
+  .lead { margin: 0 0 28px; }
+  .form-panel { padding: 28px; }
+  .links { margin-top: 20px; }
+</style>

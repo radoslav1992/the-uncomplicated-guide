@@ -43,6 +43,8 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
   - Production branch: `main` (merge the feature branch first, or set the branch you deploy from).
 - [ ] After the first build, open the Worker → **Settings → Bindings** and check that `DB`, `GUIDE_FILES`,
       `SEND_EMAIL` and `ASSETS` are listed. They come from `wrangler.jsonc`; if one is missing the config is wrong.
+- [ ] **Settings → Triggers → Cron Triggers** shows `*/5 * * * *` (from `wrangler.jsonc`). It delivers
+      queued newsletter batches and purges unconfirmed addresses; nothing to configure.
 - [ ] **Settings → Domains & Routes → Add → Custom domain** — e.g. `uncomplicated.guides` (and `www` if you want it).
 - [ ] Set `SITE_URL` in `wrangler.jsonc` `vars` to the final `https://…` URL and commit.
       Also update `Sitemap:` in `public/robots.txt`.
@@ -57,6 +59,7 @@ once in the dashboard and survive deploys.
 | `STRIPE_SECRET_KEY`      | Stripe → Developers → API keys → Secret key (`sk_live_…`)        | yes      |
 | `STRIPE_WEBHOOK_SECRET`  | Signing secret of the webhook endpoint from step 6 (`whsec_…`)   | yes      |
 | `AUTH_SECRET`            | Any long random string (`openssl rand -base64 48`)               | yes      |
+| `ADMIN_TOKEN`            | Another long random string; unlocks `/admin/newsletter`          | yes      |
 | `TURNSTILE_SECRET_KEY`   | From step 8, if you use Turnstile                                | optional |
 
 Redeploy (or push a commit) after adding secrets so the running Worker picks them up.
@@ -84,6 +87,9 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 - [ ] `EMAIL_FROM` in `wrangler.jsonc` must be an address on that domain (default `hello@uncomplicated.guides`).
 - [ ] Nothing else: the `send_email` binding is declared in `wrangler.jsonc`.
 - [ ] Test: submit the contact form on the live site; the message must arrive at `CONTACT_TO`.
+- [ ] Newsletter volume: Email Service is in beta and has per-account sending limits. Check the limit
+      shown in the Email Service dashboard before sending to a large list; delivery runs in batches
+      of 25 every five minutes, so a list of 1,000 takes about three hours.
 
 **Receiving — Email Routing**
 
@@ -119,3 +125,5 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 4. Sign out, request a sign-in link for the same address, sign in again.
 5. Send yourself a message through the contact form and reply to it — the reply reaches the visitor.
 6. Send an email to `hello@<your-domain>` from another mailbox; it arrives at `CONTACT_TO`.
+7. Subscribe to the newsletter from the footer, click the confirmation link, then open
+   `/admin/newsletter`, send yourself a test, and send a first short letter to everyone.

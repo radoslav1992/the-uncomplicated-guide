@@ -15,9 +15,10 @@ export interface OutgoingEmail {
   text: string;
   html?: string;
   replyTo?: string;
+  headers?: Record<string, string>;
 }
 
-export async function sendEmail(env: Env, mail: OutgoingEmail): Promise<{ ok: boolean; id?: string }> {
+export async function sendEmail(env: Env, mail: OutgoingEmail): Promise<{ ok: boolean; id?: string; error?: string }> {
   const from = { name: env.EMAIL_FROM_NAME || site.name, email: env.EMAIL_FROM || site.email };
   if (!env.SEND_EMAIL) {
     console.warn('[email] SEND_EMAIL binding missing — not sent:', {
@@ -25,7 +26,7 @@ export async function sendEmail(env: Env, mail: OutgoingEmail): Promise<{ ok: bo
       subject: mail.subject,
     });
     console.info('[email] body:\n' + mail.text);
-    return { ok: false };
+    return { ok: false, error: 'SEND_EMAIL binding missing' };
   }
   try {
     const result = await env.SEND_EMAIL.send({
@@ -35,11 +36,12 @@ export async function sendEmail(env: Env, mail: OutgoingEmail): Promise<{ ok: bo
       text: mail.text,
       html: mail.html ?? textToHtml(mail.text),
       replyTo: mail.replyTo,
+      headers: mail.headers,
     });
     return { ok: true, id: result.messageId };
   } catch (err) {
     console.error('[email] send failed', err);
-    return { ok: false };
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
