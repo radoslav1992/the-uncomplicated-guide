@@ -45,9 +45,9 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
       `SEND_EMAIL` and `ASSETS` are listed. They come from `wrangler.jsonc`; if one is missing the config is wrong.
 - [ ] **Settings → Triggers → Cron Triggers** shows `*/5 * * * *` (from `wrangler.jsonc`). It delivers
       queued newsletter batches and purges unconfirmed addresses; nothing to configure.
-- [ ] **Settings → Domains & Routes → Add → Custom domain** — e.g. `uncomplicated.guides` (and `www` if you want it).
-- [ ] Set `SITE_URL` in `wrangler.jsonc` `vars` to the final `https://…` URL and commit.
-      Also update `Sitemap:` in `public/robots.txt`.
+- [ ] **Settings → Domains & Routes → Add → Custom domain** — e.g. `uncomplicatedguides.com` (and `www` if you want it).
+- [ ] `SITE_URL` in `wrangler.jsonc` and `public/robots.txt` are already set to `https://uncomplicatedguides.com`.
+      Change both only if you serve the site from `www` instead.
 
 Non-secret settings live in `wrangler.jsonc` → `vars` and ship with each deploy. Secrets are set
 once in the dashboard and survive deploys.
@@ -84,7 +84,7 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 - [ ] **Email → Email Service** (on the account, not the zone) → add the sending domain → add the
       DKIM/SPF/DMARC records it shows (one click if the zone is on Cloudflare) → wait for *Verified*.
-- [ ] `EMAIL_FROM` in `wrangler.jsonc` must be an address on that domain (default `hello@uncomplicated.guides`).
+- [ ] `EMAIL_FROM` in `wrangler.jsonc` must be an address on that domain (default `hello@uncomplicatedguides.com`).
 - [ ] Nothing else: the `send_email` binding is declared in `wrangler.jsonc`.
 - [ ] Test: submit the contact form on the live site; the message must arrive at `CONTACT_TO`.
 - [ ] Newsletter volume: Email Service is in beta and has per-account sending limits. Check the limit

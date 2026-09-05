@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // The public URL of the site. Override per environment with SITE_URL
 // (wrangler `vars` are loaded into process.env at build time by the adapter).
-const site = process.env.SITE_URL || 'https://uncomplicated.guides';
+const site = process.env.SITE_URL || 'https://uncomplicatedguides.com';
 
 export default defineConfig({
   site,
