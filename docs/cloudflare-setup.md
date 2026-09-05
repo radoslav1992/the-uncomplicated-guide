@@ -19,9 +19,8 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
 
 ## 2. D1 database
 
-- [ ] **Storage & Databases → D1 SQL database → Create** — name `guides-db`.
-- [ ] Copy the **Database ID** into `wrangler.jsonc` → `d1_databases[0].database_id` and commit.
-      (Until you do, the build fails with "REPLACE_WITH_D1_DATABASE_ID".)
+- [x] **Storage & Databases → D1 SQL database → Create** — name `guides-db`.
+- [x] Its **Database ID** (`1257ef33-c0c0-4d12-b568-8629bc7fc0c8`) is in `wrangler.jsonc` → `d1_databases[0].database_id`.
 - [ ] Migrations in `migrations/` are applied by the deploy command below; you do not create tables by hand.
 
 ## 3. R2 bucket
