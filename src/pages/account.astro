@@ -1,0 +1,131 @@
+---
+/**
+ * Buyer area. Signed in: every guide bought with this email, each with a fresh download
+ * link. Signed out: magic-link form.
+ */
+import { env } from 'cloudflare:workers';
+import Base from '../layouts/Base.astro';
+import GuideCover from '../components/GuideCover.astro';
+import { getGuide } from '../data/guides';
+import { site, formatPrice } from '../data/site';
+import { getSessionEmail } from '../lib/session';
+import { listPurchasesByEmail, linkExpired, reissueToken } from '../lib/purchases';
+import { formatDate } from '../lib/http';
+
+export const prerender = false;
+Astro.response.headers.set('cache-control', 'private, no-store');
+
+const email = await getSessionEmail(Astro, env);
+const q = Astro.url.searchParams;
+const sent = q.get('sent') === '1';
+const error = q.get('error');
+
+// Make sure every link on this page is valid.
+let purchases = email ? await listPurchasesByEmail(env, email) : [];
+purchases = await Promise.all(purchases.map((p) => (linkExpired(p) ? reissueToken(env, p) : p)));
+---
+
+<Base title="Your guides" noindex current="">
+  <div class="container wrap">
+    {
+      !email ? (
+        <div class="signin">
+          <p class="eyebrow">Your guides</p>
+          <h1 class="display">Sign in with a link.</h1>
+          <p class="lead">
+            No password. Enter the email you paid with and a sign-in link arrives within a minute. It
+            works for 20 minutes; afterwards your browser stays signed in for a month. Every guide you
+            bought is then one click away, whenever you need the file again.
+          </p>
+          <form method="post" action="/api/access/request" class="card form">
+            <label class="honeypot" aria-hidden="true">
+              Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </label>
+            <label class="field">
+              Email
+              <input class="input" type="email" name="email" required autocomplete="email" placeholder="you@yourcompany.com" />
+            </label>
+            <button type="submit" class="btn btn-accent">Send me a link</button>
+            {sent && <p class="notice-ok" role="status">If that address has a purchase, the link is on its way. Check spam if it takes more than a minute.</p>}
+            {error === 'link' && <p class="notice-error" role="alert">That sign-in link is not valid any more. Request a fresh one.</p>}
+            {error && error !== 'link' && <p class="notice-error" role="alert">{error}</p>}
+          </form>
+          <p class="small">
+            Nothing bought yet? <a href="/guides">Browse the library</a>.
+          </p>
+        </div>
+      ) : (
+        <div class="grid">
+          <div>
+            <p class="eyebrow">Your guides</p>
+            <h1 class="display">{purchases.length ? 'Here they are.' : 'Nothing here yet.'}</h1>
+            <p class="lead">Signed in as <strong>{email}</strong>.</p>
+            {error && <p class="notice-error" role="alert">{error}</p>}
+
+            {purchases.length > 0 ? (
+              <ul class="guides">
+                {purchases.map((p) => {
+                  const g = getGuide(p.guide);
+                  return (
+                    <li class="card guide">
+                      {g && <GuideCover guide={g} size="shelf" />}
+                      <div>
+                        <p class="t">{g?.title ?? p.guide}</p>
+                        <p class="s">Bought {formatDate(p.created_at)} · {formatPrice(p.amount_total, p.currency)}</p>
+                        <a href={`/download/${p.token}`} class="btn btn-accent sm" download>Download →</a>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <section class="card cta">
+                <p>No purchase is recorded for this address. If you paid with a different email, sign in with that one — or write to me and I will find it.</p>
+                <a href="/guides" class="btn btn-accent">Browse the library →</a>
+              </section>
+            )}
+          </div>
+
+          <aside>
+            <div class="card">
+              <p class="h">Need help?</p>
+              <p class="p">Write to <a href={`mailto:${site.email}`}>{site.email}</a> from this address. Download problems are fixed the same day; receipts come from Stripe.</p>
+              <form method="post" action="/api/access/logout">
+                <button type="submit" class="link-btn">Sign out</button>
+              </form>
+            </div>
+          </aside>
+        </div>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .wrap { padding-top: 76px; padding-bottom: 96px; }
+  h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; margin: 12px 0 14px; }
+  .lead { margin: 0 0 26px; max-width: 56ch; }
+  .signin { max-width: 640px; }
+  .form { display: grid; gap: 16px; }
+  .form .btn { justify-self: start; }
+  .signin .small { margin-top: 18px; }
+  .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: start; }
+  .guides { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .guide { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; padding: 18px 22px; }
+  .guide :global(.cover-wrap.shelf .cover) { width: 84px; }
+  .guide .t { margin: 0; font-weight: 600; font-size: 17px; }
+  .guide .s { margin: 4px 0 12px; font-size: 13.5px; color: var(--muted); }
+  .btn.sm { padding: 11px 18px; font-size: 14.5px; }
+  .cta p { font-size: 15.5px; line-height: 1.6; color: var(--text); margin: 0 0 18px; }
+  aside { display: grid; gap: 14px; padding-top: 24px; }
+  .card .h { font-family: var(--font-display); font-weight: 600; font-size: 17px; margin: 0 0 12px; }
+  .card .p { font-size: 15px; line-height: 1.6; color: var(--text-2); margin: 0 0 14px; }
+  .link-btn { background: none; border: 0; padding: 0; color: var(--text-2); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .link-btn:hover { color: var(--ink); }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: 1fr; }
+    .wrap { padding-top: 48px; padding-bottom: 64px; }
+    aside { padding-top: 0; }
+  }
+  @media (max-width: 520px) { .guide { grid-template-columns: 1fr; } }
+</style>

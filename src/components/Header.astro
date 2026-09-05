@@ -1,0 +1,124 @@
+---
+import { site } from '../data/site';
+import { featuredGuide } from '../data/guides';
+
+interface Props {
+  current?: string;
+}
+const { current = '' } = Astro.props;
+---
+
+<header class="site-header">
+  <div class="container inner">
+    <a href="/" class="brand" aria-label={`${site.name} — home`}>
+      <img src="/brand/logo-mark-96.webp" alt="" width="30" height="30" />
+      <span class="brand-name">{site.shortName}</span>
+      <span class="brand-suffix">{site.shortSuffix}</span>
+    </a>
+    <nav aria-label="Main navigation">
+      {
+        site.nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={['nav-link', { current: item.label === current }]}
+            aria-current={item.label === current ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+      <a href={`/guides/${featuredGuide.slug}`} class="cta">Get the first guide</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(246, 243, 238, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .inner {
+    padding-top: 16px;
+    padding-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: auto;
+    color: var(--ink);
+  }
+  .brand img {
+    width: 30px;
+    height: 30px;
+    flex: none;
+    display: block;
+    border-radius: 7px;
+  }
+  .brand-name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+  .brand-suffix {
+    font-size: 13px;
+    color: var(--muted);
+    margin-left: 2px;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    font-size: 15px;
+    font-weight: 500;
+    flex-wrap: wrap;
+  }
+  .nav-link {
+    color: var(--text);
+    transition: color 0.16s ease;
+  }
+  .nav-link:hover,
+  .nav-link.current {
+    color: var(--ink);
+  }
+  .cta {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-weight: 600;
+    transition: background-color 0.18s ease;
+    white-space: nowrap;
+  }
+  .cta:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+  @media (max-width: 720px) {
+    .inner {
+      gap: 12px 20px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+    nav {
+      width: 100%;
+      justify-content: space-between;
+      gap: 14px;
+      font-size: 14px;
+    }
+    .cta {
+      padding: 9px 14px;
+      font-size: 13.5px;
+    }
+  }
+</style>

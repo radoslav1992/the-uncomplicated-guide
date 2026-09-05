@@ -1,0 +1,18 @@
+# Copy to .dev.vars for local development (wrangler dev / astro dev).
+# Production values are set with `wrangler secret put <NAME>`.
+
+# Stripe — https://dashboard.stripe.com/apikeys (use the test keys locally)
+STRIPE_SECRET_KEY=sk_test_xxx
+# From the webhook endpoint you create for <SITE_URL>/api/stripe/webhook,
+# or from `stripe listen --forward-to localhost:4321/api/stripe/webhook`
+STRIPE_WEBHOOK_SECRET=whsec_xxx
+
+# Optional: Cloudflare Turnstile (pairs with PUBLIC_TURNSTILE_SITE_KEY in wrangler.jsonc)
+TURNSTILE_SECRET_KEY=
+
+# Required: a long random string. Signs sign-in sessions, magic links and unsubscribe links.
+# Generate with: openssl rand -base64 48
+AUTH_SECRET=change-me-to-a-long-random-string
+
+# Required for /admin/newsletter. Any long random string.
+ADMIN_TOKEN=change-me-too

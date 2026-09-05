@@ -1,0 +1,89 @@
+---
+/**
+ * Minimal consent banner for Google Analytics 4 (Consent Mode v2).
+ * Only rendered when PUBLIC_GA_MEASUREMENT_ID is set. The choice is stored in
+ * localStorage under "cookie-consent" ("granted" | "denied"). The cookie policy
+ * page has a button that dispatches "cookie-consent:open" to show it again.
+ */
+---
+
+<div class="consent" id="cookie-consent" hidden role="dialog" aria-live="polite" aria-label="Cookie choice">
+  <p>
+    This site uses Google Analytics to count visits — only if you agree. Without consent no
+    analytics cookies are set. Details in the <a href="/cookies">cookie policy</a>.
+  </p>
+  <div class="actions">
+    <button type="button" class="btn btn-outline" data-consent="denied">No thanks</button>
+    <button type="button" class="btn btn-dark" data-consent="granted">Allow analytics</button>
+  </div>
+</div>
+
+<script>
+  const KEY = 'cookie-consent';
+  const el = document.getElementById('cookie-consent');
+  if (el) {
+    const read = () => {
+      try {
+        return localStorage.getItem(KEY);
+      } catch {
+        return null;
+      }
+    };
+    const show = () => {
+      el.hidden = false;
+    };
+    const apply = (value: 'granted' | 'denied') => {
+      try {
+        localStorage.setItem(KEY, value);
+      } catch {}
+      const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+      w.gtag?.('consent', 'update', { analytics_storage: value });
+      el.hidden = true;
+    };
+    if (!read()) show();
+    el.querySelectorAll<HTMLButtonElement>('[data-consent]').forEach((b) =>
+      b.addEventListener('click', () => apply(b.dataset.consent as 'granted' | 'denied')),
+    );
+    window.addEventListener('cookie-consent:open', show);
+  }
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    z-index: 9500;
+    margin: 0 auto;
+    max-width: 640px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 18px 44px rgba(22, 19, 15, 0.16);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 24px;
+  }
+  .consent p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text);
+    flex: 1 1 280px;
+  }
+  .consent a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+  }
+  .actions .btn {
+    padding: 11px 18px;
+    font-size: 14px;
+  }
+</style>

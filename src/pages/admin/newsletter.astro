@@ -1,0 +1,167 @@
+---
+/**
+ * Newsletter admin. Protected by the ADMIN_TOKEN secret (entered in the form; the browser
+ * can remember it as a password). Compose a letter, send a test, send to everyone.
+ * Delivery runs in batches: kicked off here, then continued by the cron trigger.
+ */
+import { env } from 'cloudflare:workers';
+import Base from '../../layouts/Base.astro';
+import { formatDate, siteOrigin, str } from '../../lib/http';
+import { verify, sign } from '../../lib/tokens';
+import {
+  createNewsletter,
+  deliverPending,
+  listNewsletters,
+  sendTestLetter,
+  subscriberStats,
+} from '../../lib/newsletter';
+
+export const prerender = false;
+Astro.response.headers.set('cache-control', 'private, no-store');
+
+const configured = Boolean(env.ADMIN_TOKEN);
+let authed = false;
+let notice = '';
+let error = '';
+let subject = '';
+let body = '';
+
+const form = Astro.request.method === 'POST' ? await Astro.request.formData().catch(() => null) : null;
+const token = str(form?.get('token') ?? null, 500);
+if (configured && token) {
+  // Constant-time compare through HMAC of both values.
+  const a = await sign(env.ADMIN_TOKEN!, token);
+  const b = await sign(env.ADMIN_TOKEN!, env.ADMIN_TOKEN!);
+  authed = a === b;
+  if (!authed) error = 'Wrong token.';
+}
+
+if (authed && form) {
+  const action = str(form.get('action'), 20);
+  subject = str(form.get('subject'), 200);
+  body = str(form.get('body'), 20000);
+  const origin = siteOrigin(env, Astro.request);
+  if (action === 'test' || action === 'send') {
+    if (!subject || !body) error = 'Subject and body are both needed.';
+    else if (action === 'test') {
+      const to = str(form.get('test_to'), 254) || env.CONTACT_TO;
+      const r = await sendTestLetter(env, origin, { subject, body }, to);
+      notice = r.ok ? `Test sent to ${to}.` : `Test could not be sent: ${r.error ?? 'unknown error'}`;
+    } else {
+      const n = await createNewsletter(env, subject, body);
+      notice = `Letter #${n.id} queued for ${n.total} confirmed subscriber${n.total === 1 ? '' : 's'}. Sending starts now and continues automatically.`;
+      Astro.locals.cfContext?.waitUntil(deliverPending(env, origin));
+      subject = '';
+      body = '';
+    }
+  } else if (action === 'continue') {
+    const n = await deliverPending(env, origin, 15_000);
+    notice = `Sent ${n} in this run.`;
+  }
+}
+
+const stats = authed ? await subscriberStats(env) : null;
+const letters = authed ? await listNewsletters(env) : [];
+---
+
+<Base title="Newsletter admin" noindex current="">
+  <div class="container wrap">
+    <p class="eyebrow">Admin</p>
+    <h1 class="display">Newsletter</h1>
+
+    {!configured && <p class="notice-error">ADMIN_TOKEN is not set. Add it as a secret to use this page.</p>}
+    {error && <p class="notice-error" role="alert">{error}</p>}
+    {notice && <p class="notice-ok" role="status">{notice}</p>}
+
+    {
+      configured && !authed ? (
+        <form method="post" class="card gate">
+          <label class="field">
+            Admin token
+            <input class="input" type="password" name="token" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="btn btn-dark">Open</button>
+        </form>
+      ) : configured && authed ? (
+        <div class="grid">
+          <form method="post" class="card compose">
+            <input type="hidden" name="token" value={token} />
+            <p class="h">Write a letter</p>
+            <p class="small">
+              {stats!.confirmed} confirmed subscriber{stats!.confirmed === 1 ? '' : 's'} ({stats!.total - stats!.confirmed} waiting to confirm).
+              Plain text; blank lines make paragraphs, links become clickable. An unsubscribe line is added automatically.
+            </p>
+            <label class="field">
+              Subject
+              <input class="input" type="text" name="subject" value={subject} required maxlength="200" />
+            </label>
+            <label class="field">
+              Body
+              <textarea class="input" name="body" rows="14" required set:html={body} />
+            </label>
+            <div class="row">
+              <label class="field grow">
+                Test address
+                <input class="input" type="email" name="test_to" placeholder={env.CONTACT_TO} />
+              </label>
+              <button type="submit" name="action" value="test" class="btn btn-outline">Send test</button>
+            </div>
+            <button
+              type="submit"
+              name="action"
+              value="send"
+              class="btn btn-accent"
+              onclick={`return confirm('Send to all ${stats!.confirmed} confirmed subscribers?')`}
+            >
+              Send to everyone →
+            </button>
+          </form>
+
+          <aside>
+            <div class="card">
+              <p class="h">Sent letters</p>
+              {letters.length === 0 && <p class="small">Nothing sent yet.</p>}
+              <ul class="letters">
+                {letters.map((n) => (
+                  <li>
+                    <span class="t">#{n.id} {n.subject}</span>
+                    <span class="s">
+                      {formatDate(n.created_at)} · {n.sent}/{n.total} sent{n.failed ? ` · ${n.failed} failed` : ''}
+                      {n.finished_at ? ' · done' : ' · sending'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              {letters.some((n) => !n.finished_at) && (
+                <form method="post">
+                  <input type="hidden" name="token" value={token} />
+                  <button type="submit" name="action" value="continue" class="btn btn-outline sm">Send next batch now</button>
+                  <p class="small">Batches also run automatically every 5 minutes.</p>
+                </form>
+              )}
+            </div>
+          </aside>
+        </div>
+      ) : null
+    }
+  </div>
+</Base>
+
+<style>
+  .wrap { padding-top: 64px; padding-bottom: 96px; }
+  h1 { font-size: clamp(30px, 5vw, 44px); letter-spacing: -0.035em; margin: 12px 0 20px; }
+  .gate { max-width: 420px; display: grid; gap: 14px; }
+  .gate .btn { justify-self: start; }
+  .grid { display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 24px; align-items: start; }
+  .compose { display: grid; gap: 16px; }
+  .compose .btn { justify-self: start; }
+  .h { font-family: var(--font-display); font-weight: 600; font-size: 18px; margin: 0; }
+  .row { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+  .grow { flex: 1 1 220px; }
+  .letters { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 10px; }
+  .letters .t { display: block; font-weight: 600; font-size: 15px; }
+  .letters .s { font-size: 13px; color: var(--muted); }
+  .btn.sm { padding: 11px 18px; font-size: 14.5px; }
+  .notice-ok, .notice-error { margin-bottom: 18px; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+</style>

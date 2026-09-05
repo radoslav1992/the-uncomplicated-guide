@@ -1,0 +1,60 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "the-uncomplicated-guides",
+  // Custom entry: Astro's fetch handler + an `email` handler for Cloudflare Email Routing.
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  // Newsletter delivery runs in batches; the cron continues any letter still sending.
+  "triggers": { "crons": ["*/5 * * * *"] },
+  // Static pages are built as `page.html`; serve `/page` and redirect `/page/` → `/page`.
+  // No `not_found_handling`: unmatched paths must fall through to the Worker (on-demand routes, 404 page).
+  "assets": { "binding": "ASSETS", "html_handling": "drop-trailing-slash" },
+
+  // ─── Plain configuration (not secret) ────────────────────────────────────
+  "vars": {
+    // Public URL of the deployed site (used for absolute links in emails and Stripe redirects).
+    "SITE_URL": "https://uncomplicatedguides.com",
+    // Sender for all outgoing mail. The domain must be verified in Cloudflare Email Service.
+    "EMAIL_FROM": "hello@uncomplicatedguides.com",
+    "EMAIL_FROM_NAME": "The Uncomplicated Guides",
+    // Where contact-form messages and forwarded inbound mail go.
+    // Must be a verified destination address in Cloudflare Email Routing.
+    "CONTACT_TO": "hello@uncomplicatedguides.com",
+    // Optional: Google Analytics 4 id. Leave empty to ship without analytics and without the cookie banner.
+    "PUBLIC_GA_MEASUREMENT_ID": "",
+    // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
+    "PUBLIC_TURNSTILE_SITE_KEY": "",
+    // Set to "true" once Stripe Tax is enabled on your Stripe account.
+    "STRIPE_AUTOMATIC_TAX": "false"
+  },
+
+  // ─── Secrets (set with `wrangler secret put NAME`, locally in `.dev.vars`) ──
+  // STRIPE_SECRET_KEY        sk_live_... / sk_test_...
+  // STRIPE_WEBHOOK_SECRET    whsec_... (from the webhook endpoint pointing at /api/stripe/webhook)
+  // AUTH_SECRET              required; a long random string. Signs sign-in sessions, magic links
+  //                          and unsubscribe links. Generate with: openssl rand -base64 48
+  // ADMIN_TOKEN              required to use /admin/newsletter; any long random string.
+  // TURNSTILE_SECRET_KEY     optional, pairs with PUBLIC_TURNSTILE_SITE_KEY
+
+  // ─── Storage ─────────────────────────────────────────────────────────────
+  // D1: create the database in the dashboard (Storage & Databases → D1 → Create),
+  // then paste its id into `database_id`. Apply `migrations/` with
+  //   npx wrangler d1 migrations apply guides-db --remote
+  // (the deploy command in the Workers Builds settings does this automatically).
+  "d1_databases": [
+    { "binding": "DB", "database_name": "guides-db", "database_id": "REPLACE_WITH_D1_DATABASE_ID", "migrations_dir": "migrations" }
+  ],
+  // R2: create the bucket in the dashboard (R2 → Create bucket) with this exact name.
+  "r2_buckets": [
+    { "binding": "GUIDE_FILES", "bucket_name": "uncomplicated-guides-files" }
+  ],
+
+  // ─── Email (Cloudflare Email Service, beta) ───────────────────────────────
+  // Sending: the binding below. Receiving: in the dashboard, Email → Email Routing →
+  // route hello@yourdomain to this Worker; `src/worker.ts` forwards it to CONTACT_TO.
+  "send_email": [
+    { "name": "SEND_EMAIL" }
+  ]
+}

@@ -1,0 +1,237 @@
+---
+/**
+ * Stripe returns the buyer here (success_url) with ?session_id=cs_...
+ * The page issues the download link immediately, and reissues it if it has
+ * expired — so "reopen the page Stripe returned you to" always works.
+ */
+import { env } from 'cloudflare:workers';
+import Base from '../layouts/Base.astro';
+import { getGuide } from '../data/guides';
+import { site, formatPrice } from '../data/site';
+import { stripeConfigured, retrieveSession } from '../lib/stripe';
+import { ensurePurchase, getPurchase, linkExpired, linkExpiresAt, reissueToken, type Purchase } from '../lib/purchases';
+import { setSessionCookie } from '../lib/session';
+import { formatDate } from '../lib/http';
+
+export const prerender = false;
+
+Astro.response.headers.set('cache-control', 'private, no-store');
+
+const sessionId = Astro.url.searchParams.get('session_id')?.trim() ?? '';
+const resent = Astro.url.searchParams.get('resent') === '1';
+const error = Astro.url.searchParams.get('error');
+
+type State = 'ok' | 'missing' | 'unpaid' | 'notfound' | 'unavailable';
+let state: State = 'missing';
+let purchase: Purchase | null = null;
+let reissued = false;
+
+if (sessionId) {
+  try {
+    purchase = await getPurchase(env, sessionId);
+    if (purchase) {
+      if (linkExpired(purchase)) {
+        purchase = await reissueToken(env, purchase);
+        reissued = true;
+      }
+      state = 'ok';
+    } else if (stripeConfigured(env)) {
+      const session = await retrieveSession(env, sessionId);
+      purchase = await ensurePurchase(env, session);
+      state = purchase ? 'ok' : 'unpaid';
+    } else {
+      state = 'unavailable';
+    }
+  } catch (err) {
+    console.error('[thank-you] lookup failed', err);
+    state = 'notfound';
+  }
+}
+
+// Coming back from Stripe proves ownership of the session id, so sign the buyer in for /account.
+if (state === 'ok' && purchase && Astro.url.searchParams.has('session_id')) await setSessionCookie(Astro, env, purchase.email);
+
+const guide = purchase ? getGuide(purchase.guide) : undefined;
+const downloadHref = purchase ? `/download/${purchase.token}` : '';
+const validUntil = purchase ? formatDate(linkExpiresAt(purchase)) : '';
+const title = state === 'ok' ? 'Thank you — your guide is ready' : 'Your purchase';
+---
+
+<Base title={title} noindex current="">
+  <div class="container wrap">
+    {
+      state === 'ok' && purchase && (
+        <div class="grid">
+          <div>
+            <p class="eyebrow">Payment received</p>
+            <h1 class="display">Thank you. Here is your guide.</h1>
+            <p class="lead">
+              <strong>{guide?.title ?? purchase.guide}</strong>
+              {guide?.pages && ` · ${guide.pages} pages · PDF`}
+              {purchase.amount_total > 0 && ` · ${formatPrice(purchase.amount_total, purchase.currency)}`}
+            </p>
+            <a href={downloadHref} class="btn btn-accent dl" download>Download the PDF →</a>
+            <p class="small validity">
+              Link valid until {validUntil}. {reissued && 'The previous link had expired, so a fresh one was issued. '}
+              Reopen this page any time to get a new one.
+            </p>
+
+            <div class="card next">
+              <p class="h">The same link is on its way by email</p>
+              <p>
+                Sent to <strong>{purchase.email}</strong>{purchase.emailed_at ? '' : ' shortly'}. If it does not arrive
+                within a few minutes, check the spam folder or send it again:
+              </p>
+              <form method="post" action="/api/resend-link" class="resend">
+                <input type="hidden" name="session_id" value={purchase.session_id} />
+                <button type="submit" class="btn btn-outline">Send the link again</button>
+                {resent && <span class="notice-ok">Sent. Give it a minute.</span>}
+                {error && <span class="notice-error">{error}</span>}
+              </form>
+              <p class="small">Your Stripe receipt comes separately, to the same address.</p>
+            </div>
+          </div>
+          <aside>
+            <div class="card">
+              <p class="h">Keep it</p>
+              <p>Read and print on all your devices. Use the checklists and templates with your own clients. Only the file itself is not shared or resold.</p>
+            </div>
+            <div class="card">
+              <p class="h">Something wrong?</p>
+              <p>
+                Write to <a href={`mailto:${site.email}`}>{site.email}</a> from the address you paid with. Download problems are fixed the same day; the <a href="/refunds">refund policy</a> covers the rest.
+              </p>
+            </div>
+            <p class="small">Lost the link later? Sign in at <a href="/account">your account</a> with this email and download it again.</p>
+            <a href="/guides" class="arrow-link">See what is coming next →</a>
+          </aside>
+        </div>
+      )
+    }
+
+    {
+      state === 'missing' && (
+        <div class="single">
+          <p class="eyebrow">Purchase</p>
+          <h1 class="display">Looking for your download?</h1>
+          <p class="lead">
+            Open the link in the email you received after paying, or the page Stripe returned you to — it
+            issues a fresh download link every time. If you have neither, write to{' '}
+            <a href={`mailto:${site.email}`}>{site.email}</a> from the address you paid with.
+          </p>
+          <a href="/guides" class="btn btn-outline">Back to the library</a>
+        </div>
+      )
+    }
+
+    {
+      state === 'unpaid' && (
+        <div class="single">
+          <p class="eyebrow">Purchase</p>
+          <h1 class="display">The payment has not completed yet.</h1>
+          <p class="lead">
+            Stripe has not confirmed the payment for this checkout. If you paid with a bank method that takes a
+            while, come back to this page in a few minutes. Otherwise start again from the guide page.
+          </p>
+          <a href="/guides" class="btn btn-accent">Back to the library</a>
+        </div>
+      )
+    }
+
+    {
+      (state === 'notfound' || state === 'unavailable') && (
+        <div class="single">
+          <p class="eyebrow">Purchase</p>
+          <h1 class="display">Could not find that purchase.</h1>
+          <p class="lead">
+            The link may be incomplete, or the shop is still being set up. Write to{' '}
+            <a href={`mailto:${site.email}`}>{site.email}</a> with the email you paid with and I will send the file
+            directly.
+          </p>
+          <a href="/contact" class="btn btn-accent">Contact</a>
+        </div>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .wrap {
+    padding-top: 76px;
+    padding-bottom: 96px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 48px;
+    align-items: start;
+  }
+  h1 {
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    margin: 12px 0 14px;
+  }
+  .lead {
+    margin: 0 0 26px;
+    max-width: 56ch;
+  }
+  .dl {
+    font-size: 17px;
+    padding: 17px 30px;
+  }
+  .validity {
+    margin: 14px 0 0;
+    max-width: 48ch;
+  }
+  .next {
+    margin-top: 32px;
+  }
+  .card p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-2);
+    margin: 0 0 14px;
+  }
+  .card p:last-child {
+    margin-bottom: 0;
+  }
+  .card .h {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .resend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px;
+  }
+  .resend .btn {
+    padding: 12px 20px;
+    font-size: 14.5px;
+  }
+  aside {
+    display: grid;
+    gap: 14px;
+    padding-top: 24px;
+  }
+  .single {
+    max-width: 640px;
+  }
+  @media (max-width: 860px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .wrap {
+      padding-top: 48px;
+      padding-bottom: 64px;
+    }
+    aside {
+      padding-top: 0;
+    }
+  }
+</style>

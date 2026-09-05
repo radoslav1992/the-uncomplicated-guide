@@ -1,0 +1,240 @@
+---
+import Base from '../../layouts/Base.astro';
+import GuideCover from '../../components/GuideCover.astro';
+import { formatPrice } from '../../data/site';
+import { availableGuides, upcomingGuides } from '../../data/guides';
+
+const countLabel = `${availableGuides.length} guide${availableGuides.length === 1 ? '' : 's'} available · ${upcomingGuides.length} in progress`;
+---
+
+<Base
+  title="Library"
+  description="Every guide is one procedure, start to finish: when it is worth doing, how to build it, where it breaks and how to charge for it."
+  current="Library"
+  image={availableGuides[0]?.cover}
+>
+  <section class="intro">
+    <div class="intro-bg" aria-hidden="true"></div>
+    <div class="container">
+      <p class="eyebrow">Library</p>
+      <h1 class="display">Every guide is one procedure, start to finish</h1>
+      <p class="lead">
+        When it is worth doing, how to build it, where it breaks and how to charge for it.
+        Including the parts that are usually left out because they are boring — and because of
+        which projects stop two-thirds of the way in.
+      </p>
+      <p class="count">{countLabel}</p>
+    </div>
+  </section>
+
+  <section id="shelf" class="shelf">
+    <div class="container list">
+      {
+        availableGuides.map((g) => (
+          <a href={`/guides/${g.slug}`} class="row available">
+            <GuideCover guide={g} size="shelf" />
+            <div>
+              <div class="meta">
+                <span class="price-badge sm">{formatPrice(g.price, g.currency)}</span>
+                <span class="small">{g.edition} · {g.pages} pages · PDF</span>
+              </div>
+              <h2 class="display">{g.title}</h2>
+              <p class="sub">{g.subtitle}</p>
+              <p class="short">{g.short}</p>
+              <ul class="tag-list">{g.parts.map((p) => <li>{p.title}</li>)}</ul>
+              <span class="arrow-link more">See what's inside — {formatPrice(g.price, g.currency)} →</span>
+            </div>
+          </a>
+        ))
+      }
+      {
+        upcomingGuides.map((g) => (
+          <div class="row">
+            <GuideCover guide={g} size="shelf" />
+            <div>
+              <div class="meta">
+                <span class="soon-badge">Soon</span>
+                <span class="small">{g.edition}</span>
+              </div>
+              <h2 class="display">
+                <a href={`/guides/${g.slug}`} class="plain">{g.title}</a>
+              </h2>
+              <p class="sub">{g.subtitle}</p>
+              <p class="short">{g.short}</p>
+              <ul class="tag-list">{g.parts.map((p) => <li>{p.title}</li>)}</ul>
+              <a href={`/guides/${g.slug}#notify`} class="arrow-link more">Tell me when it ships →</a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="promises">
+    <div class="container cols">
+      <div>
+        <h2 class="display">Pay once</h2>
+        <p>Checkout runs on Stripe. Card, Apple Pay or Google Pay; the price you see includes tax. You get a Stripe receipt by email.</p>
+        <a href="/terms" class="arrow-link sm">Terms of sale →</a>
+      </div>
+      <div class="mid">
+        <h2 class="display">Download right away</h2>
+        <p>The link appears the moment payment clears and is sent to your inbox too. It stays valid for a week and can be reissued from the same page any time.</p>
+        <a href="/contact" class="arrow-link sm">Problem with a download? →</a>
+      </div>
+      <div>
+        <h2 class="display">Keep it</h2>
+        <p>Read and print on all your devices, use the templates with your own clients. Only the file itself is not shared or resold.</p>
+        <a href="/refunds" class="arrow-link sm">Refund policy →</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .intro {
+    padding: clamp(48px, 7vw, 92px) 0 clamp(32px, 5vw, 56px);
+    position: relative;
+    overflow: hidden;
+  }
+  .intro-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(52% 60% at 82% 30%, rgba(226, 84, 43, 0.1), transparent 70%);
+    pointer-events: none;
+  }
+  .intro .container {
+    position: relative;
+  }
+  .intro h1 {
+    font-size: clamp(32px, 5.4vw, 62px);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    margin: 14px 0 0;
+    max-width: 17ch;
+  }
+  .intro .lead {
+    margin: 22px 0 0;
+    max-width: 58ch;
+  }
+  .count {
+    font-size: 13.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 26px 0 0;
+  }
+  .shelf {
+    padding: clamp(24px, 4vw, 48px) 0 clamp(64px, 9vw, 112px);
+  }
+  .list {
+    display: grid;
+    gap: clamp(20px, 3vw, 32px);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(24px, 4vw, 56px);
+    align-items: center;
+    color: inherit;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-panel);
+    padding: clamp(24px, 3.4vw, 44px);
+  }
+  .row.available {
+    box-shadow: var(--shadow-card);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+  .row.available:hover {
+    border-color: var(--border-2);
+    transform: translateY(-2px);
+    color: inherit;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .row h2 {
+    font-size: clamp(24px, 3.4vw, 40px);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    margin: 14px 0 0;
+  }
+  .plain {
+    color: inherit;
+  }
+  .plain:hover {
+    color: var(--accent);
+  }
+  .sub {
+    font-size: clamp(15.5px, 1.7vw, 18px);
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--ink);
+    margin: 12px 0 0;
+    max-width: 40ch;
+  }
+  .short {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 12px 0 0;
+    max-width: 52ch;
+  }
+  .more {
+    margin-top: 22px;
+  }
+  .promises {
+    background: var(--bg-alt);
+    border-top: 1px solid var(--border);
+    padding: clamp(56px, 8vw, 104px) 0;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(24px, 4vw, 56px);
+  }
+  .cols h2 {
+    font-size: clamp(19px, 2.2vw, 24px);
+    margin: 0;
+  }
+  .cols p {
+    font-size: 15.5px;
+    line-height: 1.62;
+    color: var(--text);
+    margin: 14px 0 0;
+  }
+  .arrow-link.sm {
+    font-size: 14.5px;
+    margin-top: 16px;
+  }
+  .mid {
+    padding: 0 clamp(24px, 4vw, 56px);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  @media (max-width: 860px) {
+    .cols {
+      grid-template-columns: 1fr;
+      gap: 36px;
+    }
+    .mid {
+      padding: 36px 0;
+      border-left: 0;
+      border-right: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+  }
+  @media (max-width: 640px) {
+    .row {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+  }
+</style>

@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Page not found" noindex>
+  <div class="container wrap">
+    <p class="eyebrow">404</p>
+    <h1 class="display">That page is not here.</h1>
+    <p>The link may be old, or the address mistyped. The library has everything that is for sale.</p>
+    <div class="actions">
+      <a href="/guides" class="btn btn-accent">Browse the library</a>
+      <a href="/" class="btn btn-outline">Home</a>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .wrap {
+    padding-top: 96px;
+    padding-bottom: 120px;
+    max-width: 720px;
+  }
+  h1 {
+    font-size: clamp(32px, 5.5vw, 52px);
+    letter-spacing: -0.04em;
+    margin: 12px 0 16px;
+  }
+  p:not(.eyebrow) {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0 0 28px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>
