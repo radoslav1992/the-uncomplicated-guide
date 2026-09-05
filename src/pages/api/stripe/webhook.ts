@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
 import type Stripe from 'stripe';
 import { env } from 'cloudflare:workers';
-import { constructWebhookEvent, retrieveSession, retrieveSubscription } from '../../../lib/stripe';
+import { constructWebhookEvent, retrieveSession } from '../../../lib/stripe';
 import { ensurePurchase, findPurchaseByPaymentIntent, markRefunded, sendDeliveryEmail } from '../../../lib/purchases';
-import { sendWelcomeEmail, syncSubscription, upsertCustomer } from '../../../lib/subscriptions';
 import { json, siteOrigin } from '../../../lib/http';
 
 export const prerender = false;
@@ -11,8 +10,7 @@ export const prerender = false;
 /**
  * POST /api/stripe/webhook
  * Stripe → Developers → Webhooks → add endpoint <SITE_URL>/api/stripe/webhook with events:
- *   checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded,
- *   customer.subscription.created, customer.subscription.updated, customer.subscription.deleted
+ *   checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded
  */
 export const POST: APIRoute = async ({ request }) => {
   const signature = request.headers.get('stripe-signature');
@@ -36,23 +34,6 @@ export const POST: APIRoute = async ({ request }) => {
         let session = event.data.object as Stripe.Checkout.Session;
         if (!session.customer_details?.email) session = await retrieveSession(env, session.id);
 
-        if (session.mode === 'subscription') {
-          const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
-          const subId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
-          const email = session.customer_details?.email ?? session.customer_email;
-          if (customerId && email) {
-            await upsertCustomer(env, { id: customerId, email, name: session.customer_details?.name ?? null });
-          }
-          if (subId) {
-            const sub = await syncSubscription(env, await retrieveSubscription(env, subId));
-            if (sub && !sub.welcomed_at) {
-              const r = await sendWelcomeEmail(env, origin, sub);
-              console.info('[webhook] welcome email', sub.stripe_subscription_id, r.ok ? 'sent' : 'NOT sent');
-            }
-          }
-          break;
-        }
-
         const purchase = await ensurePurchase(env, session);
         if (!purchase) {
           console.warn('[webhook] session not paid or incomplete', session.id, session.payment_status);
@@ -62,16 +43,6 @@ export const POST: APIRoute = async ({ request }) => {
           const r = await sendDeliveryEmail(env, origin, purchase);
           console.info('[webhook] delivery email', purchase.session_id, r.ok ? 'sent' : 'NOT sent');
         }
-        break;
-      }
-
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
-      case 'customer.subscription.paused':
-      case 'customer.subscription.resumed': {
-        const sub = event.data.object as Stripe.Subscription;
-        await syncSubscription(env, sub);
         break;
       }
 

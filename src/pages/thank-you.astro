@@ -8,9 +8,8 @@ import { env } from 'cloudflare:workers';
 import Base from '../layouts/Base.astro';
 import { getGuide } from '../data/guides';
 import { site, formatPrice } from '../data/site';
-import { stripeConfigured, retrieveSession, retrieveSubscription } from '../lib/stripe';
+import { stripeConfigured, retrieveSession } from '../lib/stripe';
 import { ensurePurchase, getPurchase, linkExpired, linkExpiresAt, reissueToken, type Purchase } from '../lib/purchases';
-import { getSubscription, syncSubscription, upsertCustomer } from '../lib/subscriptions';
 import { setSessionCookie } from '../lib/session';
 import { formatDate } from '../lib/http';
 
@@ -38,23 +37,8 @@ if (sessionId) {
       state = 'ok';
     } else if (stripeConfigured(env)) {
       const session = await retrieveSession(env, sessionId);
-      if (session.mode === 'subscription') {
-        // Membership checkout: mirror the subscription, sign the member in, send them to their account.
-        const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
-        const subId = typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
-        const email = (session.customer_details?.email ?? session.customer_email ?? '').toLowerCase();
-        if (customerId && email) await upsertCustomer(env, { id: customerId, email, name: session.customer_details?.name ?? null });
-        if (subId && email) {
-          const existing = await getSubscription(env, subId);
-          if (!existing) await syncSubscription(env, await retrieveSubscription(env, subId));
-          await setSessionCookie(Astro, env, email);
-          return Astro.redirect('/account?welcome=1', 303);
-        }
-        state = 'unpaid';
-      } else {
-        purchase = await ensurePurchase(env, session);
-        state = purchase ? 'ok' : 'unpaid';
-      }
+      purchase = await ensurePurchase(env, session);
+      state = purchase ? 'ok' : 'unpaid';
     } else {
       state = 'unavailable';
     }
@@ -63,6 +47,9 @@ if (sessionId) {
     state = 'notfound';
   }
 }
+
+// Coming back from Stripe proves ownership of the session id, so sign the buyer in for /account.
+if (state === 'ok' && purchase && Astro.url.searchParams.has('session_id')) await setSessionCookie(Astro, env, purchase.email);
 
 const guide = purchase ? getGuide(purchase.guide) : undefined;
 const downloadHref = purchase ? `/download/${purchase.token}` : '';
@@ -115,6 +102,7 @@ const title = state === 'ok' ? 'Thank you — your guide is ready' : 'Your purch
                 Write to <a href={`mailto:${site.email}`}>{site.email}</a> from the address you paid with. Download problems are fixed the same day; the <a href="/refunds">refund policy</a> covers the rest.
               </p>
             </div>
+            <p class="small">Lost the link later? Sign in at <a href="/account">your account</a> with this email and download it again.</p>
             <a href="/guides" class="arrow-link">See what is coming next →</a>
           </aside>
         </div>

@@ -4,7 +4,6 @@ import { site } from '../../../data/site';
 import { sendEmail } from '../../../lib/email';
 import { formResult, isEmail, siteOrigin, str } from '../../../lib/http';
 import { createLoginToken } from '../../../lib/session';
-import { findSubscriptionByEmail } from '../../../lib/subscriptions';
 import { listPurchasesByEmail } from '../../../lib/purchases';
 
 export const prerender = false;
@@ -20,14 +19,11 @@ export const POST: APIRoute = async (ctx) => {
   if (!isEmail(email)) return formResult(ctx, false, { redirect: '/account', error: 'That email address does not look right.' });
 
   const origin = siteOrigin(env, ctx.request);
-  // Only allow returning to a member download after sign-in.
-  const next = str(form?.get('next') ?? null, 200);
-  const nextParam = next.startsWith('/download/member/') ? `&next=${encodeURIComponent(next)}` : '';
-  const [sub, purchases] = await Promise.all([findSubscriptionByEmail(env, email), listPurchasesByEmail(env, email)]);
+  const purchases = await listPurchasesByEmail(env, email);
 
-  if (sub || purchases.length) {
+  if (purchases.length) {
     const token = await createLoginToken(env, email);
-    const link = `${origin}/api/access/verify?t=${encodeURIComponent(token)}${nextParam}`;
+    const link = `${origin}/api/access/verify?t=${encodeURIComponent(token)}`;
     await sendEmail(env, {
       to: email,
       subject: `Your sign-in link — ${site.name}`,

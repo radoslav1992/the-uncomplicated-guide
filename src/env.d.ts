@@ -21,8 +21,6 @@ interface Env {
   PUBLIC_GA_MEASUREMENT_ID?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
   STRIPE_AUTOMATIC_TAX?: string;
-  STRIPE_PRICE_MONTHLY?: string;
-  STRIPE_PRICE_YEARLY?: string;
 
   // Secrets
   STRIPE_SECRET_KEY?: string;

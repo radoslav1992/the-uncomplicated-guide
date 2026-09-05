@@ -10,9 +10,8 @@ import { site } from '../data/site';
   <h2>What is collected and why</h2>
   <ul>
     <li><strong>Purchases</strong> — name, email address, country and the amount paid, received from Stripe after checkout. Used to deliver the file, issue the download link, send the receipt and keep the records tax law requires. Stripe processes your card details under its own privacy policy; they never reach this site.</li>
-    <li><strong>Memberships</strong> — your email address, name, Stripe customer and subscription identifiers, plan, status and renewal date, received from Stripe and kept up to date by Stripe's notifications. Used to grant access to the guides and to show the membership on your account page.</li>
-    <li><strong>Sign-in</strong> — signing in works with a link sent to your email address. After clicking it, a signed cookie (<code>ug_session</code>) keeps you signed in for thirty days. It contains only your email address and an expiry time.</li>
-    <li><strong>Download links and downloads</strong> — the purchase or membership identifier and the time a link was issued and a file was downloaded, so that a link can be reissued, a leaked one revoked, and refund questions answered.</li>
+    <li><strong>Sign-in</strong> — to download a bought guide again, you sign in with a link sent to your email address. After clicking it, a signed cookie (<code>ug_session</code>) keeps you signed in for thirty days. It contains only your email address and an expiry time.</li>
+    <li><strong>Download links and downloads</strong> — the purchase identifier and the time a link was issued and a file was downloaded, so that a link can be reissued, a leaked one revoked, and refund questions answered.</li>
     <li><strong>Newsletter</strong> — your email address, the date you subscribed and confirmed (double opt-in), and which guide you were interested in, if any. Used only to send the newsletter; every email carries a one-click unsubscribe link, which deletes the address.</li>
     <li><strong>Contact form</strong> — name, email and the text of your message. Used only to answer you, kept only in the mailbox.</li>
     <li><strong>Analytics (Google Analytics 4)</strong> — analytics cookies are set only after you consent in the cookie banner. Without consent only anonymous, cookie-less signals are sent (Google Consent Mode). Details are in the <a href="/cookies">cookie policy</a>.</li>
@@ -20,10 +19,10 @@ import { site } from '../data/site';
   <p>Personal data is not sold and is not shared with third parties for marketing.</p>
 
   <h2>Where data is processed</h2>
-  <p>The site runs on Cloudflare infrastructure and its data is stored in a Cloudflare database; payments and subscriptions are processed by Stripe; emails are sent through Cloudflare. Each is bound by a data-processing agreement.</p>
+  <p>The site runs on Cloudflare infrastructure and its data is stored in a Cloudflare database; payments are processed by Stripe; emails are sent through Cloudflare. Each is bound by a data-processing agreement.</p>
 
   <h2>How long</h2>
-  <p>Purchase and membership records are kept for as long as tax law requires (currently ten years in Bulgaria). Newsletter addresses are kept until you unsubscribe, and unconfirmed addresses are deleted after ninety days. Contact correspondence is kept as long as it is needed to answer you; deletion can be requested at any time.</p>
+  <p>Purchase records are kept for as long as tax law requires (currently ten years in Bulgaria). Newsletter addresses are kept until you unsubscribe, and unconfirmed addresses are deleted after ninety days. Contact correspondence is kept as long as it is needed to answer you; deletion can be requested at any time.</p>
 
   <h2>Your rights</h2>
   <p>Under the GDPR you have the right to access, correct, delete and restrict the processing of your data, to object, and to lodge a complaint with the Bulgarian Commission for Personal Data Protection (CPDP) or your local authority. Requests go to <a href={`mailto:${site.email}`}>{site.email}</a>.</p>

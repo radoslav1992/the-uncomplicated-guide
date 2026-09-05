@@ -7,7 +7,6 @@ import WhoFor from '../../components/WhoFor.astro';
 import SignupForm from '../../components/SignupForm.astro';
 import { site, formatPrice } from '../../data/site';
 import { guides, upcomingGuides } from '../../data/guides';
-import { membership, plans } from '../../data/plans';
 
 export function getStaticPaths() {
   return guides.map((g) => ({ params: { slug: g.slug }, props: { guide: g } }));
@@ -134,9 +133,6 @@ const jsonLd = {
             </div>
             <div class="buy-action">
               <BuyButton guide={guide} />
-              <p class="small member-hint">
-                Or every guide, current and future, with the <a href="/membership">{membership.name.toLowerCase()}</a> from {formatPrice(plans[0]!.price, plans[0]!.currency)} a month.
-              </p>
             </div>
           </div>
         </div>
@@ -344,14 +340,6 @@ const jsonLd = {
   .buy-action {
     display: grid;
     justify-items: start;
-    gap: 14px;
-  }
-  .member-hint {
-    margin: 0;
-    max-width: 34ch;
-  }
-  .member-hint a {
-    font-weight: 600;
   }
   .next {
     padding: clamp(48px, 7vw, 88px) 0;

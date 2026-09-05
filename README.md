@@ -1,9 +1,9 @@
 # The Uncomplicated Guides
 
-Storefront for selling PDF guides, one at a time or through an all-access membership. Built with
+Storefront for selling PDF guides, one price per guide. Built with
 [Astro](https://astro.build) and deployed to [Cloudflare Workers](https://developers.cloudflare.com/workers/)
-(static pages + a few on-demand routes). Payments and subscriptions go through Stripe Checkout;
-purchases, memberships, download tokens and newsletter subscribers live in a D1 database; the PDFs
+(static pages + a few on-demand routes). Payments go through Stripe Checkout;
+purchases, download tokens and newsletter subscribers live in a D1 database; the PDFs
 live in R2; email goes out through Cloudflare Email Service and comes in through Cloudflare Email
 Routing. A small admin page sends the newsletter in batches driven by a cron trigger.
 
@@ -13,14 +13,12 @@ of everything to create in the dashboard, including the GitHub deploy integratio
 ```
 src/
   data/guides.ts        ← the catalogue: titles, prices, parts, file keys. Add guides here.
-  data/plans.ts         ← membership plans (monthly / yearly) and perks
   data/site.ts          ← site-wide facts (name, email, nav, legal date)
-  pages/                ← / , /guides, /guides/[slug], /membership, /account, /newsletter, /contact,
-                          legal pages, /thank-you, /download/[token], /download/member/[slug],
-                          /admin/newsletter
-  pages/api/            ← checkout, stripe/webhook, portal, access/{request,verify,logout},
+  pages/                ← / , /guides, /guides/[slug], /account, /newsletter, /contact, legal pages,
+                          /thank-you, /download/[token], /admin/newsletter
+  pages/api/            ← checkout, stripe/webhook, access/{request,verify,logout},
                           newsletter/{subscribe,confirm,unsubscribe}, contact, resend-link
-  lib/                  ← db (D1), purchases, subscriptions, newsletter, session, stripe, email, tokens
+  lib/                  ← db (D1), purchases, newsletter, session, stripe, email, tokens
   worker.ts             ← Worker entry: Astro fetch handler, `email()` for Email Routing,
                           `scheduled()` for newsletter delivery
 migrations/             ← D1 schema (applied by the deploy command)
@@ -49,7 +47,7 @@ npx wrangler r2 object put uncomplicated-guides-files/ai-assistants-en-v1.1.pdf 
 
 Emails sent locally are written to `.wrangler/tmp/email/` instead of being delivered — that is also
 where you find the sign-in links for `/account` during development. Inspect the local database with
-`npx wrangler d1 execute guides-db --local --command "SELECT * FROM subscriptions"`.
+`npx wrangler d1 execute guides-db --local --command "SELECT * FROM purchases"`.
 
 Other scripts: `npm run check` (type-check Astro + TS), `npm run build`.
 
@@ -70,20 +68,18 @@ after `npx wrangler login`.
 
 ### How selling works
 
-**Single guide.** Buy button → `POST /api/checkout` (`guide=<slug>`) → Stripe Checkout → back to
+**Buying a guide.** Buy button → `POST /api/checkout` (`guide=<slug>`) → Stripe Checkout → back to
 `/thank-you?session_id=…`, which issues a download link at once and reissues it when it has expired.
 The webhook records the purchase in D1 and emails the same link. `/download/<token>` streams the
 PDF from R2 while the token is valid (7 days, `site.downloadLinkDays`). Until `STRIPE_SECRET_KEY`
 is set, the buy buttons fall back to the guide's `paymentLink` (no webhook, no delivery email).
+Prices are set per guide in `src/data/guides.ts` and passed to Stripe inline; no products need to
+be created in the Stripe dashboard (an optional `stripePriceId` per guide overrides this).
 
-**Membership.** Plan button → `POST /api/checkout` (`plan=monthly|yearly`) → Stripe Checkout in
-subscription mode → back to `/thank-you`, which signs the member in and redirects to `/account`.
-The webhook mirrors `customer.subscription.*` events into the `subscriptions` table; access is
-granted while the status is `active`, `trialing` or `past_due`. Members sign in with a magic link
-(`/api/access/request` → email → `/api/access/verify` → signed 30-day cookie) and download every
-available guide from `/download/member/<slug>`. "Manage or cancel" opens the Stripe Customer Portal.
-Prices come from Stripe Price ids in `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_YEARLY`; without them
-the plan is created inline from `src/data/plans.ts`.
+**Re-downloading later.** `/account` lists everything bought with an email address, each with a
+fresh link. Sign-in is passwordless: `/api/access/request` emails a 20-minute magic link,
+`/api/access/verify` turns it into a signed 30-day cookie. Returning from Stripe Checkout signs the
+buyer in automatically.
 
 **Newsletter.** Every signup form (footer, home, guide pages, `/newsletter`) posts to
 `/api/newsletter/subscribe`. Double opt-in: the address gets a signed confirmation link and only
@@ -106,14 +102,13 @@ stripe listen --forward-to localhost:4321/api/stripe/webhook   # copy whsec_… 
    notify-me form instead of a buy button).
 2. Put the cover in `src/assets/guides/` and reference it in `cover`.
 3. Upload the PDF to R2 and set `fileKey`/`fileName`; switch `status` to `'available'`.
-4. Members see it on `/account` automatically. Announce it to subscribers from `/admin/newsletter`.
+4. Announce it to subscribers from `/admin/newsletter`.
    The `signups.guides` column records which guide each person asked about, if you ever want to
    target a letter (not exposed in the admin page yet).
 
 ## Data (D1, see `migrations/0001_init.sql`)
 
 - `purchases` — one row per paid Checkout Session: email, guide, amount, current download token.
-- `downloads` — every file download (purchase or membership), for support and refund questions.
-- `customers`, `subscriptions` — Stripe customers and memberships, kept in sync by the webhook.
+- `downloads` — every file download, for support and refund questions.
 - `signups` — newsletter subscribers (double opt-in: `confirmed_at`) with the guides they asked about.
 - `newsletters`, `newsletter_recipients` — sent letters and the per-address delivery log.

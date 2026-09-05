@@ -41,7 +41,7 @@ export async function verify(secret: string, data: string, signature: string): P
   return diff === 0;
 }
 
-/** Secret used to sign sessions, magic links and unsubscribe links. Falls back so dev works without configuration. */
+/** Secret used to sign sign-in sessions, magic links and unsubscribe links. Falls back so dev works without configuration. */
 export const signingSecret = (env: Env) => {
   if (env.AUTH_SECRET) return env.AUTH_SECRET;
   console.warn('[auth] AUTH_SECRET is not set — using an insecure development fallback');

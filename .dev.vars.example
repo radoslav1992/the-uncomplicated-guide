@@ -10,7 +10,7 @@ STRIPE_WEBHOOK_SECRET=whsec_xxx
 # Optional: Cloudflare Turnstile (pairs with PUBLIC_TURNSTILE_SITE_KEY in wrangler.jsonc)
 TURNSTILE_SECRET_KEY=
 
-# Required: a long random string. Signs member sessions, magic links and unsubscribe links.
+# Required: a long random string. Signs sign-in sessions, magic links and unsubscribe links.
 # Generate with: openssl rand -base64 48
 AUTH_SECRET=change-me-to-a-long-random-string
 

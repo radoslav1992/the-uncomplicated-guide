@@ -1,6 +1,5 @@
 import Stripe from 'stripe';
 import type { Guide } from '../data/guides';
-import { membership, type Plan } from '../data/plans';
 
 export const stripeConfigured = (env: Env) => Boolean(env.STRIPE_SECRET_KEY);
 
@@ -55,61 +54,12 @@ export async function createCheckoutSession(env: Env, guide: Guide, origin: stri
     line_items: [lineItem],
     success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/guides/${guide.slug}`,
-    metadata: { kind: 'guide', guide: guide.slug },
-  });
-}
-
-/** Recurring all-access membership. */
-export async function createSubscriptionSession(
-  env: Env,
-  plan: Plan,
-  origin: string,
-  email?: string,
-): Promise<Stripe.Checkout.Session> {
-  const priceId = env[plan.priceIdEnv];
-  const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = priceId
-    ? { price: priceId, quantity: 1 }
-    : {
-        quantity: 1,
-        price_data: {
-          currency: plan.currency.toLowerCase(),
-          unit_amount: plan.price,
-          tax_behavior: 'inclusive',
-          recurring: { interval: plan.interval },
-          product_data: {
-            name: membership.productName,
-            description: membership.tagline,
-            metadata: { plan: plan.id },
-          },
-        },
-      };
-
-  return getStripe(env).checkout.sessions.create({
-    ...baseParams(env, origin),
-    mode: 'subscription',
-    line_items: [lineItem],
-    customer_email: email || undefined,
-    success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/membership`,
-    metadata: { kind: 'membership', plan: plan.id },
-    subscription_data: { metadata: { plan: plan.id } },
-  });
-}
-
-/** Stripe Customer Portal for managing/cancelling a membership. */
-export async function createPortalSession(env: Env, customerId: string, origin: string) {
-  return getStripe(env).billingPortal.sessions.create({
-    customer: customerId,
-    return_url: `${origin}/account`,
+    metadata: { guide: guide.slug },
   });
 }
 
 export async function retrieveSession(env: Env, sessionId: string) {
   return getStripe(env).checkout.sessions.retrieve(sessionId);
-}
-
-export async function retrieveSubscription(env: Env, id: string) {
-  return getStripe(env).subscriptions.retrieve(id);
 }
 
 /** Verify a webhook and return the event. Throws on a bad signature. */

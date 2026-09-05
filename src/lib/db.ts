@@ -19,27 +19,6 @@ export interface PurchaseRow {
   reissues: number;
 }
 
-export interface SubscriptionRow {
-  stripe_subscription_id: string;
-  stripe_customer_id: string;
-  email: string;
-  plan: string | null;
-  status: string;
-  current_period_end: string | null;
-  cancel_at_period_end: number;
-  created_at: string;
-  updated_at: string;
-  welcomed_at: string | null;
-}
-
-export interface CustomerRow {
-  stripe_customer_id: string;
-  email: string;
-  name: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface SignupRow {
   email: string;
   guides: string;
@@ -53,7 +32,7 @@ export const db = (env: Env) => env.DB;
 
 export async function insertDownload(
   env: Env,
-  d: { guide: string; email: string; source: 'purchase' | 'membership'; ref?: string | null },
+  d: { guide: string; email: string; source: 'purchase'; ref?: string | null },
 ) {
   await env.DB.prepare(
     'INSERT INTO downloads (guide, email, source, ref, downloaded_at) VALUES (?1, ?2, ?3, ?4, ?5)',

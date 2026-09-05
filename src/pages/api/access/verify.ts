@@ -9,6 +9,5 @@ export const GET: APIRoute = async (ctx) => {
   const email = await verifyLoginToken(env, ctx.url.searchParams.get('t') ?? '');
   if (!email) return ctx.redirect('/account?error=link', 303);
   await setSessionCookie(ctx, env, email);
-  const next = ctx.url.searchParams.get('next') ?? '';
-  return ctx.redirect(next.startsWith('/download/member/') ? next : '/account', 303);
+  return ctx.redirect('/account', 303);
 };

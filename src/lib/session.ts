@@ -1,5 +1,5 @@
 /**
- * Passwordless member sessions.
+ * Passwordless sign-in for buyers (re-download from /account).
  *
  * - Magic link: a signed, time-limited token sent by email (`/api/access/request` →
  *   `/api/access/verify`).
@@ -53,7 +53,7 @@ export function clearSessionCookie(ctx: APIContext | AstroGlobal) {
   ctx.cookies.delete(SESSION_COOKIE, { path: '/' });
 }
 
-/** Email of the signed-in member, or null. */
+/** Email of the signed-in buyer, or null. */
 export async function getSessionEmail(ctx: APIContext | AstroGlobal, env: Env): Promise<string | null> {
   const token = ctx.cookies.get(SESSION_COOKIE)?.value;
   if (!token) return null;

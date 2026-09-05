@@ -66,15 +66,12 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 ## 6. Stripe (not Cloudflare, but the Worker depends on it)
 
-- [ ] **Products**: create "All-access membership" with two recurring prices (monthly €12, yearly €89,
-      tax behaviour *inclusive*). Put the `price_…` ids into `wrangler.jsonc` `vars` →
-      `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_YEARLY`. (Single guides are priced inline; no product needed.)
-- [ ] **Developers → Webhooks → Add endpoint**: `https://<your-domain>/api/stripe/webhook`, events
-      `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`,
-      `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`.
+- [ ] No products to create: each guide's price is set in `src/data/guides.ts` and sent to Stripe at
+      checkout. (Optionally create a Product/Price in Stripe and put its `price_…` id in the guide's
+      `stripePriceId`.)
+- [ ] **Developers → Webhooks → Add endpoint**: `https://uncomplicatedguides.com/api/stripe/webhook`, events
+      `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`.
       Copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
-- [ ] **Settings → Billing → Customer portal**: click *Save* once (activates the portal in live mode)
-      and allow customers to cancel subscriptions and update payment methods.
 - [ ] **Settings → Emails**: turn on receipts for successful payments.
 - [ ] Optional: enable **Stripe Tax** and set `STRIPE_AUTOMATIC_TAX` to `"true"` in `wrangler.jsonc`.
 
@@ -119,11 +116,9 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 1. Open the site; the home, library and guide pages render.
 2. Buy the first guide with a real card for €39 (refund it afterwards in Stripe): the thank-you page
    shows a download button, the PDF downloads, the delivery email arrives.
-3. Subscribe to the monthly plan: you land on `/account` signed in, the welcome email arrives, every
-   guide downloads, "Manage or cancel" opens the Stripe portal. Cancel there and confirm the account
-   page shows *Cancelled — access until period end*.
-4. Sign out, request a sign-in link for the same address, sign in again.
-5. Send yourself a message through the contact form and reply to it — the reply reaches the visitor.
-6. Send an email to `hello@<your-domain>` from another mailbox; it arrives at `CONTACT_TO`.
-7. Subscribe to the newsletter from the footer, click the confirmation link, then open
+3. Open `/account`: the guide you just bought is listed with a download button. Sign out, request a
+   sign-in link for the same address, sign in again.
+4. Send yourself a message through the contact form and reply to it — the reply reaches the visitor.
+5. Send an email to `hello@uncomplicatedguides.com` from another mailbox; it arrives at `CONTACT_TO`.
+6. Subscribe to the newsletter from the footer, click the confirmation link, then open
    `/admin/newsletter`, send yourself a test, and send a first short letter to everyone.
