@@ -38,11 +38,11 @@ npm run dev                         # Astro dev server with local D1/R2/email em
 npm run preview                     # astro build + wrangler dev (workerd)
 ```
 
-To test downloads locally, put the PDF into the local R2 bucket once:
+To test downloads locally, put the PDFs into the local R2 bucket once (key = exact file name):
 
 ```bash
-npx wrangler r2 object put uncomplicated-guides-files/ai-assistants-en-v1.1.pdf \
-  --file private/guides/ai-assistants-en-v1.1.pdf --local
+npx wrangler r2 object put "kova-guides/247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" \
+  --file "private/guides/247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" --local
 ```
 
 Emails sent locally are written to `.wrangler/tmp/email/` instead of being delivered — that is also
@@ -73,8 +73,11 @@ after `npx wrangler login`.
 The webhook records the purchase in D1 and emails the same link. `/download/<token>` streams the
 PDF from R2 while the token is valid (7 days, `site.downloadLinkDays`). Until `STRIPE_SECRET_KEY`
 is set, the buy buttons fall back to the guide's `paymentLink` (no webhook, no delivery email).
-Prices are set per guide in `src/data/guides.ts` and passed to Stripe inline; no products need to
-be created in the Stripe dashboard (an optional `stripePriceId` per guide overrides this).
+Prices are set per guide in `src/data/guides.ts`. When the site creates the Checkout Session it
+passes the price inline and tags the session with `metadata.guide`. When a buyer pays through a
+Payment Link made in the Stripe dashboard there is no metadata, so the paid session is matched to a
+guide through the product/price ids of what was bought — list them in the guide's `stripeIds`.
+Sessions that match neither are ignored (the Stripe account is shared with kova.bg).
 
 **Re-downloading later.** `/account` lists everything bought with an email address, each with a
 fresh link. Sign-in is passwordless: `/api/access/request` emails a 20-minute magic link,
@@ -101,7 +104,9 @@ stripe listen --forward-to localhost:4321/api/stripe/webhook   # copy whsec_… 
 1. Add an entry to `src/data/guides.ts` (`status: 'soon'` until it is ready; the page shows a
    notify-me form instead of a buy button).
 2. Put the cover in `src/assets/guides/` and reference it in `cover`.
-3. Upload the PDF to R2 and set `fileKey`/`fileName`; switch `status` to `'available'`.
+3. Upload the PDF to R2 as is; set `fileKey` to the exact file name and `fileName` to what the buyer
+   should save it as. Create the product and Payment Link in Stripe; put the `prod_…` id in
+   `stripeIds` and the link in `paymentLink`; switch `status` to `'available'`.
 4. Announce it to subscribers from `/admin/newsletter`.
    The `signups.guides` column records which guide each person asked about, if you ever want to
    target a letter (not exposed in the admin page yet).

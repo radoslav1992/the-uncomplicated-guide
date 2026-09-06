@@ -20,8 +20,8 @@
     "EMAIL_FROM": "hello@uncomplicatedguide.com",
     "EMAIL_FROM_NAME": "The Uncomplicated Guides",
     // Where contact-form messages and forwarded inbound mail go.
-    // Must be a verified destination address in Cloudflare Email Routing.
-    "CONTACT_TO": "hello@uncomplicatedguide.com",
+    // Must be a verified destination address in Cloudflare Email Routing (same inbox as kova.bg).
+    "CONTACT_TO": "radoslav.dodnikov@gmail.com",
     // Optional: Google Analytics 4 id. Leave empty to ship without analytics and without the cookie banner.
     "PUBLIC_GA_MEASUREMENT_ID": "",
     // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
@@ -46,15 +46,19 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "guides-db", "database_id": "1257ef33-c0c0-4d12-b568-8629bc7fc0c8", "migrations_dir": "migrations" }
   ],
-  // R2: create the bucket in the dashboard (R2 → Create bucket) with this exact name.
+  // R2: the private bucket shared with kova.bg. Files are uploaded as they are —
+  // the object key is the exact file name, and it must equal `fileKey` in src/data/guides.ts.
   "r2_buckets": [
-    { "binding": "GUIDE_FILES", "bucket_name": "uncomplicated-guides-files" }
+    { "binding": "GUIDE_FILES", "bucket_name": "kova-guides" }
   ],
 
   // ─── Email (Cloudflare Email Service, beta) ───────────────────────────────
-  // Sending: the binding below. Receiving: in the dashboard, Email → Email Routing →
-  // route hello@yourdomain to this Worker; `src/worker.ts` forwards it to CONTACT_TO.
+  // Sending: the binding below. Senders are restricted, recipients are not, so leaked
+  // code cannot send mail from another address on the account's domains. The sending
+  // domain must be verified in Email Service (like kova.bg is).
+  // Receiving: in the dashboard, Email → Email Routing on the uncomplicatedguide.com zone →
+  // route hello@ to this Worker; `src/worker.ts` forwards it to CONTACT_TO.
   "send_email": [
-    { "name": "SEND_EMAIL" }
+    { "name": "SEND_EMAIL", "allowed_sender_addresses": ["hello@uncomplicatedguide.com"] }
   ]
 }
