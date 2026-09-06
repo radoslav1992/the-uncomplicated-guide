@@ -18,7 +18,7 @@ export const site = {
   email: 'hello@uncomplicatedguide.com',
   imprint: 'Galactic Guides',
   /** Default currency for all guides. */
-  currency: 'EUR',
+  currency: 'USD',
   /** The month shown on legal pages. */
   legalUpdated: 'September 2026',
   /** Days a download link stays valid. Mirrored in the terms. */
@@ -41,7 +41,7 @@ export const site = {
 } as const;
 
 export const formatPrice = (cents: number, currency: string = site.currency) =>
-  new Intl.NumberFormat('en-IE', {
+  new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
     minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
