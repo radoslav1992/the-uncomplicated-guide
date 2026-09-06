@@ -11,7 +11,7 @@ const { current = '' } = Astro.props;
 <header class="site-header">
   <div class="container inner">
     <a href="/" class="brand" aria-label={`${site.name} — home`}>
-      <img src="/brand/logo-mark-96.webp" alt="" width="30" height="30" />
+      <img src="/brand/logo-mark.png" alt="" width="34" height="34" />
       <span class="brand-name">{site.shortName}</span>
       <span class="brand-suffix">{site.shortSuffix}</span>
     </a>
@@ -58,11 +58,10 @@ const { current = '' } = Astro.props;
     color: var(--ink);
   }
   .brand img {
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     flex: none;
     display: block;
-    border-radius: 7px;
   }
   .brand-name {
     font-family: var(--font-display);
