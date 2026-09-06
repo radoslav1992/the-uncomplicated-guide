@@ -2,7 +2,8 @@
  * Single-guide purchases and their download tokens (table `purchases`).
  */
 import type Stripe from 'stripe';
-import { getGuide, type Guide } from '../data/guides';
+import { getGuide, guides, type Guide } from '../data/guides';
+import { getStripe } from './stripe';
 import { site } from '../data/site';
 import { randomToken } from './tokens';
 import { sendEmail } from './email';
@@ -49,15 +50,46 @@ export async function reissueToken(env: Env, p: Purchase): Promise<Purchase> {
 }
 
 /**
+ * Which guide a Checkout Session paid for.
+ *   1. `metadata.guide` — set by sessions the site creates itself.
+ *   2. The product/price ids of the line items — the only signal a Payment Link made in
+ *      the Stripe dashboard carries. Line items are fetched when the session lacks them.
+ * Returns null for sessions that are not ours (the Stripe account is shared with kova.bg).
+ */
+export async function resolveGuide(env: Env, session: Stripe.Checkout.Session): Promise<Guide | null> {
+  const bySlug = getGuide(session.metadata?.guide);
+  if (bySlug) return bySlug;
+  let items = session.line_items?.data;
+  if (!items) {
+    try {
+      items = (await getStripe(env).checkout.sessions.listLineItems(session.id, { limit: 10 })).data;
+    } catch (err) {
+      console.error('[purchases] could not list line items', session.id, err);
+      return null;
+    }
+  }
+  const ids = new Set<string>();
+  for (const li of items) {
+    if (li.price?.id) ids.add(li.price.id);
+    const product = li.price?.product;
+    if (typeof product === 'string') ids.add(product);
+    else if (product && 'id' in product) ids.add(product.id);
+  }
+  return guides.find((g) => g.stripeIds?.some((id) => ids.has(id))) ?? null;
+}
+
+/**
  * Make sure a purchase row exists for a paid one-off Checkout Session and that it has
  * a valid token. Safe to call from both the webhook and the thank-you page.
+ * Returns null when the session is unpaid, or when it did not buy one of our guides.
  */
 export async function ensurePurchase(env: Env, session: Stripe.Checkout.Session): Promise<Purchase | null> {
   if (session.mode !== 'payment') return null;
   if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required') return null;
-  const guide = session.metadata?.guide;
   const email = (session.customer_details?.email ?? session.customer_email ?? '').toLowerCase();
-  if (!guide || !email) return null;
+  if (!email) return null;
+  const guide = (await resolveGuide(env, session))?.slug;
+  if (!guide) return null;
 
   let p = await getPurchase(env, session.id);
   if (!p) {

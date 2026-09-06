@@ -38,7 +38,7 @@ if (sessionId) {
     } else if (stripeConfigured(env)) {
       const session = await retrieveSession(env, sessionId);
       purchase = await ensurePurchase(env, session);
-      state = purchase ? 'ok' : 'unpaid';
+      state = purchase ? 'ok' : session.payment_status === 'paid' ? 'notfound' : 'unpaid';
     } else {
       state = 'unavailable';
     }

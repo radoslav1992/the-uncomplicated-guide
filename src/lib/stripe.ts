@@ -59,7 +59,7 @@ export async function createCheckoutSession(env: Env, guide: Guide, origin: stri
 }
 
 export async function retrieveSession(env: Env, sessionId: string) {
-  return getStripe(env).checkout.sessions.retrieve(sessionId);
+  return getStripe(env).checkout.sessions.retrieve(sessionId, { expand: ['line_items'] });
 }
 
 /** Verify a webhook and return the event. Throws on a bad signature. */

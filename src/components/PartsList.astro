@@ -9,7 +9,7 @@ const { parts } = Astro.props;
 <ol class="parts">
   {
     parts.map((p, i) => (
-      <li>
+      <li class="part" data-first={i === 0 ? '' : undefined}>
         <span class="num">{String(i + 1).padStart(2, '0')}</span>
         <div>
           <h3>{p.title}</h3>
@@ -19,3 +19,32 @@ const { parts } = Astro.props;
     ))
   }
 </ol>
+
+<style>
+  /* Each part rises as it enters; its number lights up when it settles in view. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .part {
+        animation: rise linear both;
+        animation-timeline: view();
+        animation-range: entry 4% cover 24%;
+      }
+      .part .num {
+        animation: number-live linear both;
+        animation-timeline: view();
+        animation-range: entry 45% cover 32%;
+      }
+      .part[data-first] .num {
+        animation-name: number-live-accent;
+      }
+    }
+  }
+  @keyframes number-live {
+    from { color: var(--faint); }
+    to { color: var(--ink); }
+  }
+  @keyframes number-live-accent {
+    from { color: var(--faint); }
+    to { color: var(--accent); }
+  }
+</style>

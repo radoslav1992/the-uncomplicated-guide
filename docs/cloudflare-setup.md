@@ -9,7 +9,7 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
 | ---------------- | ----------------------------- | ------------------------- |
 | Worker           | `the-uncomplicated-guides`    | `name`                    |
 | D1 database      | `guides-db`                   | `d1_databases[0]`         |
-| R2 bucket        | `uncomplicated-guides-files`  | `r2_buckets[0]`           |
+| R2 bucket        | `kova-guides` (shared with kova.bg) | `r2_buckets[0]`     |
 | Email binding    | `SEND_EMAIL`                  | `send_email[0]`           |
 
 ## 1. Domain
@@ -25,11 +25,14 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
 
 ## 3. R2 bucket
 
-- [ ] **R2 object storage → Create bucket** — name `uncomplicated-guides-files`, location automatic.
-      Keep it private (no public access, no custom domain): the Worker streams files itself.
-- [ ] Upload each guide PDF with the object key from `src/data/guides.ts` → `fileKey`
-      (for the first guide: `ai-assistants-en-v1.1.pdf`). Drag and drop in the bucket's
-      **Objects** tab works; so does `npx wrangler r2 object put uncomplicated-guides-files/<fileKey> --file <local file> --remote`.
+- [x] The existing private bucket `kova-guides` is reused; nothing to create.
+- [ ] **R2 → kova-guides → Objects → Upload** the two PDFs exactly as they are named — no renaming.
+      The object key must equal `fileKey` in `src/data/guides.ts`, letter for letter:
+      - `247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf`
+      - `AI_Video_Ads_UGC_Guide_EN_v1.0.pdf`
+
+      After uploading, open each object and compare the name with the list above. A mismatch means a
+      "file not available" page for the buyer, and nothing else will tell you.
 
 ## 4. Worker deployed from GitHub
 
@@ -44,8 +47,8 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
       `SEND_EMAIL` and `ASSETS` are listed. They come from `wrangler.jsonc`; if one is missing the config is wrong.
 - [ ] **Settings → Triggers → Cron Triggers** shows `*/5 * * * *` (from `wrangler.jsonc`). It delivers
       queued newsletter batches and purges unconfirmed addresses; nothing to configure.
-- [ ] **Settings → Domains & Routes → Add → Custom domain** — e.g. `uncomplicatedguides.com` (and `www` if you want it).
-- [ ] `SITE_URL` in `wrangler.jsonc` and `public/robots.txt` are already set to `https://uncomplicatedguides.com`.
+- [ ] **Settings → Domains & Routes → Add → Custom domain** — e.g. `uncomplicatedguide.com` (and `www` if you want it).
+- [ ] `SITE_URL` in `wrangler.jsonc` and `public/robots.txt` are already set to `https://uncomplicatedguide.com`.
       Change both only if you serve the site from `www` instead.
 
 Non-secret settings live in `wrangler.jsonc` → `vars` and ship with each deploy. Secrets are set
@@ -55,8 +58,8 @@ once in the dashboard and survive deploys.
 
 | Name                     | Value                                                           | Required |
 | ------------------------ | --------------------------------------------------------------- | -------- |
-| `STRIPE_SECRET_KEY`      | Stripe → Developers → API keys → Secret key (`sk_live_…`)        | yes      |
-| `STRIPE_WEBHOOK_SECRET`  | Signing secret of the webhook endpoint from step 6 (`whsec_…`)   | yes      |
+| `STRIPE_SECRET_KEY`      | The same `sk_live_…` key the `agency` Worker uses (one Stripe account) | yes |
+| `STRIPE_WEBHOOK_SECRET`  | Signing secret of **this site's** webhook endpoint from step 6 (`whsec_…`) — each endpoint has its own | yes |
 | `AUTH_SECRET`            | Any long random string (`openssl rand -base64 48`)               | yes      |
 | `ADMIN_TOKEN`            | Another long random string; unlocks `/admin/newsletter`          | yes      |
 | `TURNSTILE_SECRET_KEY`   | From step 8, if you use Turnstile                                | optional |
@@ -65,12 +68,18 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 ## 6. Stripe (not Cloudflare, but the Worker depends on it)
 
-- [ ] No products to create: each guide's price is set in `src/data/guides.ts` and sent to Stripe at
-      checkout. (Optionally create a Product/Price in Stripe and put its `price_…` id in the guide's
-      `stripePriceId`.)
-- [ ] **Developers → Webhooks → Add endpoint**: `https://uncomplicatedguides.com/api/stripe/webhook`, events
+- [ ] **Product catalogue**: one product per guide, one-off price, "Tax included in price" = Yes,
+      category *General – Electronically Supplied Services*. Copy the product's `prod_…` id (it is in
+      the product page URL) into the guide's `stripeIds` in `src/data/guides.ts`. This is how a
+      payment made through a Payment Link is matched to the file — dashboard-made links carry no
+      metadata.
+- [ ] **Payment link** per product: After payment → *Don't show confirmation page* →
+      `https://uncomplicatedguide.com/thank-you?session_id={CHECKOUT_SESSION_ID}` (braces typed
+      literally). Put the link in the guide's `paymentLink`.
+- [ ] **Developers → Webhooks → Add endpoint**: `https://uncomplicatedguide.com/api/stripe/webhook`, events
       `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`.
-      Copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
+      This is a second endpoint next to kova.bg's; both receive every event of the account and each
+      site only acts on its own products. Copy this endpoint's signing secret into `STRIPE_WEBHOOK_SECRET`.
 - [ ] **Settings → Emails**: turn on receipts for successful payments.
 - [ ] Optional: enable **Stripe Tax** and set `STRIPE_AUTOMATIC_TAX` to `"true"` in `wrangler.jsonc`.
 
@@ -78,10 +87,14 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 **Sending — Email Service (beta)**
 
-- [ ] **Email → Email Service** (on the account, not the zone) → add the sending domain → add the
-      DKIM/SPF/DMARC records it shows (one click if the zone is on Cloudflare) → wait for *Verified*.
-- [ ] `EMAIL_FROM` in `wrangler.jsonc` must be an address on that domain (default `hello@uncomplicatedguides.com`).
-- [ ] Nothing else: the `send_email` binding is declared in `wrangler.jsonc`.
+- [ ] **Email → Email Service** (account level, where kova.bg is already verified) → add
+      `uncomplicatedguide.com` as a sending domain → add the DKIM/SPF/DMARC records it shows (one
+      click, the zone is on Cloudflare) → wait for *Verified*.
+- [ ] `EMAIL_FROM` is `hello@uncomplicatedguide.com` and the `send_email` binding only allows that
+      sender (`allowed_sender_addresses`), like the agency Worker. Recipients are unrestricted, which
+      is what delivery emails to buyers need.
+- [ ] Shortcut if you do not want to verify the new domain yet: set `EMAIL_FROM` and the allowed
+      sender to an address on kova.bg (e.g. `chas@kova.bg`), which is already verified.
 - [ ] Test: submit the contact form on the live site; the message must arrive at `CONTACT_TO`.
 - [ ] Newsletter volume: Email Service is in beta and has per-account sending limits. Check the limit
       shown in the Email Service dashboard before sending to a large list; delivery runs in batches
@@ -90,9 +103,9 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 **Receiving — Email Routing**
 
 - [ ] Zone → **Email → Email Routing → Get started**; add the DNS records it asks for (MX + TXT).
-- [ ] **Destination addresses**: add the mailbox you actually read and confirm the verification email.
-      Put that address in `wrangler.jsonc` → `CONTACT_TO`.
-- [ ] **Routing rules → Create address**: `hello@<your-domain>` → action **Send to a Worker** →
+- [x] **Destination address**: `radoslav.dodnikov@gmail.com` is already verified on the account (kova.bg
+      uses it) and is set as `CONTACT_TO`.
+- [ ] **Routing rules → Create address**: `hello@uncomplicatedguide.com` → action **Send to a Worker** →
       `the-uncomplicated-guides`. The Worker (`src/worker.ts`) forwards every message to `CONTACT_TO`.
       (Choosing **Send to an email** instead, straight to the mailbox, also works; the Worker route is
       only needed if you want custom handling later.)
@@ -118,6 +131,6 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 3. Open `/account`: the guide you just bought is listed with a download button. Sign out, request a
    sign-in link for the same address, sign in again.
 4. Send yourself a message through the contact form and reply to it — the reply reaches the visitor.
-5. Send an email to `hello@uncomplicatedguides.com` from another mailbox; it arrives at `CONTACT_TO`.
+5. Send an email to `hello@uncomplicatedguide.com` from another mailbox; it arrives at `CONTACT_TO`.
 6. Subscribe to the newsletter from the footer, click the confirmation link, then open
    `/admin/newsletter`, send yourself a test, and send a first short letter to everyone.

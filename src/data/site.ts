@@ -15,7 +15,7 @@ export const site = {
   },
   legalName: 'The Uncomplicated Guides · Radoslav Dodnikov',
   reach: 'Sofia, Bulgaria · Sold worldwide as PDF',
-  email: 'hello@uncomplicatedguides.com',
+  email: 'hello@uncomplicatedguide.com',
   imprint: 'Galactic Guides',
   /** Default currency for all guides. */
   currency: 'EUR',

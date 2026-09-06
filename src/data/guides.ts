@@ -1,5 +1,6 @@
 import type { ImageMetadata } from 'astro';
 import aiAssistantsCover from '../assets/guides/ai-assistants-cover.jpg';
+import aiVideoCover from '../assets/guides/ai-video-cover.jpg';
 
 export type GuidePart = { title: string; text: string };
 
@@ -26,15 +27,21 @@ export interface Guide {
   notFor: string[];
   authorNote?: string[];
   /**
-   * Delivery: key of the PDF in the GUIDE_FILES R2 bucket and the file name the
-   * buyer sees. Upload with:
-   *   wrangler r2 object put uncomplicated-guides-files/<fileKey> --file private/guides/<file>.pdf
+   * Delivery: key of the PDF in the GUIDE_FILES R2 bucket (the exact file name as
+   * uploaded, letter for letter) and the file name the buyer's browser saves.
    */
   fileKey?: string;
   fileName?: string;
   /**
-   * Optional Stripe Price id (price_...). If omitted the checkout session is
-   * created with inline price data from `price`/`currency`.
+   * Stripe Product and/or Price ids (prod_… / price_…) that sell this guide.
+   * Payment Links made in the Stripe dashboard carry no metadata, so a paid
+   * session is matched to a guide through the ids of what was bought. List every
+   * price that leads to this file (promo, other currency…).
+   */
+  stripeIds?: string[];
+  /**
+   * Optional Stripe Price id (price_...) used when the site creates the Checkout
+   * Session itself. If omitted the session is created with inline price data.
    */
   stripePriceId?: string;
   /**
@@ -99,9 +106,11 @@ export const guides: Guide[] = [
       'Radoslav Dodnikov. I teach generative AI at university and I am a PhD candidate in computer science — but the guide is not from the lectures. It is written from things I have shipped: voice agents that answer real phone lines and book real appointments are the same ones discussed inside.',
       'That is why the telephony part is there. It is not in the tutorials because it is boring — and it is exactly where most projects stop.',
     ],
-    fileKey: 'ai-assistants-en-v1.1.pdf',
+    fileKey: '247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf',
     fileName: '24-7-AI-Assistants-EN-v1.1.pdf',
-    paymentLink: 'https://buy.stripe.com/14AfZja1t2bk8DybrO1Nu00',
+    paymentLink: 'https://buy.stripe.com/3cI9AV7Tl5nw072gM81Nu01',
+    // TODO: add the prod_… id of the product behind the Payment Link above.
+    stripeIds: [],
   },
   {
     slug: 'vibe-coding-for-non-developers',
@@ -150,24 +159,63 @@ export const guides: Guide[] = [
     notFor: ['Anyone who has never written or read code — start with the vibe coding guide'],
   },
   {
-    slug: 'social-media-content-with-ai',
-    title: 'Social Media Content with AI',
-    subtitle: 'How to run a consistent channel with AI doing the repetitive part',
-    short: 'A weekly system for planning, drafting and publishing — and what you still have to do yourself.',
+    slug: 'ai-video-ads-ugc',
+    title: 'AI Video Ads & UGC',
+    subtitle: 'How to script, voice, animate and edit AI-generated UGC ads and social videos — and sell them as a service',
+    short:
+      'The four-tool pipeline — ChatGPT or Claude, ElevenLabs, HeyGen, Captions — as a repeatable production line, with the testing, disclosure and pricing that make it sellable.',
     description:
-      'A weekly system for planning, drafting and publishing with AI doing the repetitive part — and what you still have to do yourself.',
-    status: 'soon',
+      'Not a catalogue of buttons in four apps. A working manual that starts from the business goal, goes through script, voice, avatar and edit, and ends with testing, selling, supporting and measuring the result.',
+    status: 'available',
     price: 3900,
     currency: 'EUR',
-    edition: 'English edition · in progress',
+    pages: 35,
+    edition: 'English edition — version 1.0',
+    currentAsOf: '1 September 2026',
+    cover: aiVideoCover,
     parts: [
-      { title: 'System', text: 'A weekly rhythm that survives a busy month.' },
-      { title: 'Drafting', text: 'Getting drafts that sound like you, not like a model.' },
-      { title: 'Publishing', text: 'Scheduling, formats and the boring checklist.' },
-      { title: 'Measuring', text: 'Knowing what worked without drowning in dashboards.' },
+      {
+        title: 'Script',
+        text: 'A brief that fixes audience, offer and one measurable result before any tool is opened. A scripting prompt for ChatGPT or Claude that holds hard constraints — seconds, claims, disclosure — and produces five hooks and one body. Which hooks work and which get rejected.',
+      },
+      {
+        title: 'Voice',
+        text: 'ElevenLabs models at a glance, the settings and text formatting that stop robotic delivery, choosing or cloning a voice, and the export and plan rules — including the names and numbers you check by ear before the audio leaves.',
+      },
+      {
+        title: 'Avatar',
+        text: 'HeyGen: stock avatars, photo avatars and a Digital Twin that looks natural. Driving the avatar with the ElevenLabs audio, the known artefacts to check — lips, hands, background — and the consent you need before a real likeness goes on camera.',
+      },
+      {
+        title: 'Edit & sell',
+        text: 'Captions turns the raw clip into a native post: cuts, captions inside the safe zone, B-roll, licensed music, 9:16 export. Then the part that makes it a business — a test matrix, real tool costs, a cost formula, three levels of offer, price frames and a pilot plan.',
+      },
     ],
-    forWho: ['Founders and freelancers running their own channel', 'Small teams without a marketing hire'],
-    notFor: ['Anyone looking for growth hacks — this is a system, not a trick'],
+    outcomes: [
+      'Produce ten tested ad variants in the time it used to take to make one',
+      'Run a 15-minute assessment that tells you whether a client is a good fit before you build a demo',
+      'Hand a script to ElevenLabs and HeyGen with file names, versions and checks between every tool',
+      'Label, disclose and get consent the way the EU AI Act, the FTC and the platforms expect',
+      'Price the service from real tool costs — with three offer levels and a monthly report that shows value',
+    ],
+    forWho: [
+      'Small-business owners and marketers who want a consistent stream of UGC-style ads and Reels without filming days',
+      'Freelancers and AI agencies who want to sell video creatives as a repeatable monthly service',
+      'People who have made one impressive avatar demo and got stuck turning it into a process',
+    ],
+    notFor: [
+      'Anyone who wants a cinematic brand film or an emotional launch video — the tools cannot deliver that polish yet, and the guide says so',
+      'Anyone planning fake testimonials or reviews that imply a customer experience which did not happen — that is illegal in many markets, not just risky',
+      'Anyone expecting one magic button — this is a production line with hand-offs, checks and versions',
+    ],
+    authorNote: [
+      'Radoslav Dodnikov. I run a software studio in Sofia and teach generative AI at university. The pipeline in this guide is the one used for real client creatives — the same folder conventions, the same checklists, the same pricing frames.',
+      'The chapters on disclosure, consent and real costs are there because they are the ones people skip, and the ones that decide whether the service survives its second month.',
+    ],
+    fileKey: 'AI_Video_Ads_UGC_Guide_EN_v1.0.pdf',
+    fileName: 'AI-Video-Ads-and-UGC-EN-v1.0.pdf',
+    stripeIds: ['prod_VDCwauiErlkqed'],
+    paymentLink: 'https://buy.stripe.com/9B628tehJ9DMbPKbrO1Nu02',
   },
 ];
 

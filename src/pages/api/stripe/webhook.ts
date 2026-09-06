@@ -36,7 +36,9 @@ export const POST: APIRoute = async ({ request }) => {
 
         const purchase = await ensurePurchase(env, session);
         if (!purchase) {
-          console.warn('[webhook] session not paid or incomplete', session.id, session.payment_status);
+          // Either not paid yet, or a purchase of something this site does not sell
+          // (the Stripe account is shared with kova.bg) — nothing to deliver.
+          console.info('[webhook] ignored session', session.id, session.payment_status);
           break;
         }
         if (!purchase.emailed_at) {

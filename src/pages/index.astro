@@ -13,6 +13,10 @@ import { featuredGuide as guide, upcomingGuides } from '../data/guides';
 
 const price = formatPrice(guide.price, guide.currency);
 const guideHref = `/guides/${guide.slug}`;
+const upcomingList = upcomingGuides
+  .map((g) => g.title.toLowerCase())
+  .join(', ')
+  .replace(/, ([^,]*)$/, ' and $1');
 
 const FAQ = [
   {
@@ -37,7 +41,7 @@ const FAQ = [
   },
   {
     q: 'Will there be more guides?',
-    a: 'Three are in progress: vibe coding for non-developers, working with AI coding agents such as Claude Code, and social media content with AI. The library shows what is coming, and the newsletter tells you the day one ships.',
+    a: `${upcomingGuides.length === 1 ? 'One is' : `${['Two', 'Three', 'Four', 'Five'][upcomingGuides.length - 2] ?? upcomingGuides.length} are`} in progress: ${upcomingList}. The library shows what is coming, and the newsletter tells you the day one ships.`,
   },
 ];
 
@@ -102,28 +106,35 @@ const jsonLd = [
     </div>
   </section>
 
-  <!-- Manifesto -->
-  <section class="section-dark manifesto">
-    <div class="container">
-      <p class="eyebrow">Why these guides</p>
-      <h2 class="display">
-        <span>Most guides stop</span>
-        <span class="accent">at the demo.</span>
-        <span>These start where</span>
-        <span class="accent">the demo breaks.</span>
-      </h2>
-      <p>
-        The phone number. The invoice. The price. The moment you have to tell a client where the
-        thing will fail. Those are the parts that stop projects two-thirds of the way in, and they
-        are the parts each guide is built around.
-      </p>
+  <!-- Manifesto: pinned while the reader scrolls through it; lines appear one by one -->
+  <section class="section-dark manifesto" aria-labelledby="manifesto-heading">
+    <div class="manifesto-track">
+      <div class="manifesto-pin">
+        <div class="container">
+          <p class="eyebrow">Why these guides</p>
+          <h2 id="manifesto-heading" class="visually-hidden">
+            Most guides stop at the demo. These start where the demo breaks.
+          </h2>
+          <p class="display lines" aria-hidden="true">
+            <span class="line" style="--i: 0">Most guides stop</span>
+            <span class="line accent" style="--i: 1">at the demo.</span>
+            <span class="line" style="--i: 2">These start where</span>
+            <span class="line accent" style="--i: 3">the demo breaks.</span>
+          </p>
+          <p class="line body" style="--i: 4">
+            The phone number. The invoice. The price. The moment you have to tell a client where the
+            thing will fail. Those are the parts that stop projects two-thirds of the way in, and they
+            are the parts each guide is built around.
+          </p>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- Featured guide -->
   <section id="first-guide" class="section-alt featured">
     <div class="container featured-grid">
-      <div class="featured-intro">
+      <div class="featured-intro reveal">
         <p class="eyebrow">The first guide</p>
         <h2 class="display">{guide.title}</h2>
         <p class="sub">{guide.subtitle}.</p>
@@ -159,7 +170,7 @@ const jsonLd = [
   <!-- Author -->
   <section id="author" class="author">
     <div class="container author-grid">
-      <figure>
+      <figure class="reveal">
         <div class="backdrop" aria-hidden="true"></div>
         <Image
           src={portrait}
@@ -173,7 +184,7 @@ const jsonLd = [
           <p class="role">{site.author.role}</p>
         </figcaption>
       </figure>
-      <div>
+      <div class="reveal" style="--i: 2">
         <p class="eyebrow">Who writes these</p>
         <h2 class="display">Hello — I'm Radoslav.</h2>
         <p class="bio">
@@ -200,11 +211,11 @@ const jsonLd = [
   <!-- Signup -->
   <section id="signup" class="signup-section">
     <div class="container">
-      <div class="panel signup-panel">
+      <div class="panel signup-panel reveal">
         <div>
           <h2 class="display">Hear when the next one ships.</h2>
           <p class="lead-text">
-            {upcomingGuides.length} guides are in progress: {upcomingGuides.map((g) => g.title.toLowerCase()).join(', ').replace(/, ([^,]*)$/, ' and $1')}. Subscribe and you get one email on the day a guide comes out, and now and then a short note on something learned building or selling one. Never more than a couple a month.
+            {upcomingGuides.length} guides are in progress: {upcomingList}. Subscribe and you get one email on the day a guide comes out, and now and then a short note on something learned building or selling one. Never more than a couple a month.
           </p>
           <p class="small">No sequences, no “last chance”. Unsubscribe in one click, from every email.</p>
         </div>
@@ -216,7 +227,7 @@ const jsonLd = [
   <!-- FAQ -->
   <section class="section faq-section">
     <div class="container faq-grid">
-      <div>
+      <div class="reveal">
         <p class="eyebrow">Questions</p>
         <h2 class="display">The things people ask before buying</h2>
         <p class="lead-text">
@@ -393,14 +404,24 @@ const jsonLd = [
     animation: cue-fall 2.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
   }
 
-  /* Manifesto */
-  .manifesto {
-    padding: clamp(88px, 12vw, 160px) 0;
+  /* Manifesto — the track's height is how much scroll the pin lasts. */
+  .manifesto-track {
+    height: 260vh;
+    view-timeline-name: --manifesto;
+    view-timeline-axis: block;
+  }
+  .manifesto-pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: grid;
+    align-content: center;
+    overflow: hidden;
   }
   .manifesto .eyebrow {
     margin-bottom: clamp(20px, 4vw, 44px);
   }
-  .manifesto h2 {
+  .lines {
     display: flex;
     flex-direction: column;
     gap: 0.04em;
@@ -409,15 +430,45 @@ const jsonLd = [
     line-height: 1;
     letter-spacing: -0.045em;
   }
-  .manifesto .accent {
+  .line {
+    display: block;
+    opacity: 1; /* base state is the FINAL state */
+  }
+  .line.accent {
     color: var(--accent);
   }
-  .manifesto p:not(.eyebrow) {
+  .line.body {
     margin: clamp(32px, 5vw, 56px) 0 0;
     max-width: 54ch;
     font-size: clamp(16.5px, 1.7vw, 19px);
     line-height: 1.6;
     color: var(--dark-body);
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .line {
+        animation: line-in linear both;
+        animation-timeline: --manifesto;
+        /* Each line starts 13% after the previous and takes 20% of the pin;
+           the last one finishes at 72% and stays readable to the end. */
+        animation-range: contain calc(var(--i) * 13%) contain calc(var(--i) * 13% + 20%);
+      }
+    }
+  }
+  @keyframes line-in {
+    from {
+      opacity: 0.12;
+      transform: translateY(0.22em);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (max-width: 640px) {
+    .manifesto-track {
+      height: 180vh;
+    }
   }
 
   /* Featured */
@@ -634,6 +685,27 @@ const jsonLd = [
   .banner-section {
     padding: 0 0 clamp(72px, 10vw, 120px);
   }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .banner {
+        animation: unfold linear both;
+        animation-timeline: view();
+        animation-range: entry 8% cover 42%;
+      }
+    }
+  }
+  @keyframes unfold {
+    from {
+      transform: scale(0.93);
+      border-radius: 72px;
+      opacity: 0.55;
+    }
+    to {
+      transform: none;
+      border-radius: 36px;
+      opacity: 1;
+    }
+  }
   .banner {
     background: var(--accent);
     color: #fff;
@@ -711,6 +783,19 @@ const jsonLd = [
     }
     .banner {
       border-radius: 28px;
+    }
+    /* Shallower on phones: the big corner reads as a defect, not a gesture. */
+    @keyframes unfold {
+      from {
+        transform: scale(0.95);
+        border-radius: 44px;
+        opacity: 0.6;
+      }
+      to {
+        transform: none;
+        border-radius: 28px;
+        opacity: 1;
+      }
     }
   }
 </style>
