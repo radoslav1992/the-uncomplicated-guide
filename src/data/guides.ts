@@ -214,7 +214,8 @@ export const guides: Guide[] = [
     ],
     fileKey: 'AI_Video_Ads_UGC_Guide_EN_v1.0.pdf',
     fileName: 'AI-Video-Ads-and-UGC-EN-v1.0.pdf',
-    stripeIds: [],
+    stripeIds: ['prod_VDCwauiErlkqed'],
+    paymentLink: 'https://buy.stripe.com/9B628tehJ9DMbPKbrO1Nu02',
   },
 ];
 
