@@ -102,7 +102,7 @@ export const guides: Guide[] = [
     ],
     fileKey: 'ai-assistants-en-v1.1.pdf',
     fileName: '24-7-AI-Assistants-EN-v1.1.pdf',
-    paymentLink: 'https://buy.stripe.com/14AfZja1t2bk8DybrO1Nu00',
+    paymentLink: 'https://buy.stripe.com/3cI9AV7Tl5nw072gM81Nu01',
   },
   {
     slug: 'vibe-coding-for-non-developers',
