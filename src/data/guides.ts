@@ -217,6 +217,26 @@ export const guides: Guide[] = [
     stripeIds: ['prod_VDCwauiErlkqed'],
     paymentLink: 'https://buy.stripe.com/9B628tehJ9DMbPKbrO1Nu02',
   },
+  {
+    slug: '30-tiktok-hacks-for-success',
+    title: '30 TikTok Hacks for Success',
+    subtitle: 'Thirty things that actually move a TikTok account, each one tested and explained',
+    short: 'Hooks, formats, posting rhythm, the algorithm’s real signals and what to do when a video dies — thirty hacks, no fluff.',
+    description:
+      'Thirty hacks that actually move a TikTok account: hooks, formats, posting rhythm, the signals the algorithm really reads, and what to do when a video dies. Each one says when it works, when it does not, and how to check.',
+    status: 'soon',
+    price: 3900,
+    currency: 'USD',
+    edition: 'English edition · in progress',
+    parts: [
+      { title: 'Hooks', text: 'The first two seconds, and the ten openers that survive them.' },
+      { title: 'Formats', text: 'Which video shapes the platform rewards this year — and which it buries.' },
+      { title: 'Rhythm', text: 'Posting cadence, timing and batching that hold up in a busy week.' },
+      { title: 'Signals', text: 'What the algorithm actually measures, and how to read your analytics without lying to yourself.' },
+    ],
+    forWho: ['Founders, freelancers and small brands running their own TikTok', 'Marketers who need a checklist, not a theory'],
+    notFor: ['Anyone looking for a growth trick that replaces posting consistently — there is none'],
+  },
 ];
 
 export const availableGuides = guides.filter((g) => g.status === 'available');
