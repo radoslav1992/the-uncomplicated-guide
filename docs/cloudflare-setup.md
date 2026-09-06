@@ -44,8 +44,8 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
       `SEND_EMAIL` and `ASSETS` are listed. They come from `wrangler.jsonc`; if one is missing the config is wrong.
 - [ ] **Settings → Triggers → Cron Triggers** shows `*/5 * * * *` (from `wrangler.jsonc`). It delivers
       queued newsletter batches and purges unconfirmed addresses; nothing to configure.
-- [ ] **Settings → Domains & Routes → Add → Custom domain** — e.g. `uncomplicatedguides.com` (and `www` if you want it).
-- [ ] `SITE_URL` in `wrangler.jsonc` and `public/robots.txt` are already set to `https://uncomplicatedguides.com`.
+- [ ] **Settings → Domains & Routes → Add → Custom domain** — e.g. `uncomplicatedguide.com` (and `www` if you want it).
+- [ ] `SITE_URL` in `wrangler.jsonc` and `public/robots.txt` are already set to `https://uncomplicatedguide.com`.
       Change both only if you serve the site from `www` instead.
 
 Non-secret settings live in `wrangler.jsonc` → `vars` and ship with each deploy. Secrets are set
@@ -68,7 +68,7 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 - [ ] No products to create: each guide's price is set in `src/data/guides.ts` and sent to Stripe at
       checkout. (Optionally create a Product/Price in Stripe and put its `price_…` id in the guide's
       `stripePriceId`.)
-- [ ] **Developers → Webhooks → Add endpoint**: `https://uncomplicatedguides.com/api/stripe/webhook`, events
+- [ ] **Developers → Webhooks → Add endpoint**: `https://uncomplicatedguide.com/api/stripe/webhook`, events
       `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `charge.refunded`.
       Copy the signing secret into `STRIPE_WEBHOOK_SECRET`.
 - [ ] **Settings → Emails**: turn on receipts for successful payments.
@@ -80,7 +80,7 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 - [ ] **Email → Email Service** (on the account, not the zone) → add the sending domain → add the
       DKIM/SPF/DMARC records it shows (one click if the zone is on Cloudflare) → wait for *Verified*.
-- [ ] `EMAIL_FROM` in `wrangler.jsonc` must be an address on that domain (default `hello@uncomplicatedguides.com`).
+- [ ] `EMAIL_FROM` in `wrangler.jsonc` must be an address on that domain (default `hello@uncomplicatedguide.com`).
 - [ ] Nothing else: the `send_email` binding is declared in `wrangler.jsonc`.
 - [ ] Test: submit the contact form on the live site; the message must arrive at `CONTACT_TO`.
 - [ ] Newsletter volume: Email Service is in beta and has per-account sending limits. Check the limit
@@ -118,6 +118,6 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 3. Open `/account`: the guide you just bought is listed with a download button. Sign out, request a
    sign-in link for the same address, sign in again.
 4. Send yourself a message through the contact form and reply to it — the reply reaches the visitor.
-5. Send an email to `hello@uncomplicatedguides.com` from another mailbox; it arrives at `CONTACT_TO`.
+5. Send an email to `hello@uncomplicatedguide.com` from another mailbox; it arrives at `CONTACT_TO`.
 6. Subscribe to the newsletter from the footer, click the confirmation link, then open
    `/admin/newsletter`, send yourself a test, and send a first short letter to everyone.

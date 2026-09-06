@@ -15,13 +15,13 @@
   // ─── Plain configuration (not secret) ────────────────────────────────────
   "vars": {
     // Public URL of the deployed site (used for absolute links in emails and Stripe redirects).
-    "SITE_URL": "https://uncomplicatedguides.com",
+    "SITE_URL": "https://uncomplicatedguide.com",
     // Sender for all outgoing mail. The domain must be verified in Cloudflare Email Service.
-    "EMAIL_FROM": "hello@uncomplicatedguides.com",
+    "EMAIL_FROM": "hello@uncomplicatedguide.com",
     "EMAIL_FROM_NAME": "The Uncomplicated Guides",
     // Where contact-form messages and forwarded inbound mail go.
     // Must be a verified destination address in Cloudflare Email Routing.
-    "CONTACT_TO": "hello@uncomplicatedguides.com",
+    "CONTACT_TO": "hello@uncomplicatedguide.com",
     // Optional: Google Analytics 4 id. Leave empty to ship without analytics and without the cookie banner.
     "PUBLIC_GA_MEASUREMENT_ID": "",
     // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
