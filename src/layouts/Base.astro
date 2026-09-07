@@ -14,7 +14,7 @@ interface Props {
   title: string;
   description?: string;
   /** Which top-nav item is highlighted. */
-  current?: 'Home' | 'Library' | 'About' | 'Contact' | '';
+  current?: 'Home' | 'Library' | 'Blog' | 'About' | 'Contact' | '';
   /** Absolute or root-relative path to an Open Graph image. */
   image?: ImageMetadata | string;
   /** Set for pages that should not be indexed (thank-you, download). */
@@ -53,6 +53,7 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
     <link rel="icon" href="/favicon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/rss+xml" title={`${site.name} — blog`} href="/rss.xml" />
     <meta name="theme-color" content="#f6f3ee" />
 
     <meta property="og:type" content="website" />

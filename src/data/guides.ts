@@ -103,7 +103,7 @@ export const guides: Guide[] = [
       'Anyone who wants theory about large language models — this is a guide for putting one to work',
     ],
     authorNote: [
-      'Radoslav Dodnikov. I teach generative AI at university and I am a PhD candidate in computer science — but the guide is not from the lectures. It is written from things I have shipped: voice agents that answer real phone lines and book real appointments are the same ones discussed inside.',
+      'R. D. Mitchell. I teach generative AI at university and I am a PhD candidate in computer science — but the guide is not from the lectures. It is written from things I have shipped: voice agents that answer real phone lines and book real appointments are the same ones discussed inside.',
       'That is why the telephony part is there. It is not in the tutorials because it is boring — and it is exactly where most projects stop.',
     ],
     fileKey: '247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf',
@@ -209,7 +209,7 @@ export const guides: Guide[] = [
       'Anyone expecting one magic button — this is a production line with hand-offs, checks and versions',
     ],
     authorNote: [
-      'Radoslav Dodnikov. I run a software studio in Sofia and teach generative AI at university. The pipeline in this guide is the one used for real client creatives — the same folder conventions, the same checklists, the same pricing frames.',
+      'R. D. Mitchell. I run a software studio in Sofia and teach generative AI at university. The pipeline in this guide is the one used for real client creatives — the same folder conventions, the same checklists, the same pricing frames.',
       'The chapters on disclosure, consent and real costs are there because they are the ones people skip, and the ones that decide whether the service survives its second month.',
     ],
     fileKey: 'AI_Video_Ads_UGC_Guide_EN_v1.0.pdf',

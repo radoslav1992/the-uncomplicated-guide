@@ -1,6 +1,15 @@
 /**
  * Site-wide facts. Content that appears in more than one place lives here.
  */
+
+/**
+ * The real legal identity behind the site — who is registered as the trader and, for
+ * GDPR, the data controller. EU consumer-disclosure and privacy law require this genuine
+ * name on the Imprint, Terms of sale and Privacy policy; it must NOT be replaced by the
+ * public pen name below (`author.name`), which is used everywhere else.
+ */
+const legalTraderName = 'Radoslav Dodnikov';
+
 export const site = {
   name: 'The Uncomplicated Guides',
   shortName: 'Uncomplicated',
@@ -9,11 +18,14 @@ export const site = {
   description:
     'Each guide is one procedure from start to finish: when it is worth doing, how to build it, where it breaks and how to charge for it.',
   author: {
-    name: 'Radoslav Dodnikov',
+    /** Public byline / pen name — used for the author bio, guide credits and casual sign-offs. */
+    name: 'R. D. Mitchell',
     role: 'Author · Software and AI engineer',
     city: 'Sofia, Bulgaria',
   },
-  legalName: 'The Uncomplicated Guides · Radoslav Dodnikov',
+  /** Use on legal pages only (Imprint, Terms, Privacy) — see the comment on the constant above. */
+  legalTraderName,
+  legalName: `The Uncomplicated Guides · ${legalTraderName}`,
   reach: 'Sofia, Bulgaria · Sold worldwide as PDF',
   email: 'hello@uncomplicatedguide.com',
   imprint: 'Galactic Guides',
@@ -23,9 +35,12 @@ export const site = {
   legalUpdated: 'September 2026',
   /** Days a download link stays valid. Mirrored in the terms. */
   downloadLinkDays: 7,
+  /** Public URL, used as the RSS feed's fallback base when Astro.site is unset. */
+  url: 'https://uncomplicatedguide.com',
   nav: [
     { label: 'Home', href: '/' },
     { label: 'Library', href: '/guides' },
+    { label: 'Blog', href: '/blog' },
     { label: 'About', href: '/#author' },
     { label: 'Contact', href: '/contact' },
   ],

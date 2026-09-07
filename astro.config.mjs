@@ -21,9 +21,15 @@ export default defineConfig({
       filter: (page) =>
         !page.includes('/thank-you') &&
         !page.includes('/download/') &&
+        !page.includes('/account') &&
+        !page.includes('/admin/') &&
         !page.includes('/api/'),
     }),
   ],
+  // Blog code blocks: a light theme so they sit on the site's paper, not a dark slab.
+  markdown: {
+    shikiConfig: { theme: 'github-light', wrap: true },
+  },
   // Sessions are not used; keep the adapter from provisioning a KV namespace for them.
   session: false,
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },

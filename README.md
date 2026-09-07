@@ -14,8 +14,11 @@ of everything to create in the dashboard, including the GitHub deploy integratio
 src/
   data/guides.ts        ← the catalogue: titles, prices, parts, file keys. Add guides here.
   data/site.ts          ← site-wide facts (name, email, nav, legal date)
-  pages/                ← / , /guides, /guides/[slug], /account, /newsletter, /contact, legal pages,
-                          /thank-you, /download/[token], /admin/newsletter
+  content/blog/         ← the blog: one Markdown file per post
+  content.config.ts     ← the blog's frontmatter schema
+  pages/                ← / , /guides, /guides/[slug], /blog, /blog/[slug], /account, /newsletter,
+                          /contact, legal pages, /thank-you, /download/[token], /admin/newsletter,
+                          /rss.xml
   pages/api/            ← checkout, stripe/webhook, access/{request,verify,logout},
                           newsletter/{subscribe,confirm,unsubscribe}, contact, resend-link
   lib/                  ← db (D1), purchases, newsletter, session, stripe, email, tokens
@@ -110,6 +113,35 @@ stripe listen --forward-to localhost:4321/api/stripe/webhook   # copy whsec_… 
 4. Announce it to subscribers from `/admin/newsletter`.
    The `signups.guides` column records which guide each person asked about, if you ever want to
    target a letter (not exposed in the admin page yet).
+
+## Writing a blog post
+
+Posts are Markdown files in `src/content/blog/`. The file name becomes the URL, so
+`your-ad-gets-three-seconds.md` is served at `/blog/your-ad-gets-three-seconds`. Nothing else needs
+touching — the listing, the feed and the sitemap pick it up on the next build.
+
+```markdown
+---
+title: Your ad gets three seconds
+description: One or two sentences. Shown on the listing, in the meta description and in the feed.
+pubDate: 2026-08-26
+tags: [Video, Ads]
+guide: ai-video-ads-ugc   # optional: a slug from src/data/guides.ts
+draft: false              # optional: true keeps it out of the build
+---
+
+Body in Markdown. Headings, lists, quotes, code and tables are all styled.
+```
+
+`guide` links the post to a guide: it puts that guide's card at the end of the post and uses its
+cover as the social-sharing image. Leave it out for posts that do not belong with one.
+
+A post marked `draft: true` is visible with `npm run dev` and left out of `npm run build`, so a
+half-written piece can be previewed without shipping it. Reading time is worked out from the word
+count; the schema is enforced at build time by `src/content.config.ts`, so a missing or misspelled
+field fails the build rather than shipping broken.
+
+The feed lives at `/rss.xml` and is linked from the `<head>` of every page.
 
 ## Data (D1, see `migrations/0001_init.sql`)
 
