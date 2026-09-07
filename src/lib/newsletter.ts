@@ -84,7 +84,7 @@ What you get: one email when a guide ships or a revised edition replaces the old
 
 If you did not ask for this, ignore it — nothing is sent without the click.
 
-Radoslav
+${site.author.name}
 ${site.name}`,
   });
   return { status: 'confirmation-sent' as const };

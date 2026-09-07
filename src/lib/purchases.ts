@@ -153,7 +153,7 @@ ${thankYouUrl(origin, p)}
 
 The receipt comes separately from Stripe. If anything about the download does not work, reply to this email — I fix links the same day.
 
-Radoslav
+${site.author.name}
 ${site.name}`;
   const result = await sendEmail(env, {
     to: p.email,
