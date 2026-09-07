@@ -1,0 +1,286 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import GuideCover from '../../components/GuideCover.astro';
+import SignupForm from '../../components/SignupForm.astro';
+import { getPosts, readingTime, postUrl, type Post } from '../../lib/blog';
+import { getGuide } from '../../data/guides';
+import { site, formatPrice } from '../../data/site';
+import { formatDate } from '../../lib/http';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const guide = getGuide(post.data.guide);
+const minutes = readingTime(post.body);
+
+const others = (await getPosts()).filter((p) => p.id !== post.id).slice(0, 2);
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.pubDate.toISOString(),
+  dateModified: (post.data.updatedDate ?? post.data.pubDate).toISOString(),
+  author: { '@type': 'Person', name: site.author.name },
+  publisher: { '@type': 'Organization', name: site.name },
+  mainEntityOfPage: canonical,
+  keywords: post.data.tags.join(', ') || undefined,
+};
+---
+
+<Base
+  title={post.data.title}
+  description={post.data.description}
+  current="Blog"
+  image={guide?.cover}
+  jsonLd={jsonLd}
+>
+  <article class="post">
+    <header class="head container">
+      <a href="/blog" class="back">← All posts</a>
+      <p class="meta">
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{minutes} min read</span>
+      </p>
+      <h1 class="display">{post.data.title}</h1>
+      <p class="standfirst">{post.data.description}</p>
+      {
+        post.data.updatedDate && (
+          <p class="updated">Updated {formatDate(post.data.updatedDate)}</p>
+        )
+      }
+    </header>
+
+    <div class="body container prose">
+      <Content />
+    </div>
+
+    <footer class="foot container">
+      {
+        post.data.tags.length > 0 && (
+          <ul class="tag-list">
+            {post.data.tags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+      <p class="byline">Written by {site.author.name}.</p>
+    </footer>
+  </article>
+
+  {
+    guide && guide.status === 'available' && (
+      <section class="section related">
+        <div class="container">
+          <div class="panel related-panel">
+            <GuideCover guide={guide} size="shelf" href={`/guides/${guide.slug}`} />
+            <div>
+              <p class="eyebrow">The guide behind this piece</p>
+              <h2 class="display">{guide.title}</h2>
+              <p class="related-sub">{guide.subtitle}</p>
+              <p class="related-short">{guide.short}</p>
+              <a href={`/guides/${guide.slug}`} class="btn btn-accent">
+                What's inside — {formatPrice(guide.price, guide.currency)} →
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section signup-section">
+    <div class="container signup-grid">
+      {
+        others.length > 0 && (
+          <div>
+            <h2 class="display h2">More from the blog</h2>
+            <ul class="others">
+              {others.map((p) => (
+                <li>
+                  <a href={postUrl(p)}>
+                    <span class="t">{p.data.title}</span>
+                    <span class="d">{p.data.description}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+      <div class="card signup-card">
+        <p class="h">Get the next one</p>
+        <p class="p">
+          One email when a new piece or a new guide lands. A couple a month at most, one click to
+          leave.
+        </p>
+        <SignupForm compact source={`blog:${post.id}`} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-top: clamp(40px, 6vw, 72px);
+    max-width: 780px;
+  }
+  .back {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 20px;
+  }
+  .back:hover {
+    color: var(--accent);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .head h1 {
+    font-size: clamp(30px, 4.8vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    margin: 14px 0 0;
+  }
+  .standfirst {
+    font-size: clamp(17px, 1.9vw, 20px);
+    line-height: 1.55;
+    color: var(--text);
+    margin: 18px 0 0;
+  }
+  .updated {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin: 14px 0 0;
+  }
+  .body {
+    max-width: 780px;
+    padding-top: clamp(28px, 4vw, 40px);
+  }
+  .foot {
+    max-width: 780px;
+    padding-top: 8px;
+    padding-bottom: clamp(48px, 7vw, 72px);
+  }
+  .foot .tag-list {
+    margin: 0 0 18px;
+  }
+  .byline {
+    font-size: 14.5px;
+    color: var(--muted);
+    margin: 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .related {
+    padding-top: 0;
+  }
+  .related-panel {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(24px, 4vw, 48px);
+    align-items: center;
+  }
+  .related-panel h2 {
+    font-size: clamp(22px, 2.8vw, 30px);
+    letter-spacing: -0.035em;
+    margin: 12px 0 0;
+  }
+  .related-sub {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--ink);
+    margin: 10px 0 0;
+    max-width: 42ch;
+  }
+  .related-short {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 10px 0 18px;
+    max-width: 54ch;
+  }
+
+  .signup-section {
+    padding-top: 0;
+  }
+  .signup-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(28px, 4vw, 56px);
+    align-items: start;
+    border-top: 1px solid var(--border);
+    padding-top: clamp(40px, 6vw, 64px);
+  }
+  .h2 {
+    font-size: clamp(20px, 2.4vw, 26px);
+    letter-spacing: -0.03em;
+    margin: 0 0 18px;
+  }
+  .others {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+  }
+  .others a {
+    display: block;
+    color: inherit;
+  }
+  .others .t {
+    display: block;
+    font-weight: 600;
+    font-size: 17px;
+  }
+  .others a:hover .t {
+    color: var(--accent);
+  }
+  .others .d {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+  .signup-card .h {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 18px;
+    margin: 0 0 10px;
+  }
+  .signup-card .p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-2);
+    margin: 0 0 16px;
+  }
+
+  @media (max-width: 860px) {
+    .related-panel,
+    .signup-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

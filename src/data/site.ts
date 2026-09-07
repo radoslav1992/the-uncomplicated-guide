@@ -35,9 +35,12 @@ export const site = {
   legalUpdated: 'September 2026',
   /** Days a download link stays valid. Mirrored in the terms. */
   downloadLinkDays: 7,
+  /** Public URL, used as the RSS feed's fallback base when Astro.site is unset. */
+  url: 'https://uncomplicatedguide.com',
   nav: [
     { label: 'Home', href: '/' },
     { label: 'Library', href: '/guides' },
+    { label: 'Blog', href: '/blog' },
     { label: 'About', href: '/#author' },
     { label: 'Contact', href: '/contact' },
   ],
