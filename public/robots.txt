@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
+
+# Private and transactional pages. These also send `noindex` in the page itself
+# and are excluded from the sitemap.
 Disallow: /api/
+Disallow: /admin/
+Disallow: /account
 Disallow: /download/
 Disallow: /thank-you
 

@@ -19,6 +19,11 @@ interface Props {
   image?: ImageMetadata | string;
   /** Set for pages that should not be indexed (thank-you, download). */
   noindex?: boolean;
+  /**
+   * Set on blog posts. Switches the page to `og:type=article` and adds the
+   * published/modified times and tags that social cards and readers use.
+   */
+  article?: { publishedTime: Date; modifiedTime?: Date; tags?: string[] };
   /** Extra JSON-LD to inject. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
@@ -29,12 +34,19 @@ const {
   current = '',
   image,
   noindex = false,
+  article,
   jsonLd,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 const ogImageSrc = typeof image === 'string' ? image : image?.src ?? '/favicon-512.png';
 const ogImage = new URL(ogImageSrc, Astro.site ?? Astro.url).href;
+// Dimensions let a scraper lay the card out before it has fetched the file.
+const ogImageSize = typeof image === 'string' || !image ? null : { width: image.width, height: image.height };
+// Guide covers are portrait and the fallback is a square logo; a wide card would
+// crop either to an unreadable horizontal slice. Only genuinely landscape art
+// earns `summary_large_image`.
+const wideCard = ogImageSize ? ogImageSize.width / ogImageSize.height >= 1.5 : false;
 const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}`;
 const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
 ---
@@ -56,13 +68,35 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
     <link rel="alternate" type="application/rss+xml" title={`${site.name} — blog`} href="/rss.xml" />
     <meta name="theme-color" content="#f6f3ee" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={article ? 'article' : 'website'} />
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="en_GB" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
-    <meta name="twitter:card" content="summary_large_image" />
+    {
+      ogImageSize && (
+        <Fragment>
+          <meta property="og:image:width" content={String(ogImageSize.width)} />
+          <meta property="og:image:height" content={String(ogImageSize.height)} />
+        </Fragment>
+      )
+    }
+    {
+      article && (
+        <Fragment>
+          <meta property="article:published_time" content={article.publishedTime.toISOString()} />
+          {article.modifiedTime && (
+            <meta property="article:modified_time" content={article.modifiedTime.toISOString()} />
+          )}
+          <meta property="article:author" content={site.author.name} />
+          {article.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+        </Fragment>
+      )
+    }
+    <meta name="author" content={site.author.name} />
+    <meta name="twitter:card" content={wideCard ? 'summary_large_image' : 'summary'} />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />

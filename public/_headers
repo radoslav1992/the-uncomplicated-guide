@@ -1,0 +1,19 @@
+# Cloudflare response headers. The build appends its own immutable Cache-Control
+# rule for /_astro/* to this file, so leave that path alone here.
+
+/*
+  # Stop browsers guessing a file's type from its contents.
+  X-Content-Type-Options: nosniff
+  # Send the full URL to ourselves, only the origin to other sites.
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Nothing here needs to be embedded in someone else's page.
+  X-Frame-Options: DENY
+  # Features the site never uses.
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
+  # One year of HTTPS-only. No `preload` on purpose: that is a one-way door,
+  # submitted separately at hstspreload.org once you are sure about every subdomain.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# The feed is fetched repeatedly by readers; let them cache it briefly.
+/rss.xml
+  Cache-Control: public, max-age=3600

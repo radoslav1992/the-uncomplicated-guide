@@ -18,24 +18,38 @@ const price = formatPrice(guide.price, guide.currency);
 const others = upcomingGuides.filter((g) => g.slug !== guide.slug);
 const metaLine = [guide.pages && `${guide.pages} pages`, 'PDF', guide.edition].filter(Boolean).join(' · ');
 
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Product',
-  name: guide.title,
-  description: guide.short,
-  image: guide.cover ? new URL(guide.cover.src, Astro.site).href : undefined,
-  brand: { '@type': 'Brand', name: site.name },
-  author: { '@type': 'Person', name: site.author.name },
-  offers: sellable
-    ? {
-        '@type': 'Offer',
-        price: (guide.price / 100).toFixed(2),
-        priceCurrency: guide.currency,
-        availability: 'https://schema.org/InStock',
-        url: new URL(Astro.url.pathname, Astro.site).href,
-      }
-    : undefined,
-};
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+const origin = (Astro.site ?? new URL(Astro.url.origin)).href.replace(/\/$/, '');
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: guide.title,
+    description: guide.short,
+    image: guide.cover ? new URL(guide.cover.src, Astro.site).href : undefined,
+    brand: { '@type': 'Brand', name: site.name },
+    author: { '@type': 'Person', name: site.author.name },
+    offers: sellable
+      ? {
+          '@type': 'Offer',
+          price: (guide.price / 100).toFixed(2),
+          priceCurrency: guide.currency,
+          availability: 'https://schema.org/InStock',
+          url: canonical,
+        }
+      : undefined,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
+      { '@type': 'ListItem', position: 2, name: 'Library', item: `${origin}/guides` },
+      { '@type': 'ListItem', position: 3, name: guide.title, item: canonical },
+    ],
+  },
+];
 ---
 
 <Base title={guide.title} description={guide.short} current="Library" image={guide.cover} jsonLd={jsonLd}>
