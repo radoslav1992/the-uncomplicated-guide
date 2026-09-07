@@ -1,0 +1,53 @@
+---
+/**
+ * A rating shown as five stars. Read-only — the input version lives in ReviewForm.
+ */
+interface Props {
+  rating: number;
+  /** Text after the stars, e.g. "4.7 from 12 reviews". */
+  label?: string;
+  size?: 'sm' | 'md';
+}
+const { rating, label, size = 'md' } = Astro.props;
+const rounded = Math.round(rating);
+---
+
+<span class:list={['rating', size]}>
+  <span class="stars" role="img" aria-label={`${rating.toFixed(1)} out of 5`}>
+    {[1, 2, 3, 4, 5].map((i) => <span class:list={['star', { on: i <= rounded }]}>★</span>)}
+  </span>
+  {label && <span class="label">{label}</span>}
+</span>
+
+<style>
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stars {
+    display: inline-flex;
+    gap: 1px;
+    letter-spacing: 0.02em;
+  }
+  .star {
+    color: var(--border-2);
+    line-height: 1;
+  }
+  .star.on {
+    color: var(--accent);
+  }
+  .md .stars {
+    font-size: 17px;
+  }
+  .sm .stars {
+    font-size: 14px;
+  }
+  .label {
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .sm .label {
+    font-size: 13px;
+  }
+</style>

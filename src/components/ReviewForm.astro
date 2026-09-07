@@ -1,0 +1,209 @@
+---
+/**
+ * Leave or edit a review. Shown on the account page under each guide the person
+ * bought. Radio buttons rather than a JavaScript star widget, so it works without
+ * scripting and is reachable from the keyboard.
+ */
+import type { Guide } from '../data/guides';
+import type { Review } from '../lib/reviews';
+import { MAX_BODY, MAX_NAME } from '../lib/reviews';
+
+interface Props {
+  guide: Guide;
+  review?: Review;
+}
+const { guide, review } = Astro.props;
+const id = `rv-${guide.slug}`;
+const labels = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
+---
+
+<form method="post" action="/api/reviews/submit" class="review-form">
+  <input type="hidden" name="guide" value={guide.slug} />
+
+  <fieldset class="rating-field">
+    <legend>Your rating</legend>
+    <div class="stars">
+      {
+        [1, 2, 3, 4, 5].map((n) => (
+          <span class="opt">
+            <input
+              type="radio"
+              name="rating"
+              id={`${id}-${n}`}
+              value={n}
+              required
+              checked={review?.rating === n}
+            />
+            <label for={`${id}-${n}`} title={`${n} — ${labels[n - 1]}`}>
+              <span aria-hidden="true">★</span>
+              <span class="visually-hidden">
+                {n} {n === 1 ? 'star' : 'stars'} — {labels[n - 1]}
+              </span>
+            </label>
+          </span>
+        ))
+      }
+    </div>
+  </fieldset>
+
+  <label class="field">
+    <span class="lbl">Your review <span class="opt-tag">optional</span></span>
+    <textarea
+      class="input"
+      name="body"
+      rows="4"
+      maxlength={MAX_BODY}
+      placeholder="What did it help you do? What was missing?">{review?.body ?? ''}</textarea>
+  </label>
+
+  <label class="field">
+    <span class="lbl">Name shown <span class="opt-tag">optional</span></span>
+    <input
+      class="input"
+      type="text"
+      name="display_name"
+      maxlength={MAX_NAME}
+      value={review?.display_name ?? ''}
+      placeholder="Leave empty to appear as “Verified buyer”"
+    />
+  </label>
+
+  <div class="actions">
+    <button type="submit" class="btn btn-accent sm">{review ? 'Update review' : 'Publish review'}</button>
+    {
+      review && (
+        <button type="submit" name="action" value="delete" class="link-btn" formnovalidate>
+          Remove
+        </button>
+      )
+    }
+  </div>
+
+  <p class="fine">
+    Your email is never shown. Reviews appear on the guide page as soon as you publish, and only
+    people who bought the guide can leave one.
+  </p>
+</form>
+
+<style>
+  .review-form {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .rating-field {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 6px;
+  }
+
+  legend,
+  .lbl {
+    padding: 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-3);
+  }
+
+  .opt-tag {
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  /* Stars fill left-to-right on hover using the sibling order, reversed in the DOM
+     is not needed because each label styles itself and its preceding siblings. */
+  .stars {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    gap: 2px;
+  }
+
+  .opt input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+  }
+
+  .opt label {
+    display: block;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--border-2);
+    cursor: pointer;
+    padding: 2px;
+    transition: color 0.12s ease;
+  }
+
+  /* The checked star and everything after it in the reversed row (i.e. lower ratings). */
+  .opt input:checked ~ label,
+  .opt:has(input:checked) ~ .opt label,
+  .opt:has(input:checked) label {
+    color: var(--accent);
+  }
+
+  .stars:hover .opt label {
+    color: var(--border-2);
+  }
+
+  .opt:hover label,
+  .opt:hover ~ .opt label {
+    color: var(--accent);
+  }
+
+  .opt input:focus-visible + label {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .field {
+    display: grid;
+    gap: 6px;
+  }
+
+  .input {
+    font-size: 15px;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn.sm {
+    padding: 11px 18px;
+    font-size: 14.5px;
+  }
+
+  .link-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: var(--text-2);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .link-btn:hover {
+    color: var(--accent);
+  }
+
+  .fine {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+    margin: 0;
+  }
+</style>

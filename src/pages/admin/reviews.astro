@@ -1,0 +1,167 @@
+---
+/**
+ * Review moderation. Same ADMIN_TOKEN gate as the newsletter page.
+ *
+ * Hiding is for spam, abuse or personal data only. Hiding a review because it is
+ * critical is a banned commercial practice under EU consumer rules, and every hidden
+ * row keeps the reason so the decision stays auditable.
+ */
+import { env } from 'cloudflare:workers';
+import Base from '../../layouts/Base.astro';
+import StarRating from '../../components/StarRating.astro';
+import { getGuide } from '../../data/guides';
+import { formatDate, str } from '../../lib/http';
+import { sign } from '../../lib/tokens';
+import { listAllReviews, reviewerName, setHidden } from '../../lib/reviews';
+
+export const prerender = false;
+Astro.response.headers.set('cache-control', 'private, no-store');
+
+const configured = Boolean(env.ADMIN_TOKEN);
+let authed = false;
+let notice = '';
+let error = '';
+
+const form = Astro.request.method === 'POST' ? await Astro.request.formData().catch(() => null) : null;
+const token = str(form?.get('token') ?? null, 500);
+if (configured && token) {
+  // Constant-time compare through HMAC of both values.
+  const a = await sign(env.ADMIN_TOKEN!, token);
+  const b = await sign(env.ADMIN_TOKEN!, env.ADMIN_TOKEN!);
+  authed = a === b;
+  if (!authed) error = 'Wrong token.';
+}
+
+if (authed && form) {
+  const action = str(form.get('action'), 10);
+  const id = Number.parseInt(str(form.get('id'), 12), 10);
+  if (Number.isInteger(id) && (action === 'hide' || action === 'show')) {
+    await setHidden(env, id, action === 'hide', str(form.get('reason'), 200));
+    notice = action === 'hide' ? `Review #${id} hidden.` : `Review #${id} published again.`;
+  }
+}
+
+const reviews = authed ? await listAllReviews(env) : [];
+const visible = reviews.filter((r) => !r.hidden_at).length;
+---
+
+<Base title="Review moderation" noindex current="">
+  <div class="container wrap">
+    <p class="eyebrow">Admin</p>
+    <h1 class="display">Reviews</h1>
+
+    {!configured && <p class="notice-error">ADMIN_TOKEN is not set. Add it as a secret to use this page.</p>}
+    {error && <p class="notice-error" role="alert">{error}</p>}
+    {notice && <p class="notice-ok" role="status">{notice}</p>}
+
+    {
+      configured && !authed ? (
+        <form method="post" class="card gate">
+          <label class="field">
+            Admin token
+            <input class="input" type="password" name="token" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="btn btn-dark">Open</button>
+        </form>
+      ) : configured && authed ? (
+        <Fragment>
+          <p class="small count">
+            {reviews.length} total · {visible} published · {reviews.length - visible} hidden
+          </p>
+
+          {reviews.length === 0 && <p class="lead">No reviews yet.</p>}
+
+          <ul class="list">
+            {reviews.map((r) => (
+              <li class:list={['row', { hidden: r.hidden_at }]}>
+                <div class="meta">
+                  <StarRating rating={r.rating} size="sm" />
+                  <span class="who">{reviewerName(r)}</span>
+                  <span class="mono">{r.email}</span>
+                  <span>{getGuide(r.guide)?.title ?? r.guide}</span>
+                  <time datetime={r.created_at}>{formatDate(r.created_at)}</time>
+                  {r.hidden_at && <span class="flag">Hidden — {r.hidden_reason}</span>}
+                </div>
+                {r.body && <p class="body">{r.body}</p>}
+                <form method="post" class="act">
+                  <input type="hidden" name="token" value={token} />
+                  <input type="hidden" name="id" value={r.id} />
+                  {r.hidden_at ? (
+                    <button type="submit" name="action" value="show" class="btn btn-outline xs">
+                      Publish again
+                    </button>
+                  ) : (
+                    <Fragment>
+                      <input
+                        class="input reason"
+                        type="text"
+                        name="reason"
+                        placeholder="Reason (spam, abuse, personal data)"
+                        required
+                      />
+                      <button type="submit" name="action" value="hide" class="btn btn-outline xs">
+                        Hide
+                      </button>
+                    </Fragment>
+                  )}
+                </form>
+              </li>
+            ))}
+          </ul>
+
+          <p class="small policy">
+            Hide only spam, abuse or personal data. Hiding criticism is prohibited under EU consumer
+            rules, and the site tells readers that reviews are published as written.
+          </p>
+        </Fragment>
+      ) : null
+    }
+  </div>
+</Base>
+
+<style>
+  .wrap { padding-top: 64px; padding-bottom: 96px; }
+  h1 { font-size: clamp(30px, 5vw, 44px); letter-spacing: -0.035em; margin: 12px 0 20px; }
+  .gate { max-width: 420px; display: grid; gap: 14px; }
+  .gate .btn { justify-self: start; }
+  .count { margin: 0 0 20px; }
+  .list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .row {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 18px 20px;
+    display: grid;
+    gap: 10px;
+  }
+  .row.hidden { opacity: 0.62; border-style: dashed; }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+  .who { font-weight: 600; color: var(--ink); font-size: 15px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; }
+  .flag {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .body {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0;
+    white-space: pre-line;
+    max-width: 70ch;
+  }
+  .act { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .reason { max-width: 340px; font-size: 14px; padding: 9px 12px; }
+  .btn.xs { padding: 9px 16px; font-size: 13.5px; }
+  .policy { margin-top: 24px; max-width: 64ch; }
+</style>

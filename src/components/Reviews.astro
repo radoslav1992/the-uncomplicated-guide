@@ -1,0 +1,209 @@
+---
+/**
+ * The reviews section on a guide page: the average, the star spread, and the reviews
+ * themselves. Renders nothing when there are none — an empty "no reviews yet" block
+ * on a sales page does more harm than leaving it out.
+ *
+ * Used with `server:defer`, so it renders per request while the guide page around it
+ * stays prerendered. That keeps a new review visible immediately instead of waiting
+ * for the next deploy, and leaves the page's build-time image optimisation alone.
+ */
+import { env } from 'cloudflare:workers';
+import StarRating from './StarRating.astro';
+import { getSummary, listReviews, formatAverage, reviewerName, MIN_FOR_AVERAGE } from '../lib/reviews';
+import { formatDate } from '../lib/http';
+
+interface Props {
+  /** Guide slug. */
+  guide: string;
+}
+const { guide } = Astro.props;
+
+const [reviews, summary] = await Promise.all([listReviews(env, guide), getSummary(env, guide)]);
+const showAverage = summary.count >= MIN_FOR_AVERAGE;
+---
+
+{
+  reviews.length > 0 && (
+    <section class="section reviews" id="reviews">
+      <div class="container">
+        <div class="head">
+          <div>
+            <p class="eyebrow">What buyers say</p>
+            <h2 class="display">
+              {showAverage
+                ? `${formatAverage(summary.average)} out of 5`
+                : `${summary.count} ${summary.count === 1 ? 'review' : 'reviews'}`}
+            </h2>
+            {showAverage && (
+              <p class="sub">
+                <StarRating rating={summary.average} label={`from ${summary.count} verified buyers`} />
+              </p>
+            )}
+          </div>
+
+          {showAverage && (
+            <ul class="spread" aria-label="Ratings breakdown">
+              {[5, 4, 3, 2, 1].map((n) => {
+                const count = summary.spread[n - 1];
+                const pct = summary.count ? Math.round((count / summary.count) * 100) : 0;
+                return (
+                  <li>
+                    <span class="n">{n}★</span>
+                    <span class="bar" aria-hidden="true">
+                      <span class="fill" style={`width: ${pct}%`} />
+                    </span>
+                    <span class="c">{count}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <ol class="list">
+          {reviews.map((r) => (
+            <li class="review">
+              <div class="meta">
+                <StarRating rating={r.rating} size="sm" />
+                <span class="who">{reviewerName(r)}</span>
+                <span class="badge">Verified buyer</span>
+                <time datetime={r.created_at}>{formatDate(r.created_at)}</time>
+              </div>
+              {r.body && <p class="body">{r.body}</p>}
+            </li>
+          ))}
+        </ol>
+
+        <p class="policy">
+          Only people who bought this guide can review it, and reviews are published as written.
+          Nothing is removed for being critical — see the <a href="/terms">terms of sale</a>.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .reviews {
+    border-top: 1px solid var(--border);
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 28px;
+    padding-bottom: 24px;
+  }
+
+  .head h2 {
+    font-size: clamp(24px, 3.2vw, 34px);
+    letter-spacing: -0.035em;
+    margin: 12px 0 0;
+  }
+
+  .sub {
+    margin: 10px 0 0;
+  }
+
+  .spread {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    min-width: 210px;
+  }
+
+  .spread li {
+    display: grid;
+    grid-template-columns: 28px 1fr 22px;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .spread .bar {
+    height: 6px;
+    background: var(--bg-chip);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .spread .fill {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .spread .c {
+    text-align: right;
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .review {
+    padding: 22px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+
+  .who {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 15px;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    background: var(--bg-chip);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+
+  .body {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text);
+    margin: 12px 0 0;
+    max-width: 62ch;
+    white-space: pre-line;
+  }
+
+  .policy {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 20px 0 0;
+    max-width: 60ch;
+  }
+
+  @media (max-width: 640px) {
+    .spread {
+      width: 100%;
+    }
+  }
+</style>

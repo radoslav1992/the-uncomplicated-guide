@@ -5,6 +5,7 @@ import BuyButton from '../../components/BuyButton.astro';
 import PartsList from '../../components/PartsList.astro';
 import WhoFor from '../../components/WhoFor.astro';
 import SignupForm from '../../components/SignupForm.astro';
+import Reviews from '../../components/Reviews.astro';
 import { site, formatPrice } from '../../data/site';
 import { guides, upcomingGuides } from '../../data/guides';
 
@@ -168,6 +169,9 @@ const jsonLd = [
       </section>
     )
   }
+
+  {/* Rendered per request so a new review shows up without waiting for a deploy. */}
+  {sellable && <Reviews guide={guide.slug} server:defer />}
 
   {
     others.length > 0 && (
