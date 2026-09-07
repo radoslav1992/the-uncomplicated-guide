@@ -91,30 +91,6 @@ export async function getSummary(env: Env, guide: string): Promise<RatingSummary
   return { count, average: count ? total / count : 0, spread };
 }
 
-/** Summaries for several guides at once, for the library listing. */
-export async function getSummaries(env: Env, guides: string[]): Promise<Map<string, RatingSummary>> {
-  const out = new Map<string, RatingSummary>();
-  if (!guides.length) return out;
-  const placeholders = guides.map((_, i) => `?${i + 1}`).join(', ');
-  const r = await env.DB.prepare(
-    `SELECT guide, rating, COUNT(*) AS n FROM reviews
-     WHERE hidden_at IS NULL AND guide IN (${placeholders}) GROUP BY guide, rating`,
-  )
-    .bind(...guides)
-    .all<{ guide: string; rating: number; n: number }>();
-
-  for (const guide of guides) out.set(guide, { count: 0, average: 0, spread: [0, 0, 0, 0, 0] });
-  const totals = new Map<string, number>();
-  for (const { guide, rating, n } of r.results) {
-    const s = out.get(guide)!;
-    s.spread[rating - 1] = n;
-    s.count += n;
-    totals.set(guide, (totals.get(guide) ?? 0) + rating * n);
-  }
-  for (const [guide, s] of out) s.average = s.count ? totals.get(guide)! / s.count : 0;
-  return out;
-}
-
 /**
  * Save a buyer's review, replacing their previous one for that guide.
  * Returns null when the address has not bought the guide.

@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import GuideCover from '../../components/GuideCover.astro';
+import GuideRating from '../../components/GuideRating.astro';
 import { formatPrice } from '../../data/site';
 import { availableGuides, upcomingGuides } from '../../data/guides';
 
@@ -37,6 +38,7 @@ const countLabel = `${availableGuides.length} guide${availableGuides.length === 
               <div class="meta">
                 <span class="price-badge sm">{formatPrice(g.price, g.currency)}</span>
                 <span class="small">{g.edition} · {g.pages} pages · PDF</span>
+                <GuideRating guide={g.slug} server:defer />
               </div>
               <h2 class="display">{g.title}</h2>
               <p class="sub">{g.subtitle}</p>
