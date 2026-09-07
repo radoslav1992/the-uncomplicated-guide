@@ -8,8 +8,11 @@ import Base from '../layouts/Base.astro';
 import GuideCover from '../components/GuideCover.astro';
 import { getGuide } from '../data/guides';
 import { site, formatPrice } from '../data/site';
+import ReviewForm from '../components/ReviewForm.astro';
+import StarRating from '../components/StarRating.astro';
 import { getSessionEmail } from '../lib/session';
 import { listPurchasesByEmail, linkExpired, reissueToken } from '../lib/purchases';
+import { getOwnReviews } from '../lib/reviews';
 import { formatDate } from '../lib/http';
 
 export const prerender = false;
@@ -23,6 +26,12 @@ const error = q.get('error');
 // Make sure every link on this page is valid.
 let purchases = email ? await listPurchasesByEmail(env, email) : [];
 purchases = await Promise.all(purchases.map((p) => (linkExpired(p) ? reissueToken(env, p) : p)));
+
+const reviews = email ? await getOwnReviews(env, email) : new Map();
+const savedReview = q.get('saved') === '1';
+const removedReview = q.get('removed') === '1';
+// Reopen the review panel the person just used, so the page comes back where they left it.
+const reviewOpen = savedReview || removedReview ? (purchases[0]?.guide ?? '') : '';
 ---
 
 <Base title="Your guides" noindex current="">
@@ -61,19 +70,44 @@ purchases = await Promise.all(purchases.map((p) => (linkExpired(p) ? reissueToke
             <h1 class="display">{purchases.length ? 'Here they are.' : 'Nothing here yet.'}</h1>
             <p class="lead">Signed in as <strong>{email}</strong>.</p>
             {error && <p class="notice-error" role="alert">{error}</p>}
+            {savedReview && (
+              <p class="notice-ok" role="status" id="reviews">
+                Thank you — your review is live on the guide page.
+              </p>
+            )}
+            {removedReview && (
+              <p class="notice-ok" role="status" id="reviews">Your review has been removed.</p>
+            )}
 
             {purchases.length > 0 ? (
               <ul class="guides">
                 {purchases.map((p) => {
                   const g = getGuide(p.guide);
+                  const review = reviews.get(p.guide);
                   return (
                     <li class="card guide">
-                      {g && <GuideCover guide={g} size="shelf" />}
-                      <div>
-                        <p class="t">{g?.title ?? p.guide}</p>
-                        <p class="s">Bought {formatDate(p.created_at)} · {formatPrice(p.amount_total, p.currency)}</p>
-                        <a href={`/download/${p.token}`} class="btn btn-accent sm" download>Download →</a>
+                      <div class="top">
+                        {g && <GuideCover guide={g} size="shelf" />}
+                        <div>
+                          <p class="t">{g?.title ?? p.guide}</p>
+                          <p class="s">Bought {formatDate(p.created_at)} · {formatPrice(p.amount_total, p.currency)}</p>
+                          <a href={`/download/${p.token}`} class="btn btn-accent sm" download>Download →</a>
+                        </div>
                       </div>
+                      {g && (
+                        <details class="review-block" open={reviewOpen === p.guide}>
+                          <summary>
+                            {review ? (
+                              <span>
+                                Your review: <StarRating rating={review.rating} size="sm" /> — edit it
+                              </span>
+                            ) : (
+                              <span>Leave a review</span>
+                            )}
+                          </summary>
+                          <ReviewForm guide={g} review={review} />
+                        </details>
+                      )}
                     </li>
                   );
                 })}
@@ -111,7 +145,24 @@ purchases = await Promise.all(purchases.map((p) => (linkExpired(p) ? reissueToke
   .signin .small { margin-top: 18px; }
   .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: start; }
   .guides { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
-  .guide { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; padding: 18px 22px; }
+  .guide { display: block; padding: 18px 22px; }
+  .guide .top { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
+  .review-block { margin-top: 4px; }
+  .review-block > summary {
+    cursor: pointer;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2);
+    padding: 8px 0 2px;
+  }
+  .review-block > summary::-webkit-details-marker { display: none; }
+  .review-block > summary::before { content: '＋'; color: var(--accent); font-weight: 700; }
+  .review-block[open] > summary::before { content: '－'; }
+  .review-block > summary:hover { color: var(--ink); }
   .guide :global(.cover-wrap.shelf .cover) { width: 84px; }
   .guide .t { margin: 0; font-weight: 600; font-size: 17px; }
   .guide .s { margin: 4px 0 12px; font-size: 13.5px; color: var(--muted); }
@@ -127,5 +178,5 @@ purchases = await Promise.all(purchases.map((p) => (linkExpired(p) ? reissueToke
     .wrap { padding-top: 48px; padding-bottom: 64px; }
     aside { padding-top: 0; }
   }
-  @media (max-width: 520px) { .guide { grid-template-columns: 1fr; } }
+  @media (max-width: 520px) { .guide .top { grid-template-columns: 1fr; } }
 </style>

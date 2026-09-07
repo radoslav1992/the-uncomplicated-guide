@@ -109,8 +109,7 @@ export const guides: Guide[] = [
     fileKey: '247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf',
     fileName: '24-7-AI-Assistants-EN-v1.1.pdf',
     paymentLink: 'https://buy.stripe.com/3cI9AV7Tl5nw072gM81Nu01',
-    // TODO: add the prod_… id of the product behind the Payment Link above.
-    stripeIds: [],
+    stripeIds: ['prod_VDCE0pSfyMOATJ'],
   },
   {
     slug: 'vibe-coding-for-non-developers',

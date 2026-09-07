@@ -18,10 +18,11 @@ src/
   content.config.ts     ← the blog's frontmatter schema
   pages/                ← / , /guides, /guides/[slug], /blog, /blog/[slug], /account, /newsletter,
                           /contact, legal pages, /thank-you, /download/[token], /admin/newsletter,
-                          /rss.xml
+                          /admin/reviews, /rss.xml
   pages/api/            ← checkout, stripe/webhook, access/{request,verify,logout},
-                          newsletter/{subscribe,confirm,unsubscribe}, contact, resend-link
-  lib/                  ← db (D1), purchases, newsletter, session, stripe, email, tokens
+                          newsletter/{subscribe,confirm,unsubscribe}, reviews/submit, contact,
+                          resend-link
+  lib/                  ← db (D1), purchases, reviews, newsletter, session, stripe, email, tokens
   worker.ts             ← Worker entry: Astro fetch handler, `email()` for Email Routing,
                           `scheduled()` for newsletter delivery
 migrations/             ← D1 schema (applied by the deploy command)
@@ -86,6 +87,22 @@ Sessions that match neither are ignored (the Stripe account is shared with kova.
 fresh link. Sign-in is passwordless: `/api/access/request` emails a 20-minute magic link,
 `/api/access/verify` turns it into a signed 30-day cookie. Returning from Stripe Checkout signs the
 buyer in automatically.
+
+**Reviews.** Only people who bought a guide can review it. The form lives on `/account`, under
+each purchased guide, and `/api/reviews/submit` re-checks the `purchases` table before writing the
+row, so a forged POST cannot review something the address never paid for. One review per buyer per
+guide, editable and deletable by its author. `/admin/reviews` (same `ADMIN_TOKEN` gate) can hide a
+review, and demands a reason that is stored with the row — hiding is for spam, abuse or personal
+data only, since suppressing criticism is a banned practice under the EU Omnibus directive.
+`/terms#reviews` states the verification method publicly, as that directive requires.
+
+The guide page stays prerendered: `Reviews.astro` is rendered as an [Astro server
+island](https://docs.astro.build/en/guides/server-islands/) (`server:defer`), so the HTML is static
+and cached while the ratings are always current. There is deliberately no `aggregateRating`
+structured data — the island's content is not in the initial HTML that crawlers parse, and the D1
+database reachable at build time is not the production one, so the stars would be markup no search
+engine could verify. The average is shown only from three reviews on, so a single rating never
+becomes "5.0 out of 5".
 
 **Newsletter.** Every signup form (footer, home, guide pages, `/newsletter`) posts to
 `/api/newsletter/subscribe`. Double opt-in: the address gets a signed confirmation link and only
@@ -169,9 +186,12 @@ Mostly automatic, but here is where each piece lives.
   one needs per-response nonces, which static assets cannot provide, and a blanket
   `unsafe-inline` policy would be security theatre.
 
-## Data (D1, see `migrations/0001_init.sql`)
+## Data (D1, see `migrations/`)
 
 - `purchases` — one row per paid Checkout Session: email, guide, amount, current download token.
 - `downloads` — every file download, for support and refund questions.
 - `signups` — newsletter subscribers (double opt-in: `confirmed_at`) with the guides they asked about.
 - `newsletters`, `newsletter_recipients` — sent letters and the per-address delivery log.
+- `reviews` — one row per buyer per guide (`0003_reviews.sql`): rating 1–5 enforced by a `CHECK`,
+  optional text and display name, and `hidden_at`/`hidden_reason` for moderation. The unique index
+  on `(guide, email)` is what makes a second review an edit rather than a duplicate.
