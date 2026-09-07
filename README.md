@@ -143,6 +143,32 @@ field fails the build rather than shipping broken.
 
 The feed lives at `/rss.xml` and is linked from the `<head>` of every page.
 
+## SEO and headers
+
+Mostly automatic, but here is where each piece lives.
+
+- **Sitemap** — `@astrojs/sitemap` in `astro.config.mjs`. Private and transactional pages
+  (`/account`, `/admin/*`, `/thank-you`, `/download/*`, `/api/*`) are filtered out; the rest get a
+  `changefreq` and `priority` by section. Blog posts carry a real `lastmod`, read from their
+  frontmatter — no other page does, because stamping every URL with the build time is what teaches
+  search engines to ignore the field.
+- **robots.txt** — `public/robots.txt`. Disallows the same private paths and points at the sitemap.
+  Those pages also send `noindex` in the page itself, so they are covered twice.
+- **Structured data** — `WebSite`, `Person` and `FAQPage` on the home page, `Product` plus
+  `BreadcrumbList` on guide pages, `BlogPosting` plus `BreadcrumbList` on posts. The FAQ markup is
+  generated from the same array the page renders; keep it that way, as marking up answers that are
+  not visible on the page is against Google's guidelines.
+- **Social cards** — set in `src/layouts/Base.astro`. Blog posts switch to `og:type=article` with
+  published/modified times and tags. The Twitter card type follows the image shape: the covers are
+  portrait and the fallback is a square logo, so pages use `summary` rather than having a wide card
+  crop them to an unreadable slice. Landscape art would automatically get `summary_large_image` — a
+  purpose-made 1200×630 card per page is the obvious next improvement here.
+- **Response headers** — `public/_headers`. Security headers for everything and a one-hour cache for
+  the feed. The build appends its own immutable `Cache-Control` rule for `/_astro/*` to this file, so
+  do not add a rule for that path by hand. There is deliberately no Content-Security-Policy: a useful
+  one needs per-response nonces, which static assets cannot provide, and a blanket
+  `unsafe-inline` policy would be security theatre.
+
 ## Data (D1, see `migrations/0001_init.sql`)
 
 - `purchases` — one row per paid Checkout Session: email, guide, amount, current download token.

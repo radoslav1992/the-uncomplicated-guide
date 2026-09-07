@@ -59,6 +59,18 @@ const jsonLd = [
     jobTitle: 'Software and AI engineer',
     url: new URL('/#author', Astro.site).href,
   },
+  // The questions below are on the page for readers; this is the same set for search
+  // results. Keep the two in step — marking up answers that are not visible is against
+  // Google's structured-data guidelines.
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
 ];
 ---
 
