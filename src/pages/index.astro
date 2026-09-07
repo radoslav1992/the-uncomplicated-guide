@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import GuideCover from '../components/GuideCover.astro';
+import GuideRating from '../components/GuideRating.astro';
 import BuyButton from '../components/BuyButton.astro';
 import PartsList from '../components/PartsList.astro';
 import WhoFor from '../components/WhoFor.astro';
@@ -154,6 +155,7 @@ const jsonLd = [
         <div class="meta">
           <span class="price-badge">{price}</span>
           <span class="small">{guide.pages} pages · PDF · {guide.edition.replace(' — ', ', ')}</span>
+          <GuideRating guide={guide.slug} server:defer />
         </div>
         <div class="actions">
           <BuyButton guide={guide} label="Buy the guide →" />

@@ -1,0 +1,31 @@
+---
+/**
+ * The rating on a listing card: stars, the average and the review count.
+ *
+ * Used with `server:defer` so a listing page stays prerendered while the numbers
+ * stay current. Renders nothing below `MIN_FOR_AVERAGE`, matching the guide page —
+ * a lone five-star card would be an average of one person.
+ */
+import { env } from 'cloudflare:workers';
+import StarRating from './StarRating.astro';
+import { getSummary, formatAverage, MIN_FOR_AVERAGE } from '../lib/reviews';
+
+interface Props {
+  /** Guide slug. */
+  guide: string;
+  size?: 'sm' | 'md';
+}
+const { guide, size = 'sm' } = Astro.props;
+
+const summary = await getSummary(env, guide);
+---
+
+{
+  summary.count >= MIN_FOR_AVERAGE && (
+    <StarRating
+      rating={summary.average}
+      size={size}
+      label={`${formatAverage(summary.average)} · ${summary.count} reviews`}
+    />
+  )
+}

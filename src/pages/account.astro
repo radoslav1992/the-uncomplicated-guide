@@ -32,6 +32,10 @@ const savedReview = q.get('saved') === '1';
 const removedReview = q.get('removed') === '1';
 // Reopen the review panel the person just used, so the page comes back where they left it.
 const reviewOpen = savedReview || removedReview ? (purchases[0]?.guide ?? '') : '';
+// `?review=1#reviews` is where the guide page and the thank-you page send a buyer who
+// came here to review something: land on the list with the forms already open, since a
+// collapsed panel behind an anchor looks like the page ignored the link.
+const openReviews = q.get('review') === '1';
 ---
 
 <Base title="Your guides" noindex current="">
@@ -65,18 +69,18 @@ const reviewOpen = savedReview || removedReview ? (purchases[0]?.guide ?? '') : 
         </div>
       ) : (
         <div class="grid">
-          <div>
+          <div id="reviews">
             <p class="eyebrow">Your guides</p>
             <h1 class="display">{purchases.length ? 'Here they are.' : 'Nothing here yet.'}</h1>
             <p class="lead">Signed in as <strong>{email}</strong>.</p>
             {error && <p class="notice-error" role="alert">{error}</p>}
             {savedReview && (
-              <p class="notice-ok" role="status" id="reviews">
+              <p class="notice-ok" role="status">
                 Thank you — your review is live on the guide page.
               </p>
             )}
             {removedReview && (
-              <p class="notice-ok" role="status" id="reviews">Your review has been removed.</p>
+              <p class="notice-ok" role="status">Your review has been removed.</p>
             )}
 
             {purchases.length > 0 ? (
@@ -95,7 +99,7 @@ const reviewOpen = savedReview || removedReview ? (purchases[0]?.guide ?? '') : 
                         </div>
                       </div>
                       {g && (
-                        <details class="review-block" open={reviewOpen === p.guide}>
+                        <details class="review-block" open={openReviews || reviewOpen === p.guide}>
                           <summary>
                             {review ? (
                               <span>
