@@ -1,4 +1,3 @@
--- Operational state; preserve existing purchases and reviews for reconciliation.
 ALTER TABLE purchases ADD COLUMN verified_at TEXT;
 ALTER TABLE purchases ADD COLUMN livemode INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE purchases ADD COLUMN consent_at TEXT;
@@ -18,5 +17,4 @@ ALTER TABLE newsletter_recipients ADD COLUMN lease_until INTEGER NOT NULL DEFAUL
 ALTER TABLE newsletter_recipients ADD COLUMN lease_id TEXT;
 CREATE INDEX delivery_jobs_pending ON delivery_jobs(completed_at, next_attempt_at);
 
--- A full refund can arrive before checkout.session.completed.
 CREATE TABLE refunded_payments (payment_intent TEXT PRIMARY KEY, refunded_at TEXT NOT NULL);
