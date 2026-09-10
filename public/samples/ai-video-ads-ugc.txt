@@ -1,0 +1,137 @@
+Original page 10
+
+Video map
+Describe the most common video on one sheet. Do not write the script yet; describe the beats and
+what each must achieve. Short-form platforms reward the same shape: a hook that earns three
+seconds, a body that earns twenty, and a close that earns the tap.
+One-page creative brief
+This brief is the contract between the business and the production pipeline. It does not need to be
+long, but every field must be filled by someone who knows the product. Show it to the person who
+answers customer questions – they know the real objections the owner often forgets.
+Field
+Example
+Goal
+Leads for a teeth-whitening offer at a dental clinic.
+Audience
+Women 25-40, city, scrolls Reels in the evening, price-sensitive.
+Offer
+Free consultation plus 20% off the first session this month.
+Approved claims
+“Visible result after one session for most patients” – not “guaranteed white teeth”.
+Forbidden claims
+Medical outcomes, comparisons to named competitors, “no pain”.
+Proof available
+Number of sessions done, before/after photos with signed release.
+Format
+9:16, 25-35 s, captions on, sound on, avatar presenter with product B-roll.
+Success
+Hook rate above 35% and cost per lead below the current creative within 72 h.
+Don't start with “it can do everything”
+The first system should produce one format reliably: one platform, one length, one presenter. After
+20-30 published variants you will know which second format actually brings value.
+4. Platforms, formats and the first three
+seconds
+The same clip is not “fine everywhere”. Each platform has its own frame, safe zone and
+rhythm.
+Hook (0-3 s): a pattern interrupt, a question or a bold-but-true statement addressed to the target
+viewer.
+1
+Problem (3-8 s): the pain in the viewer's words, not the brand's.
+2
+Solution (8-18 s): what the product does, shown or named concretely.
+3
+Proof (18-25 s): a demonstrable fact, a number you can back up, a before/after that complies with
+policy.
+4
+Offer and CTA (25-30 s): one action, one place to do it, one reason to do it now.
+5
+Disclosure: the AI label, sponsorship tag or “dramatised” note the platform or law requires.
+6
+3. Define the result before the tools
+10
+
+
+Original page 20
+
+    05_exports/      2026-09_whitening_hookB_v2_9x16.mp4
+    99_report/       2026-09_report.pdf
+name = {campaign}_{hook}_{version}_{stage}.{ext}
+Step by step for one campaign
+Checkpoints between tools
+Hand-off
+Check before moving on
+Brief →
+Script
+Every claim in the script appears in the approved list; length within the time budget.
+Script →
+Audio
+Names, numbers, dates read correctly; no audible tags; pace 2.3-2.7 words/s; file named with
+version.
+Audio →
+Avatar
+Same audio version as approved; lip-sync tight at the start and end; hands and background clean.
+Avatar → Edit
+Captions match the audio word for word; safe zone respected; CTA card matches the offer; music
+licensed for the platform.
+Edit →
+Publish
+Correct ratio and resolution; AI label set where required; ad-account naming matches the file
+name.
+Do not re-generate upstream after downstream work is done unless you re-run everything below it. A
+changed word in the audio means a new avatar render and a new edit; that is cheap in credits but
+expensive in confusion if the versions are not tracked.
+10. Variations, testing and what to
+measure
+The pipeline's real value is not one video – it is ten comparable videos and a decision.
+Creative testing is where the AI chain pays for itself. A human shoot gives you one or two versions;
+the pipeline gives you a matrix. But a matrix only works if you change one variable at a time and read
+the right numbers. The platforms agree on the basics: test 3-5 creatives per ad group, judge after a
+short window and refresh when delivery declines.
+Fill the one-page brief and the approved-claims list; get written sign-off.
+1
+Run the scripting prompt; pick 3-5 hooks and one body; get sign-off on claims and disclosure.
+2
+Prepare the TTS text: numbers in words, pronunciation dictionary for the brand, tags or breaks.
+3
+Generate audio for each hook plus the shared body; listen to every file end to end.
+4
+Render avatar clips in HeyGen from the approved audio; inspect at 100% zoom on a phone.
+5
+Finish in Captions with the client's locked template; export named variants.
+6
+Run the QA checklist (chapter 13) and the disclosure checklist (chapter 12).
+7
+Publish 3-5 variants; measure for 48-72 hours; keep, iterate or kill.
+8
+9. Assembling the pipeline
+20
+
+
+Original page 31
+
+A checklist does not replace judgement, but it protects against omissions in a repeatable process.
+Turn it into a task in your project tool and require a name and date next to every critical check. The
+answer “it looked fine on my laptop” is not a test.
+Demo readiness
+Pilot readiness
+Production readiness
+The brief exists and the demo script uses only approved claims.
+A stock or photo avatar is used – no real likeness without consent.
+Voice generated on a paid ElevenLabs plan; brand name pronounced correctly.
+Captions inside the safe zone; the hook works muted.
+The AI presenter label is visible.
+Three hook variants demonstrate the testing idea.
+Signed releases and consent videos on file for every real presenter.
+Claims list, forbidden list and disclosure text approved by the client's owner.
+Locked finishing template and naming convention.
+QA checklist passed on real phones for every variant.
+Platform AI labels set; music licensed for the placement.
+Ad-account access or a reporting export agreed; owner of the daily check named.
+Credits, plan limits and budget alerts monitored across all four tools.
+A fallback presenter or tool in case a twin is rejected or a service is down.
+Rights renewals and takedown procedure calendared.
+Prompt, template and settings versions traceable to published variants.
+The client knows what the system can and cannot do.
+A periodic report and an improvement loop are in place.
+20. Final checklists
+31

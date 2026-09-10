@@ -1,3 +1,4 @@
+import { allowForm } from '../../lib/rate-limit';
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { sendEmail } from '../../lib/email';
@@ -25,6 +26,7 @@ export const POST: APIRoute = async (ctx) => {
   if (!name || !email || !message) return fail('Please fill in your name, email and message.');
   if (!isEmail(email)) return fail('That email address does not look right.');
 
+  if (!(await allowForm(env, ctx.request, 'contact', email))) return formResult(ctx, false, { redirect: '/contact', error: 'Too many attempts. Please try again in ten minutes.', status: 429 });
   const ok = await verifyTurnstile(env, str(form.get('cf-turnstile-response'), 4000), ctx.clientAddress);
   if (!ok) return fail('Could not verify that you are human. Please try again.');
 
@@ -41,7 +43,7 @@ ${message}
 Reply to this email to answer ${name} directly.`;
 
   const result = await sendEmail(env, { to, subject, text, replyTo: email });
-  if (!result.ok && env.SEND_EMAIL) {
+  if (!result.ok) {
     return fail(`The message could not be sent. Please email ${to} directly.`, 502);
   }
   return formResult(ctx, true, { redirect });

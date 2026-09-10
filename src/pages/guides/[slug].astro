@@ -1,4 +1,6 @@
 ---
+import GuideSample from '../../components/GuideSample.astro';
+import Faq from '../../components/Faq.astro';
 import Base from '../../layouts/Base.astro';
 import GuideCover from '../../components/GuideCover.astro';
 import BuyButton from '../../components/BuyButton.astro';
@@ -7,7 +9,7 @@ import WhoFor from '../../components/WhoFor.astro';
 import SignupForm from '../../components/SignupForm.astro';
 import Reviews from '../../components/Reviews.astro';
 import { site, formatPrice } from '../../data/site';
-import { guides, upcomingGuides } from '../../data/guides';
+import { guides } from '../../data/guides';
 
 export function getStaticPaths() {
   return guides.map((g) => ({ params: { slug: g.slug }, props: { guide: g } }));
@@ -16,7 +18,7 @@ export function getStaticPaths() {
 const { guide } = Astro.props;
 const sellable = guide.status === 'available';
 const price = formatPrice(guide.price, guide.currency);
-const others = upcomingGuides.filter((g) => g.slug !== guide.slug);
+const others = guides.filter((g) => g.slug !== guide.slug && g.status === 'available');
 const metaLine = [guide.pages && `${guide.pages} pages`, 'PDF', guide.edition].filter(Boolean).join(' · ');
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
@@ -53,7 +55,7 @@ const jsonLd = [
 ];
 ---
 
-<Base title={guide.title} description={guide.short} current="Library" image={guide.cover} jsonLd={jsonLd}>
+<Base title={guide.title} description={guide.short} current="Library" image={sellable ? `/social/${guide.slug}.png` : undefined} jsonLd={jsonLd}>
   <section class="hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="container hero-grid">
@@ -69,7 +71,7 @@ const jsonLd = [
         <div class="cta hero-in" style="--s: 4">
           {
             sellable ? (
-              <BuyButton guide={guide} label="Buy the guide →" />
+              <Fragment><BuyButton guide={guide} /><a href="#sample" class="btn btn-outline">Read a free sample</a></Fragment>
             ) : (
               <a href="#notify" class="btn btn-accent">Tell me when it's out →</a>
             )
@@ -79,6 +81,8 @@ const jsonLd = [
       <GuideCover guide={guide} class="hero-in" />
     </div>
   </section>
+
+  {sellable && <GuideSample guide={guide} />}
 
   <section class="section-alt inside">
     <div class="container inside-grid">
@@ -96,7 +100,7 @@ const jsonLd = [
       <section class="section-dark outcomes">
         <div class="container">
           <p class="eyebrow">After the guide</p>
-          <h2 class="display">What you will be able to do that you can't today</h2>
+          <h2 class="display">What this guide helps you do</h2>
           <ul>
             {guide.outcomes.map((o, i) => (
               <li class="reveal" style={`--i: ${i}`}>
@@ -170,6 +174,13 @@ const jsonLd = [
     )
   }
 
+  {sellable && <section class="section"><div class="container"><h2 class="display">Before you buy</h2><Faq items={[
+    {q:'What is included?',a:`${guide.pages} pages in English, with the prompts, checklists, planning tables and examples described above. This is a PDF playbook. Tool subscriptions, one-to-one support and ready-to-run integrations or editable media projects are not included.`},
+    {q:'How much experience do I need?',a:guide.slug === 'ai-assistants' ? 'You should be comfortable configuring web tools. Connecting a live calendar or CRM requires API or automation experience beyond this guide.' : 'You should be comfortable using creative web tools and reviewing audio and video. Start manually; the automation chapter is a workflow outline, not an importable project.'},
+    {q:'How do downloads and updates work?',a:'Download after payment and receive the link by email. Links last seven days; recover a fresh link from My guides with your purchase email. Published updates within edition 1.x are included.'},
+    {q:'Can I ask a question or request a refund?',a:'Email hello@uncomplicatedguide.com. Our refund policy includes an additional 14-day not-as-described promise; your statutory consumer rights remain unaffected.'},
+  ]} /></div></section>}
+  {sellable && <div class="mobile-buy"><span>{price} <small>USD · PDF</small></span><BuyButton guide={guide} label="Get the guide →" /></div>}
   {/* Rendered per request so a new review shows up without waiting for a deploy. */}
   {sellable && <Reviews guide={guide.slug} server:defer />}
 
@@ -177,7 +188,7 @@ const jsonLd = [
     others.length > 0 && (
       <section class="next">
         <div class="container">
-          <h2 class="display">Coming next</h2>
+          <h2 class="display">Also in the library</h2>
           <ul>
             {others.map((g) => (
               <li>
@@ -195,6 +206,9 @@ const jsonLd = [
 </Base>
 
 <style>
+  .mobile-buy{display:none}.cta{display:flex;flex-wrap:wrap;gap:12px}
+  @media(max-width:640px){.mobile-buy{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:45;background:var(--bg);border-top:1px solid var(--border-2);padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom));align-items:center;justify-content:space-between;gap:12px}.mobile-buy>span{font-size:22px;font-weight:700}.mobile-buy small{display:block;font-size:11px;color:var(--text);font-weight:400}:global(body:has(.mobile-buy)){padding-bottom:92px}}
+
   @keyframes hero-in {
     from { opacity: 0; transform: translateY(16px); }
     to { opacity: 1; transform: none; }
@@ -435,7 +449,7 @@ const jsonLd = [
       grid-template-columns: 1fr;
     }
     .hero-grid > :global(.cover-wrap) {
-      order: -1;
+      order: 0;
     }
     .sticky {
       position: static;

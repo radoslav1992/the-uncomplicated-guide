@@ -2,45 +2,28 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { getGuide } from '../../data/guides';
 import { createCheckoutSession, stripeConfigured } from '../../lib/stripe';
-import { json, siteOrigin, str } from '../../lib/http';
-
+import { siteOrigin, str } from '../../lib/http';
+import { setOrderCookie } from '../../lib/session';
+import { signingSecret } from '../../lib/tokens';
+import { rateLimit } from '../../lib/rate-limit';
 export const prerender = false;
-
-/**
- * POST /api/checkout (guide=<slug>)
- * Creates a Stripe Checkout Session for the guide and redirects the buyer to it.
- * Without STRIPE_SECRET_KEY it falls back to the guide's Payment Link.
- */
 export const POST: APIRoute = async (ctx) => {
-  const { request, redirect } = ctx;
-  const form = await request.formData().catch(() => null);
-  const origin = siteOrigin(env, request);
+  const form = await ctx.request.formData().catch(() => null);
   const guide = getGuide(str(form?.get('guide') ?? null, 80));
-  if (!guide) return json({ ok: false, error: 'Unknown guide.' }, { status: 404 });
-  if (guide.status !== 'available') return json({ ok: false, error: 'This guide is not on sale yet.' }, { status: 409 });
-
-  if (!stripeConfigured(env)) {
-    if (guide.paymentLink) return redirect(guide.paymentLink, 303);
-    return json({ ok: false, error: 'Checkout is not configured yet. Please try again later.' }, { status: 503 });
-  }
-
+  if (!guide || guide.status !== 'available') return ctx.redirect('/guides', 303);
+  const back = `/checkout?guide=${guide.slug}`;
+  if (form?.get('digital_consent') !== 'yes') return ctx.redirect(`${back}&error=consent`, 303);
+  if (!(await rateLimit(env, 'checkout', ctx.request.headers.get('CF-Connecting-IP') || 'local', 10, 600_000))) return ctx.redirect(`${back}&error=rate`, 303);
   try {
-    const session = await createCheckoutSession(env, guide, origin);
+    signingSecret(env); // Fail before creating a payment session if order-cookie signing is unavailable.
+    if (!stripeConfigured(env)) throw new Error('Stripe is not configured');
+    const session = await createCheckoutSession(env, guide, siteOrigin(env, ctx.request), new Date().toISOString());
     if (!session.url) throw new Error('Stripe returned no checkout URL');
-    return redirect(session.url, 303);
+    await setOrderCookie(ctx, env, session.id);
+    return ctx.redirect(session.url, 303);
   } catch (err) {
-    console.error('[checkout] failed', err);
-    if (guide.paymentLink) return redirect(guide.paymentLink, 303);
-    return json({ ok: false, error: 'Could not start checkout. Please try again in a minute.' }, { status: 502 });
+    console.error('[checkout] failed', err instanceof Error ? err.message : 'unknown error');
+    return ctx.redirect(`${back}&error=unavailable`, 303);
   }
 };
-
-/** GET /api/checkout?guide=slug — a self-submitting form for plain links. */
-export const GET: APIRoute = ({ url }) => {
-  const guide = (url.searchParams.get('guide') ?? '').replace(/[^a-z0-9-]/gi, '');
-  const field = `<input type="hidden" name="guide" value="${guide}">`;
-  return new Response(
-    `<!doctype html><meta charset="utf-8"><title>Checkout</title><form id="f" method="post" action="/api/checkout">${field}<noscript><button>Continue to checkout</button></noscript></form><script>document.getElementById('f').submit()</script>`,
-    { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } },
-  );
-};
+export const GET: APIRoute = ({url, redirect}) => redirect(`/checkout?guide=${encodeURIComponent(url.searchParams.get('guide') ?? '')}`, 303);

@@ -1,5 +1,7 @@
 # The Uncomplicated Guides
 
+> Deployment changes: read [the launch checklist](docs/LAUNCH.md) before applying migration 0004 or publishing this branch.
+
 Storefront for selling PDF guides, one price per guide. Built with
 [Astro](https://astro.build) and deployed to [Cloudflare Workers](https://developers.cloudflare.com/workers/)
 (static pages + a few on-demand routes). Payments go through Stripe Checkout;

@@ -1,0 +1,16 @@
+---
+import type { Guide } from '../data/guides';
+interface Props { guide: Guide; }
+const { guide } = Astro.props;
+const pages = guide.slug === 'ai-assistants' ? [{n:9,title:'Decide if the project fits'},{n:15,title:'A prompt you can adapt'},{n:26,title:'Test before production'}] : [{n:10,title:'Define the brief'},{n:20,title:'Connect the production steps'},{n:31,title:'Check demo and pilot readiness'}];
+---
+<section id="sample" class="section section-alt"><div class="container">
+  <p class="eyebrow">Look inside · No email needed</p><h2 class="display">Real pages. Before you pay.</h2>
+  <p class="intro">Three selected pages from this edition. Open the PDF for full-size text, or read the plain-text version.</p>
+  <div class="sample-pages">{pages.map(p => <figure><a href={`/samples/${guide.slug}.pdf`} data-track="view_sample" data-guide={guide.slug} aria-label={`Read sample PDF: ${p.title}, original page ${p.n}`}><img src={`/samples/${guide.slug}-${p.n}.webp`} alt={`${p.title} — page ${p.n} from ${guide.title}`} width="893" height="1263" loading="lazy" /></a><figcaption><span>Page {p.n}</span>{p.title}</figcaption></figure>)}</div>
+  <div class="sample-actions"><a class="btn btn-outline" href={`/samples/${guide.slug}.pdf`} data-track="view_sample" data-guide={guide.slug}>Read the 3-page PDF →</a><a href={`/samples/${guide.slug}.txt`}>Plain-text sample</a></div>
+  <p class="small">Selected pages are shown with their original numbering. These are excerpts, not the complete guide.</p>
+</div></section>
+<style>
+#sample{scroll-margin-top:80px}h2{font-size:clamp(26px,3vw,38px);letter-spacing:-.035em;margin:14px 0}.intro{max-width:650px;font-size:17px;color:var(--text);line-height:1.65}.sample-pages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:28px 0}figure{margin:0;min-width:0}img{width:100%;height:auto;display:block;border:1px solid var(--border);box-shadow:0 8px 20px #16130f0d}figcaption{display:flex;flex-direction:column;gap:4px;margin-top:14px;font-weight:600;font-size:15px}figcaption span{font-size:12px;color:var(--muted);font-weight:400}.sample-actions{display:flex;flex-wrap:wrap;gap:24px;align-items:center}@media(max-width:640px){.sample-pages{grid-template-columns:1fr;max-width:360px;margin-inline:auto;gap:28px}}
+</style>

@@ -1,16 +1,16 @@
 ---
 /**
  * Stripe returns the buyer here (success_url) with ?session_id=cs_...
- * The page issues the download link immediately, and reissues it if it has
- * expired — so "reopen the page Stripe returned you to" always works.
+ * Access requires the checkout browser cookie or the signed-in owner.
+ * A session id alone never reveals buyer details or signs anyone in.
  */
 import { env } from 'cloudflare:workers';
 import Base from '../layouts/Base.astro';
 import { getGuide } from '../data/guides';
 import { site, formatPrice } from '../data/site';
 import { stripeConfigured, retrieveSession } from '../lib/stripe';
-import { ensurePurchase, getPurchase, linkExpired, linkExpiresAt, reissueToken, type Purchase } from '../lib/purchases';
-import { setSessionCookie } from '../lib/session';
+import { activePurchase, ensurePurchase, getPurchase, linkExpired, linkExpiresAt, reissueToken, type Purchase } from '../lib/purchases';
+import { canAccessOrder } from '../lib/session';
 import { formatDate } from '../lib/http';
 
 export const prerender = false;
@@ -21,7 +21,7 @@ const sessionId = Astro.url.searchParams.get('session_id')?.trim() ?? '';
 const resent = Astro.url.searchParams.get('resent') === '1';
 const error = Astro.url.searchParams.get('error');
 
-type State = 'ok' | 'missing' | 'unpaid' | 'notfound' | 'unavailable';
+type State = 'ok' | 'missing' | 'unpaid' | 'notfound' | 'unavailable' | 'signin';
 let state: State = 'missing';
 let purchase: Purchase | null = null;
 let reissued = false;
@@ -29,7 +29,9 @@ let reissued = false;
 if (sessionId) {
   try {
     purchase = await getPurchase(env, sessionId);
-    if (purchase) {
+    if (purchase && !(await canAccessOrder(Astro, env, sessionId, purchase.email))) {
+      purchase = null; state = 'signin';
+    } else if (activePurchase(purchase)) {
       if (linkExpired(purchase)) {
         purchase = await reissueToken(env, purchase);
         reissued = true;
@@ -37,8 +39,12 @@ if (sessionId) {
       state = 'ok';
     } else if (stripeConfigured(env)) {
       const session = await retrieveSession(env, sessionId);
+      if (!(await canAccessOrder(Astro, env, sessionId, session.customer_details?.email ?? session.customer_email ?? ''))) {
+        state = 'signin';
+      } else {
       purchase = await ensurePurchase(env, session);
       state = purchase ? 'ok' : session.payment_status === 'paid' ? 'notfound' : 'unpaid';
+      }
     } else {
       state = 'unavailable';
     }
@@ -48,8 +54,8 @@ if (sessionId) {
   }
 }
 
-// Coming back from Stripe proves ownership of the session id, so sign the buyer in for /account.
-if (state === 'ok' && purchase && Astro.url.searchParams.has('session_id')) await setSessionCookie(Astro, env, purchase.email);
+// A checkout id never grants access to the buyer's account.
+if (state !== 'ok') purchase = null;
 
 const guide = purchase ? getGuide(purchase.guide) : undefined;
 const downloadHref = purchase ? `/download/${purchase.token}` : '';
@@ -59,6 +65,7 @@ const title = state === 'ok' ? 'Thank you — your guide is ready' : 'Your purch
 
 <Base title={title} noindex current="">
   <div class="container wrap">
+    {state === 'signin' && <div class="single"><p class="eyebrow">Your purchase</p><h1 class="display">Find your guide in your inbox.</h1><p class="lead">For your privacy, open the delivery email or sign in with the email used at checkout.</p><a href="/account" class="btn btn-accent">Open My guides →</a></div>}
     {
       state === 'ok' && purchase && (
         <div class="grid">
@@ -73,19 +80,19 @@ const title = state === 'ok' ? 'Thank you — your guide is ready' : 'Your purch
             <a href={downloadHref} class="btn btn-accent dl" download>Download the PDF →</a>
             <p class="small validity">
               Link valid until {validUntil}. {reissued && 'The previous link had expired, so a fresh one was issued. '}
-              Reopen this page any time to get a new one.
+              Sign in to My guides whenever you need a fresh link.
             </p>
 
             <div class="card next">
-              <p class="h">The same link is on its way by email</p>
+              <p class="h">Your download email</p>
               <p>
-                Sent to <strong>{purchase.email}</strong>{purchase.emailed_at ? '' : ' shortly'}. If it does not arrive
+                {purchase.emailed_at ? 'Sent to' : 'Delivery is being processed for'} <strong>{purchase.email}</strong>. If it does not arrive
                 within a few minutes, check the spam folder or send it again:
               </p>
               <form method="post" action="/api/resend-link" class="resend">
                 <input type="hidden" name="session_id" value={purchase.session_id} />
                 <button type="submit" class="btn btn-outline">Send the link again</button>
-                {resent && <span class="notice-ok">Sent. Give it a minute.</span>}
+                {resent && <span class="notice-ok">Queued. Give it a few minutes.</span>}
                 {error && <span class="notice-error">{error}</span>}
               </form>
               <p class="small">Your Stripe receipt comes separately, to the same address.</p>
@@ -123,8 +130,7 @@ const title = state === 'ok' ? 'Thank you — your guide is ready' : 'Your purch
           <p class="eyebrow">Purchase</p>
           <h1 class="display">Looking for your download?</h1>
           <p class="lead">
-            Open the link in the email you received after paying, or the page Stripe returned you to — it
-            issues a fresh download link every time. If you have neither, write to{' '}
+            Open the link in the email you received after paying, or sign in at My guides with your purchase email. If you have neither, write to{' '}
             <a href={`mailto:${site.email}`}>{site.email}</a> from the address you paid with.
           </p>
           <a href="/guides" class="btn btn-outline">Back to the library</a>

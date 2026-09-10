@@ -8,7 +8,8 @@
  * name on the Imprint, Terms of sale and Privacy policy; it must NOT be replaced by the
  * public pen name below (`author.name`), which is used everywhere else.
  */
-const legalTraderName = 'Radoslav Dodnikov';
+// Match the seller shown in Stripe Checkout. Confirm company registration details before release.
+const legalTraderName = 'Digital Craft EOOD';
 
 export const site = {
   name: 'The Uncomplicated Guides',
@@ -16,7 +17,7 @@ export const site = {
   shortSuffix: 'guides',
   tagline: 'Practical guides on AI, vibe coding and social media',
   description:
-    'Each guide is one procedure from start to finish: when it is worth doing, how to build it, where it breaks and how to charge for it.',
+    'Practical PDF playbooks for AI services: plan the workflow, understand the costs and deliver work you can support. Read real sample pages before buying.',
   author: {
     /** Public byline / pen name — used for the author bio, guide credits and casual sign-offs. */
     name: 'R. D. Mitchell',
@@ -25,6 +26,9 @@ export const site = {
   },
   /** Use on legal pages only (Imprint, Terms, Privacy) — see the comment on the constant above. */
   legalTraderName,
+  registeredAddress: import.meta.env.SELLER_REGISTERED_ADDRESS || '',
+  registrationNumber: import.meta.env.SELLER_REGISTRATION_NUMBER || '',
+  vatNumber: import.meta.env.SELLER_VAT_NUMBER || '',
   legalName: `The Uncomplicated Guides · ${legalTraderName}`,
   reach: 'Sofia, Bulgaria · Sold worldwide as PDF',
   email: 'hello@uncomplicatedguide.com',

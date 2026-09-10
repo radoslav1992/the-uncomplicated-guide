@@ -6,6 +6,7 @@
  * critical is a banned commercial practice under EU consumer rules, and every hidden
  * row keeps the reason so the decision stays auditable.
  */
+import { reconcilePurchases } from '../../lib/purchases';
 import { env } from 'cloudflare:workers';
 import Base from '../../layouts/Base.astro';
 import StarRating from '../../components/StarRating.astro';
@@ -34,6 +35,10 @@ if (configured && token) {
 
 if (authed && form) {
   const action = str(form.get('action'), 10);
+  if (action === 'verify') {
+    const result = await reconcilePurchases(env);
+    notice = `Checked ${result.checked}; verified ${result.verified}; unresolved ${result.failed}. Run again for the next batch.`;
+  }
   const id = Number.parseInt(str(form.get('id'), 12), 10);
   if (Number.isInteger(id) && (action === 'hide' || action === 'show')) {
     await setHidden(env, id, action === 'hide', str(form.get('reason'), 200));
@@ -66,9 +71,10 @@ const visible = reviews.filter((r) => !r.hidden_at).length;
       ) : configured && authed ? (
         <Fragment>
           <p class="small count">
-            {reviews.length} total · {visible} published · {reviews.length - visible} hidden
+            {reviews.length} total · {visible} not hidden · {reviews.length - visible} hidden. Public reviews also require a verified live Stripe purchase.
           </p>
 
+          <form method="post"><input type="hidden" name="token" value={token} /><button class="btn btn-outline" name="action" value="verify">Verify legacy purchases with Stripe (25)</button><p class="small">Checks purchase provenance regardless of rating. Test and unverified records never appear as verified-buyer reviews.</p></form>
           {reviews.length === 0 && <p class="lead">No reviews yet.</p>}
 
           <ul class="list">

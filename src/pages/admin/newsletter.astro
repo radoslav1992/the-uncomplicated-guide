@@ -9,6 +9,7 @@ import Base from '../../layouts/Base.astro';
 import { formatDate, siteOrigin, str } from '../../lib/http';
 import { verify, sign } from '../../lib/tokens';
 import {
+  retryFailedLetters,
   createNewsletter,
   deliverPending,
   listNewsletters,
@@ -54,9 +55,12 @@ if (authed && form) {
       subject = '';
       body = '';
     }
+  } else if (action === 'retry') {
+    await retryFailedLetters(env);
+    notice = 'Failed deliveries requeued for subscribers who are still confirmed.';
   } else if (action === 'continue') {
     const n = await deliverPending(env, origin, 15_000);
-    notice = `Sent ${n} in this run.`;
+    notice = `Attempted ${n} deliveries in this run. See the delivery counts below.`;
   }
 }
 
@@ -136,6 +140,7 @@ const letters = authed ? await listNewsletters(env) : [];
                 <form method="post">
                   <input type="hidden" name="token" value={token} />
                   <button type="submit" name="action" value="continue" class="btn btn-outline sm">Send next batch now</button>
+                  <button type="submit" name="action" value="retry" class="btn btn-outline sm">Retry failed deliveries</button>
                   <p class="small">Batches also run automatically every 5 minutes.</p>
                 </form>
               )}

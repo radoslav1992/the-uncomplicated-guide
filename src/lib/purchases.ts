@@ -18,6 +18,7 @@ export const LINK_TTL_MS = site.downloadLinkDays * DAY;
 export const linkExpiresAt = (p: Purchase) =>
   new Date(new Date(p.token_issued_at ?? 0).getTime() + LINK_TTL_MS);
 export const linkExpired = (p: Purchase) => !p.token || Date.now() > linkExpiresAt(p).getTime();
+export const activePurchase = (p: Purchase | null): p is Purchase => Boolean(p && !p.refunded_at && !p.session_id.startsWith('cs_seed_') && !p.email.endsWith('.test'));
 
 export async function getPurchase(env: Env, sessionId: string): Promise<Purchase | null> {
   return env.DB.prepare('SELECT * FROM purchases WHERE session_id = ?1').bind(sessionId).first<Purchase>();
@@ -33,20 +34,22 @@ export async function listPurchasesByEmail(env: Env, email: string): Promise<Pur
   )
     .bind(email.toLowerCase())
     .all<Purchase>();
-  return r.results;
+  return r.results.filter(activePurchase);
 }
 
-/** Issue a fresh download token (revoking the previous one). */
+/** Renew expired tokens atomically; concurrent callers receive the same token. */
 export async function reissueToken(env: Env, p: Purchase): Promise<Purchase> {
-  p.token = randomToken();
-  p.token_issued_at = now();
-  p.reissues += 1;
+  if (!activePurchase(p)) throw new Error('Purchase is not eligible for a download');
   await env.DB.prepare(
-    'UPDATE purchases SET token = ?2, token_issued_at = ?3, reissues = ?4 WHERE session_id = ?1',
+    `UPDATE purchases SET token = ?2, token_issued_at = ?3, reissues = reissues + 1
+     WHERE session_id = ?1 AND refunded_at IS NULL
+     AND (token IS NULL OR token_issued_at IS NULL OR token_issued_at < ?4)`,
   )
-    .bind(p.session_id, p.token, p.token_issued_at, p.reissues)
+    .bind(p.session_id, randomToken(), now(), new Date(Date.now() - LINK_TTL_MS).toISOString())
     .run();
-  return p;
+  const fresh = await getPurchase(env, p.session_id);
+  if (!activePurchase(fresh)) throw new Error('Purchase is not eligible for a download');
+  return fresh;
 }
 
 /**
@@ -65,7 +68,7 @@ export async function resolveGuide(env: Env, session: Stripe.Checkout.Session): 
       items = (await getStripe(env).checkout.sessions.listLineItems(session.id, { limit: 10 })).data;
     } catch (err) {
       console.error('[purchases] could not list line items', session.id, err);
-      return null;
+      throw err;
     }
   }
   const ids = new Set<string>();
@@ -90,6 +93,8 @@ export async function ensurePurchase(env: Env, session: Stripe.Checkout.Session)
   if (!email) return null;
   const guide = (await resolveGuide(env, session))?.slug;
   if (!guide) return null;
+  const intent = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id;
+  if (intent && await env.DB.prepare('SELECT 1 FROM refunded_payments WHERE payment_intent = ?1').bind(intent).first()) return null;
 
   let p = await getPurchase(env, session.id);
   if (!p) {
@@ -115,12 +120,23 @@ export async function ensurePurchase(env: Env, session: Stripe.Checkout.Session)
     p = await getPurchase(env, session.id);
     if (!p) return null;
   }
+  if (!activePurchase(p) || p.email !== email || p.guide !== guide) return null;
+  if (intent && await env.DB.prepare('SELECT 1 FROM refunded_payments WHERE payment_intent = ?1').bind(intent).first()) {
+    await markRefunded(env, session.id);
+    return null;
+  }
+  await env.DB.prepare(`UPDATE purchases SET verified_at = ?2, livemode = ?3, consent_at = COALESCE(consent_at, ?4), terms_version = COALESCE(terms_version, ?5) WHERE session_id = ?1`)
+    .bind(p.session_id, now(), session.livemode ? 1 : 0, session.metadata?.consent_at ?? null, session.metadata?.terms_version ?? null).run();
+  p = (await getPurchase(env, p.session_id))!;
   if (linkExpired(p)) p = await reissueToken(env, p);
   return p;
 }
 
 export async function markRefunded(env: Env, sessionId: string) {
-  await env.DB.prepare('UPDATE purchases SET refunded_at = ?2 WHERE session_id = ?1').bind(sessionId, now()).run();
+  await env.DB.batch([
+    env.DB.prepare('UPDATE purchases SET refunded_at = ?2, token = NULL, token_issued_at = NULL WHERE session_id = ?1').bind(sessionId, now()),
+    env.DB.prepare('UPDATE delivery_jobs SET completed_at = ?2 WHERE session_id = ?1').bind(sessionId, now()),
+  ]);
 }
 
 export async function findPurchaseByPaymentIntent(env: Env, paymentIntent: string) {
@@ -129,10 +145,11 @@ export async function findPurchaseByPaymentIntent(env: Env, paymentIntent: strin
 
 /** Returns false when a resend happened less than a minute ago. */
 export async function claimResend(env: Env, p: Purchase): Promise<boolean> {
-  const last = p.last_resend_at ? new Date(p.last_resend_at).getTime() : 0;
-  if (Date.now() - last < 60_000) return false;
-  await env.DB.prepare('UPDATE purchases SET last_resend_at = ?2 WHERE session_id = ?1').bind(p.session_id, now()).run();
-  return true;
+  if (!activePurchase(p)) return false;
+  const r = await env.DB.prepare(`UPDATE purchases SET last_resend_at = ?2 WHERE session_id = ?1 AND refunded_at IS NULL
+    AND (last_resend_at IS NULL OR last_resend_at < ?3)`)
+    .bind(p.session_id, now(), new Date(Date.now() - 60_000).toISOString()).run();
+  return r.meta.changes === 1;
 }
 
 export const downloadUrl = (origin: string, p: Purchase) => `${origin}/download/${p.token}`;
@@ -141,6 +158,7 @@ export const thankYouUrl = (origin: string, p: Purchase) =>
 
 /** Send (or re-send) the delivery email with the current download link. */
 export async function sendDeliveryEmail(env: Env, origin: string, p: Purchase, guide?: Guide) {
+  if (!activePurchase(p)) return {ok: false, error: 'Purchase is not eligible for delivery'};
   const g = guide ?? getGuide(p.guide);
   const title = g?.title ?? 'your guide';
   const text = `Thank you for buying ${title}.
@@ -149,7 +167,11 @@ Your download link:
 ${downloadUrl(origin, p)}
 
 It is valid until ${formatDate(linkExpiresAt(p))}. If it expires, open this page to get a fresh one:
-${thankYouUrl(origin, p)}
+${origin}/account
+
+Sign in with the email used for this purchase. The link opens your personal download library.
+
+${p.consent_at ? 'You requested immediate digital delivery and acknowledged that your withdrawal right ends when delivery begins. Terms: ' + origin + '/terms' : 'Your statutory consumer rights are preserved. Terms: ' + origin + '/terms'}
 
 The receipt comes separately from Stripe. If anything about the download does not work, reply to this email — I fix links the same day.
 
@@ -166,4 +188,25 @@ ${site.name}`;
     await env.DB.prepare('UPDATE purchases SET emailed_at = ?2 WHERE session_id = ?1').bind(p.session_id, p.emailed_at).run();
   }
   return result;
+}
+
+/** Reconcile legacy purchase provenance against Stripe before displaying review badges. */
+export async function reconcilePurchases(env: Env, limit = 25) {
+  const rows = await env.DB.prepare(`SELECT * FROM purchases WHERE verified_at IS NULL AND refunded_at IS NULL
+    AND session_id NOT LIKE 'cs_seed_%' AND email NOT LIKE '%.test' ORDER BY created_at LIMIT ?1`).bind(limit).all<Purchase>();
+  let verified = 0; let failed = 0;
+  for (const p of rows.results) {
+    try {
+      const stripe = getStripe(env);
+      const session = await stripe.checkout.sessions.retrieve(p.session_id, {expand:['line_items']});
+      const pi = typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id;
+      if (pi) {
+        const payment = await stripe.paymentIntents.retrieve(pi, {expand:['latest_charge']});
+        const charge = payment.latest_charge;
+        if (charge && typeof charge !== 'string' && charge.refunded) { await markRefunded(env, p.session_id); continue; }
+      }
+      if (await ensurePurchase(env, session)) verified++; else failed++;
+    } catch { failed++; }
+  }
+  return {verified, failed, checked:rows.results.length};
 }

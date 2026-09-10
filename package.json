@@ -7,11 +7,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro build && wrangler dev",
-    "deploy": "astro build && wrangler deploy",
+    "deploy": "npm run check:release && astro build && wrangler deploy",
     "check": "astro check",
     "db:migrate:local": "wrangler d1 migrations apply guides-db --local",
     "db:migrate": "wrangler d1 migrations apply guides-db --remote",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "test": "node --import ./tests/register.mjs --test tests/*.test.mjs",
+    "check:release": "node scripts/check-release.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.0",

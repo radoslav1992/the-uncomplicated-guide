@@ -17,6 +17,10 @@ export interface PurchaseRow {
   token: string | null;
   token_issued_at: string | null;
   reissues: number;
+  verified_at: string | null;
+  livemode: number;
+  consent_at: string | null;
+  terms_version: string | null;
 }
 
 export interface SignupRow {

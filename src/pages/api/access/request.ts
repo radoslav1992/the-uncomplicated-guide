@@ -1,10 +1,10 @@
+import { allowForm } from '../../../lib/rate-limit';
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { site } from '../../../data/site';
 import { sendEmail } from '../../../lib/email';
 import { formResult, isEmail, siteOrigin, str } from '../../../lib/http';
 import { createLoginToken } from '../../../lib/session';
-import { listPurchasesByEmail } from '../../../lib/purchases';
 
 export const prerender = false;
 
@@ -18,26 +18,17 @@ export const POST: APIRoute = async (ctx) => {
   if (str(form?.get('website') ?? null)) return formResult(ctx, true, { redirect: '/account?sent=1' });
   if (!isEmail(email)) return formResult(ctx, false, { redirect: '/account', error: 'That email address does not look right.' });
 
+  if (!(await allowForm(env, ctx.request, 'access', email))) return formResult(ctx, false, { redirect: '/account', error: 'Too many attempts. Please try again in ten minutes.', status: 429 });
+  if (!env.SEND_EMAIL) return formResult(ctx, false, { redirect: '/account', error: 'Sign-in email is temporarily unavailable. Please try again later.', status: 503 });
   const origin = siteOrigin(env, ctx.request);
-  const purchases = await listPurchasesByEmail(env, email);
-
-  if (purchases.length) {
-    const token = await createLoginToken(env, email);
-    const link = `${origin}/api/access/verify?t=${encodeURIComponent(token)}`;
-    await sendEmail(env, {
-      to: email,
-      subject: `Your sign-in link — ${site.name}`,
-      text: `Here is your sign-in link. It works once, for the next 20 minutes:
-
-${link}
-
-If you did not ask for it, ignore this email — nothing happens without the link.
-
-${site.name}`,
-    });
-  } else {
-    // Do not reveal that the address is unknown; just log for support.
-    console.info('[access] sign-in requested for unknown address');
-  }
+  // Issue the same email for every valid address; the authenticated account lists only its purchases.
+  const token = await createLoginToken(env, email);
+  const link = `${origin}/api/access/verify?t=${encodeURIComponent(token)}`;
+  const result = await sendEmail(env, {
+    to: email,
+    subject: `Your sign-in link — ${site.name}`,
+    text: `Open your personal guide library:\n${link}\n\nThis link works once, for 20 minutes. If you did not ask for it, ignore this email.\n\n${site.name}`,
+  });
+  if (!result.ok) return formResult(ctx, false, {redirect:'/account', error:'Sign-in email could not be sent. Please try again later.', status:503});
   return formResult(ctx, true, { redirect: '/account?sent=1' });
 };

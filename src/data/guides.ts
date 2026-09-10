@@ -45,8 +45,8 @@ export interface Guide {
    */
   stripePriceId?: string;
   /**
-   * Optional Stripe Payment Link. Used as a fallback only when STRIPE_SECRET_KEY
-   * is not configured, so the site still sells while you finish the setup.
+   * Legacy Stripe Payment Link retained as a record of existing products. New checkout
+   * always uses the consent flow; do not link directly to these URLs.
    */
   paymentLink?: string;
 }
@@ -59,11 +59,11 @@ export const guides: Guide[] = [
     short:
       'A practical guide to building and selling voice AI agents that pick up the phone — including the telephony and the bill.',
     description:
-      'The same thing a studio does for clients, written so you can do it yourself. Including the part that is usually missing: the telephony and the bill.',
+      'A planning and operations playbook for voice AI services: scope the job, understand prompts and tools, plan telephony, test the agent and price ongoing support. You will still need to configure the tools and build your own integrations.',
     status: 'available',
     price: 3900,
     currency: 'USD',
-    pages: 35,
+    pages: 36,
     edition: 'English edition — extended version 1.1',
     currentAsOf: '1 September 2026',
     cover: aiAssistantsCover,
@@ -86,9 +86,9 @@ export const guides: Guide[] = [
       },
     ],
     outcomes: [
-      'Launch a voice agent that answers the phone and books appointments into a real calendar',
+      'Plan a voice agent, its calendar tools and the tests it needs before taking calls',
       'Work out in half an hour whether the numbers add up for a specific business',
-      'Connect a phone number with forwarding, instead of an agent that only lives in a browser',
+      'Choose a telephony route and use the launch checklist to plan number connection and forwarding',
       'Set a price that covers the variable cost even in a busy month',
       'Know in advance where it will break — and tell the client before they find out',
     ],
@@ -98,6 +98,7 @@ export const guides: Guide[] = [
       'People who have tried already and got stuck on the telephony',
     ],
     notFor: [
+      'Anyone seeking a ready-to-import agent, a working calendar integration or a complete API tutorial',
       'Anyone looking for a template to copy without understanding it — this explains why, not only how',
       'Anyone expecting the agent to replace a person. It takes the repetitive part; judgement stays human',
       'Anyone who wants theory about large language models — this is a guide for putting one to work',
@@ -191,10 +192,10 @@ export const guides: Guide[] = [
       },
     ],
     outcomes: [
-      'Produce ten tested ad variants in the time it used to take to make one',
+      'Plan comparable ad variants with a repeatable script, voice, avatar and editing workflow',
       'Run a 15-minute assessment that tells you whether a client is a good fit before you build a demo',
       'Hand a script to ElevenLabs and HeyGen with file names, versions and checks between every tool',
-      'Label, disclose and get consent the way the EU AI Act, the FTC and the platforms expect',
+      'Identify the consent, disclosure and platform-policy checks your campaign needs',
       'Price the service from real tool costs — with three offer levels and a monthly report that shows value',
     ],
     forWho: [
@@ -205,6 +206,7 @@ export const guides: Guide[] = [
     notFor: [
       'Anyone who wants a cinematic brand film or an emotional launch video — the tools cannot deliver that polish yet, and the guide says so',
       'Anyone planning fake testimonials or reviews that imply a customer experience which did not happen — that is illegal in many markets, not just risky',
+      'Anyone looking for finished example videos, editable video projects or an importable n8n workflow',
       'Anyone expecting one magic button — this is a production line with hand-offs, checks and versions',
     ],
     authorNote: [

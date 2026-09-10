@@ -10,3 +10,5 @@ Disallow: /download/
 Disallow: /thank-you
 
 Sitemap: https://uncomplicatedguide.com/sitemap-index.xml
+
+Disallow: /checkout

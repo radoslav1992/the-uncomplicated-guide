@@ -1,6 +1,8 @@
+import { canAccessOrder } from '../../lib/session';
+import { queueDelivery, deliverPurchases } from '../../lib/delivery';
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import { claimResend, getPurchase, linkExpired, reissueToken, sendDeliveryEmail } from '../../lib/purchases';
+import { activePurchase, claimResend, getPurchase, linkExpired, reissueToken } from '../../lib/purchases';
 import { formResult, siteOrigin, str } from '../../lib/http';
 
 export const prerender = false;
@@ -13,14 +15,14 @@ export const POST: APIRoute = async (ctx) => {
   if (!sessionId) return formResult(ctx, false, { redirect: '/thank-you', error: 'Missing session.' });
 
   let purchase = await getPurchase(env, sessionId);
-  if (!purchase) return formResult(ctx, false, { redirect: back, error: 'Purchase not found.', status: 404 });
+  if (!activePurchase(purchase) || !(await canAccessOrder(ctx, env, sessionId, purchase.email))) return formResult(ctx, false, { redirect: back, error: 'Purchase not found.', status: 404 });
 
   if (!(await claimResend(env, purchase))) {
     return formResult(ctx, false, { redirect: back, error: 'Already sent a moment ago. Check your inbox and spam folder.', status: 429 });
   }
 
   if (linkExpired(purchase)) purchase = await reissueToken(env, purchase);
-  const r = await sendDeliveryEmail(env, siteOrigin(env, ctx.request), purchase);
-  if (!r.ok) return formResult(ctx, false, { redirect: back, error: 'Email could not be sent right now. Use the download button on this page instead.', status: 502 });
+  await queueDelivery(env, purchase.session_id, true);
+  ctx.locals.cfContext?.waitUntil(deliverPurchases(env, siteOrigin(env, ctx.request)));
   return formResult(ctx, true, { redirect: `${back}&resent=1` });
 };

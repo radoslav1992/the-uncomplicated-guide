@@ -2,13 +2,13 @@
 /**
  * GET /download/<token>
  * Streams the PDF from R2 for a valid, unexpired token. Otherwise renders a
- * short page that points back to the thank-you page (which reissues links).
+ * short page directing the buyer to authenticated account recovery.
  */
 import { env } from 'cloudflare:workers';
 import Base from '../../layouts/Base.astro';
 import { getGuide } from '../../data/guides';
 import { site } from '../../data/site';
-import { getPurchaseByToken, linkExpired } from '../../lib/purchases';
+import { activePurchase, getPurchaseByToken, linkExpired } from '../../lib/purchases';
 import { insertDownload } from '../../lib/db';
 
 export const prerender = false;
@@ -22,7 +22,7 @@ const guide = purchase ? getGuide(purchase.guide) : undefined;
 type State = 'invalid' | 'expired' | 'missing-file';
 let state: State = 'invalid';
 
-if (purchase && purchase.token === token && guide) {
+if (activePurchase(purchase) && purchase.token === token && guide) {
   if (linkExpired(purchase)) {
     state = 'expired';
     Astro.response.status = 410;
@@ -54,7 +54,7 @@ if (purchase && purchase.token === token && guide) {
 if (state === 'missing-file') Astro.response.status = 503;
 if (state === 'invalid') Astro.response.status = 404;
 
-const thankYou = purchase ? `/thank-you?session_id=${encodeURIComponent(purchase.session_id)}` : '';
+const thankYou = '/account';
 ---
 
 <Base title="Download" noindex>
@@ -65,8 +65,7 @@ const thankYou = purchase ? `/thank-you?session_id=${encodeURIComponent(purchase
         <Fragment>
           <h1 class="display">This link has expired.</h1>
           <p class="lead">
-            Download links stay valid for {site.downloadLinkDays} days. Reopening the page Stripe returned you to
-            issues a fresh one straight away.
+            Download links stay valid for {site.downloadLinkDays} days. Sign in to My guides with your purchase email to get a fresh link.
           </p>
           <a href={thankYou} class="btn btn-accent">Get a fresh link →</a>
         </Fragment>

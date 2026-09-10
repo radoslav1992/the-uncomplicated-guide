@@ -1,8 +1,9 @@
+import { queueDelivery, deliverPurchases } from '../../../lib/delivery';
 import type { APIRoute } from 'astro';
 import type Stripe from 'stripe';
 import { env } from 'cloudflare:workers';
 import { constructWebhookEvent, retrieveSession } from '../../../lib/stripe';
-import { ensurePurchase, findPurchaseByPaymentIntent, markRefunded, sendDeliveryEmail } from '../../../lib/purchases';
+import { ensurePurchase, findPurchaseByPaymentIntent, markRefunded } from '../../../lib/purchases';
 import { json, siteOrigin } from '../../../lib/http';
 
 export const prerender = false;
@@ -12,7 +13,7 @@ export const prerender = false;
  * Stripe → Developers → Webhooks → add endpoint <SITE_URL>/api/stripe/webhook with events:
  *   checkout.session.completed, checkout.session.async_payment_succeeded, charge.refunded
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   const signature = request.headers.get('stripe-signature');
   if (!signature) return json({ error: 'Missing signature' }, { status: 400 });
 
@@ -42,8 +43,8 @@ export const POST: APIRoute = async ({ request }) => {
           break;
         }
         if (!purchase.emailed_at) {
-          const r = await sendDeliveryEmail(env, origin, purchase);
-          console.info('[webhook] delivery email', purchase.session_id, r.ok ? 'sent' : 'NOT sent');
+          await queueDelivery(env, purchase.session_id);
+          locals.cfContext?.waitUntil(deliverPurchases(env, origin));
         }
         break;
       }
@@ -51,7 +52,8 @@ export const POST: APIRoute = async ({ request }) => {
       case 'charge.refunded': {
         const charge = event.data.object as Stripe.Charge;
         const pi = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
-        if (pi) {
+        if (pi && charge.refunded) {
+          await env.DB.prepare('INSERT OR IGNORE INTO refunded_payments (payment_intent, refunded_at) VALUES (?1, ?2)').bind(pi, new Date().toISOString()).run();
           const purchase = await findPurchaseByPaymentIntent(env, pi);
           if (purchase) {
             await markRefunded(env, purchase.session_id);

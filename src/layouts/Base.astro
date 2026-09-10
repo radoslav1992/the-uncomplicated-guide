@@ -39,16 +39,16 @@ const {
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
-const ogImageSrc = typeof image === 'string' ? image : image?.src ?? '/favicon-512.png';
+const ogImageSrc = typeof image === 'string' ? image : image?.src ?? '/social/default.png';
 const ogImage = new URL(ogImageSrc, Astro.site ?? Astro.url).href;
 // Dimensions let a scraper lay the card out before it has fetched the file.
-const ogImageSize = typeof image === 'string' || !image ? null : { width: image.width, height: image.height };
+const ogImageSize = ogImageSrc.startsWith('/social/') ? {width:1200,height:630} : typeof image === 'string' || !image ? null : { width: image.width, height: image.height };
 // Guide covers are portrait and the fallback is a square logo; a wide card would
 // crop either to an unreadable horizontal slice. Only genuinely landscape art
 // earns `summary_large_image`.
 const wideCard = ogImageSize ? ogImageSize.width / ogImageSize.height >= 1.5 : false;
 const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}`;
-const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
+const gaId = noindex ? '' : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
 ---
 
 <!doctype html>
@@ -110,45 +110,35 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
       )
     }
 
-    {
-      gaId && (
-        <Fragment>
-          {/* Google Consent Mode v2: everything denied until the visitor accepts in the banner. */}
-          <script is:inline>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-              dataLayer.push(arguments);
-            }
-            gtag('consent', 'default', {
-              ad_storage: 'denied',
-              ad_user_data: 'denied',
-              ad_personalization: 'denied',
-              analytics_storage: 'denied',
-              wait_for_update: 500,
-            });
-            try {
-              if (localStorage.getItem('cookie-consent') === 'granted') {
-                gtag('consent', 'update', { analytics_storage: 'granted' });
-              }
-            } catch (e) {}
-          </script>
-          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
-          <script is:inline define:vars={{ gaId }}>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-              dataLayer.push(arguments);
-            }
-            gtag('js', new Date());
-            gtag('config', gaId, { anonymize_ip: true });
-          </script>
-        </Fragment>
-      )
-    }
+    {gaId && <script is:inline define:vars={{ gaId }}>
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function(){window.dataLayer.push(arguments);};
+      let analyticsStarted = false;
+      const permitted = () => { try { return localStorage.getItem('cookie-consent') === 'granted'; } catch { return false; } };
+      const start = () => {
+        if (analyticsStarted || !permitted()) return;
+        analyticsStarted = true;
+        gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'granted'});
+        gtag('js',new Date());
+        gtag('config',gaId,{send_page_view:false,page_location:location.origin+location.pathname,page_referrer:''});
+        gtag('event','page_view');
+        const script=document.createElement('script');script.async=true;script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(gaId);document.head.appendChild(script);
+        const match=location.pathname.match(/^\/guides\/([^/]+)$/);
+        if(match) gtag('event','view_item',{item_id:match[1]});
+      };
+      document.addEventListener('cookie-consent:changed',start);
+      document.addEventListener('click',event=>{
+        const link=event.target instanceof Element ? event.target.closest('[data-track]') : null;
+        if(link && permitted()) gtag('event',link.getAttribute('data-track'),{item_id:link.getAttribute('data-guide')});
+      });
+      start();
+    </script>}
     <slot name="head" />
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <Header current={current} />
-    <main>
+    <main id="main-content" tabindex="-1">
       <slot />
     </main>
     <Footer />

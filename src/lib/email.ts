@@ -4,8 +4,7 @@
  * Setup (dashboard → Email → Email Service):
  *   1. Verify the sending domain (adds DKIM/SPF records to your zone).
  *   2. Keep the `send_email` binding in wrangler.jsonc.
- * Locally (`wrangler dev`) sends are logged instead of delivered unless the
- * binding is available; the helper degrades to a console log so forms still work.
+ * Missing bindings return a failure. Message bodies and bearer links are never logged.
  */
 import { site } from '../data/site';
 
@@ -25,7 +24,7 @@ export async function sendEmail(env: Env, mail: OutgoingEmail): Promise<{ ok: bo
       to: mail.to,
       subject: mail.subject,
     });
-    console.info('[email] body:\n' + mail.text);
+    // Never log message bodies: they contain bearer download and login tokens.
     return { ok: false, error: 'SEND_EMAIL binding missing' };
   }
   try {

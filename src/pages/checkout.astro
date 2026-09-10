@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import { getGuide } from '../data/guides';
+import { site, formatPrice } from '../data/site';
+export const prerender = false;
+Astro.response.headers.set('cache-control', 'private, no-store');
+const guide = getGuide(Astro.url.searchParams.get('guide') ?? undefined);
+if (!guide || guide.status !== 'available') return Astro.redirect('/guides');
+const error = Astro.url.searchParams.get('error');
+---
+<Base title="Review your purchase" noindex>
+  <section class="container checkout section">
+    <a href={`/guides/${guide.slug}`} class="arrow-link">← Back to the guide</a>
+    <p class="eyebrow">One payment · Yours to keep</p>
+    <h1 class="display">Review your purchase.</h1>
+    <div class="panel">
+      <h2>{guide.title}</h2>
+      <p>{guide.pages} pages · English · PDF · {guide.edition}</p>
+      <p class="price">{formatPrice(guide.price, guide.currency)} USD</p>
+      <p>Download after payment, with a copy of the link by email. Tool subscriptions and personal support are not included. You can recover your download from <a href="/account">My guides</a>.</p>
+      <p class="small">Sold by {site.legalTraderName}. Final total, including applicable taxes, is shown in Stripe before you pay.</p>
+      {error && <p class="notice-error" role="alert">{error === 'consent' ? 'Please confirm immediate digital delivery below.' : error === 'rate' ? 'Too many checkout attempts. Please try again in ten minutes.' : 'Checkout is temporarily unavailable. Please try again shortly or contact us.'}</p>}
+      <form method="post" action="/api/checkout" data-checkout-form>
+        <input type="hidden" name="guide" value={guide.slug} />
+        <label class="consent"><input type="checkbox" name="digital_consent" value="yes" required /><span>I agree to the <a href="/terms">terms of sale</a> and request immediate supply of the PDF. I understand that I lose my 14-day right of withdrawal when supply begins. My statutory rights for faulty or misdescribed content remain.</span></label>
+        <button type="submit" class="btn btn-accent">Continue to secure payment →</button>
+        <p class="small">No subscription. See the <a href="/refunds">refund policy</a> and <a href="/privacy">privacy policy</a>.</p>
+      </form>
+    </div>
+  </section>
+</Base>
+<script>
+const form = document.querySelector<HTMLFormElement>('[data-checkout-form]');
+form?.addEventListener('submit', () => { const button = form.querySelector('button'); if (button) { button.disabled = true; button.setAttribute('aria-busy', 'true'); button.textContent = 'Opening secure payment…'; } });
+window.addEventListener('pageshow', () => { const button = form?.querySelector('button'); if(button) { button.disabled = false; button.removeAttribute('aria-busy'); button.textContent = 'Continue to secure payment →'; } });
+</script>
+<style>
+.checkout{max-width:780px}.checkout .eyebrow{margin-top:36px}h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin:12px 0 28px}h2{font-family:var(--font-display);font-size:22px}.price{font-size:32px;font-weight:700}.consent{display:flex;gap:14px;align-items:flex-start;margin:28px 0;line-height:1.6}.consent input{width:22px;height:22px;flex:none;margin-top:3px;accent-color:var(--accent)}.panel{padding:clamp(20px,4vw,36px)}
+</style>

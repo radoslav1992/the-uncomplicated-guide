@@ -39,7 +39,7 @@ export const MAX_NAME = 60;
 /** True when this address bought this guide and the purchase was not refunded. */
 export async function hasBought(env: Env, email: string, guide: string): Promise<boolean> {
   const row = await env.DB.prepare(
-    'SELECT 1 AS ok FROM purchases WHERE email = ?1 AND guide = ?2 AND refunded_at IS NULL LIMIT 1',
+    `SELECT 1 AS ok FROM purchases WHERE email = ?1 AND guide = ?2 AND refunded_at IS NULL AND verified_at IS NOT NULL AND livemode = 1 AND session_id NOT LIKE 'cs_seed_%' AND email NOT LIKE '%.test' LIMIT 1`,
   )
     .bind(email.toLowerCase(), guide)
     .first<{ ok: number }>();
@@ -64,7 +64,7 @@ export async function getOwnReviews(env: Env, email: string): Promise<Map<string
 /** Published reviews for a guide, newest first. */
 export async function listReviews(env: Env, guide: string, limit = 50): Promise<Review[]> {
   const r = await env.DB.prepare(
-    'SELECT * FROM reviews WHERE guide = ?1 AND hidden_at IS NULL ORDER BY created_at DESC LIMIT ?2',
+    `SELECT * FROM reviews WHERE guide = ?1 AND hidden_at IS NULL AND EXISTS (SELECT 1 FROM purchases p WHERE p.email = reviews.email AND p.guide = reviews.guide AND p.refunded_at IS NULL AND p.verified_at IS NOT NULL AND p.livemode = 1 AND p.session_id NOT LIKE 'cs_seed_%' AND p.email NOT LIKE '%.test') ORDER BY created_at DESC LIMIT ?2`,
   )
     .bind(guide, limit)
     .all<Review>();
@@ -75,7 +75,7 @@ export async function listReviews(env: Env, guide: string, limit = 50): Promise<
 export async function getSummary(env: Env, guide: string): Promise<RatingSummary> {
   const r = await env.DB.prepare(
     `SELECT rating, COUNT(*) AS n FROM reviews
-     WHERE guide = ?1 AND hidden_at IS NULL GROUP BY rating`,
+     WHERE guide = ?1 AND hidden_at IS NULL AND EXISTS (SELECT 1 FROM purchases p WHERE p.email = reviews.email AND p.guide = reviews.guide AND p.refunded_at IS NULL AND p.verified_at IS NOT NULL AND p.livemode = 1 AND p.session_id NOT LIKE 'cs_seed_%' AND p.email NOT LIKE '%.test') GROUP BY rating`,
   )
     .bind(guide)
     .all<{ rating: number; n: number }>();

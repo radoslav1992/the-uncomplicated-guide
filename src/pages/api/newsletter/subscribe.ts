@@ -1,3 +1,4 @@
+import { allowForm } from '../../../lib/rate-limit';
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { getGuide } from '../../../data/guides';
@@ -20,10 +21,12 @@ export const POST: APIRoute = async (ctx) => {
 
   const email = str(form.get('email'), 254).toLowerCase();
   if (!isEmail(email)) return fail('That email address does not look right.');
+  if (!(await allowForm(env, ctx.request, 'newsletter', email))) return formResult(ctx, false, { redirect: '/newsletter', error: 'Too many attempts. Please try again in ten minutes.', status: 429 });
   const guide = getGuide(str(form.get('guide'), 80));
   const referer = ctx.request.headers.get('referer');
   const source = str(form.get('source'), 40) || (referer ? new URL(referer).pathname : 'unknown');
 
   const r = await subscribe(env, siteOrigin(env, ctx.request), email, guide?.slug ?? '*', source);
+  if (r.status === 'delivery-failed') return fail('Confirmation email could not be sent. Please try again later.', 503);
   return formResult(ctx, true, { redirect, data: { status: r.status } });
 };

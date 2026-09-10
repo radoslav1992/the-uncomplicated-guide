@@ -12,7 +12,7 @@ export function getStripe(env: Env): Stripe {
 }
 
 const consumerNotice = (origin: string) =>
-  `Digital content, delivered immediately after payment. By paying you agree that the 14-day right of withdrawal ends once the download starts. Terms: ${origin}/terms`;
+  `Digital content, delivered immediately after payment. You requested immediate supply and acknowledged the loss of your withdrawal right when supply begins. Statutory rights for faulty content remain. Terms: ${origin}/terms`;
 
 /** Shared options for both checkout modes. */
 function baseParams(env: Env, origin: string): Partial<Stripe.Checkout.SessionCreateParams> {
@@ -30,7 +30,7 @@ function baseParams(env: Env, origin: string): Partial<Stripe.Checkout.SessionCr
 }
 
 /** One-off purchase of a single guide. */
-export async function createCheckoutSession(env: Env, guide: Guide, origin: string): Promise<Stripe.Checkout.Session> {
+export async function createCheckoutSession(env: Env, guide: Guide, origin: string, consentAt: string): Promise<Stripe.Checkout.Session> {
   const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = guide.stripePriceId
     ? { price: guide.stripePriceId, quantity: 1 }
     : {
@@ -54,7 +54,7 @@ export async function createCheckoutSession(env: Env, guide: Guide, origin: stri
     line_items: [lineItem],
     success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/guides/${guide.slug}`,
-    metadata: { guide: guide.slug },
+    metadata: { guide: guide.slug, consent_at: consentAt, terms_version: '2026-09-10' },
   });
 }
 

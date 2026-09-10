@@ -39,6 +39,7 @@
       const w = window as unknown as { gtag?: (...args: unknown[]) => void };
       w.gtag?.('consent', 'update', { analytics_storage: value });
       el.hidden = true;
+      document.dispatchEvent(new Event('cookie-consent:changed'));
     };
     if (!read()) show();
     el.querySelectorAll<HTMLButtonElement>('[data-consent]').forEach((b) =>
@@ -49,6 +50,7 @@
 </script>
 
 <style>
+  .consent[hidden] { display: none; }
   .consent {
     position: fixed;
     left: 16px;

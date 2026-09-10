@@ -11,7 +11,7 @@
   --text: #514941;
   --text-2: #6b635a;
   --text-3: #443d36;
-  --muted: #8a8177;
+  --muted: #70675c;
   --faint: #c3b8aa;
 
   --border: #e5ded4;
@@ -19,8 +19,9 @@
   --border-input: #ddd5c9;
   --border-dark: #2e2921;
 
-  --accent: #e2542b;
-  --accent-hover: #c4431f;
+  --accent: #bb3e1c;
+  --accent-decorative: #e2542b;
+  --accent-hover: #9b3116;
   --accent-link-hover: #b93b16;
   --accent-tint: #ffe6dd;
   --accent-ring: rgba(226, 84, 43, 0.14);
@@ -750,3 +751,5 @@ textarea.input {
     scroll-behavior: auto;
   }
 }
+
+.skip-link{position:fixed;top:8px;left:16px;z-index:1000;background:var(--ink);color:white;padding:12px 20px;border-radius:8px;transform:translateY(-150%)}.skip-link:focus{transform:none;color:white}button:disabled{cursor:wait;opacity:.75}#main-content{scroll-margin-top:85px}

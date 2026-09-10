@@ -1,123 +1,25 @@
 ---
 import { site } from '../data/site';
-import { featuredGuide } from '../data/guides';
-
-interface Props {
-  current?: string;
-}
+interface Props { current?: string; }
 const { current = '' } = Astro.props;
 ---
-
-<header class="site-header">
-  <div class="container inner">
-    <a href="/" class="brand" aria-label={`${site.name} — home`}>
-      <img src="/brand/logo-mark.png" alt="" width="34" height="34" />
-      <span class="brand-name">{site.shortName}</span>
-      <span class="brand-suffix">{site.shortSuffix}</span>
-    </a>
-    <nav aria-label="Main navigation">
-      {
-        site.nav.map((item) => (
-          <a
-            href={item.href}
-            class:list={['nav-link', { current: item.label === current }]}
-            aria-current={item.label === current ? 'page' : undefined}
-          >
-            {item.label}
-          </a>
-        ))
-      }
-      <a href={`/guides/${featuredGuide.slug}`} class="cta">Get the first guide</a>
-    </nav>
-  </div>
-</header>
-
+<header class="site-header"><div class="container inner">
+  <a href="/" class="brand" aria-label={`${site.name} — home`}><img src="/brand/logo-mark.png" alt="" width="34" height="34" /><span>{site.shortName}<small>guides</small></span></a>
+  <button class="menu-toggle" type="button" aria-controls="main-navigation" aria-expanded="false">Menu <span aria-hidden="true">☰</span></button>
+  <nav id="main-navigation" aria-label="Main navigation">{site.nav.map(item=><a href={item.href} class:list={['nav-link',{current:item.label===current}]} aria-current={item.label===current?'page':undefined}>{item.label}</a>)}<a href="/account" class="account">My guides ↗</a></nav>
+</div></header>
+<script>
+const toggle = document.querySelector<HTMLButtonElement>('.menu-toggle');
+const nav = document.querySelector<HTMLElement>('#main-navigation');
+if(toggle && nav){
+ document.documentElement.classList.add('nav-ready');
+ const close=()=>{toggle.setAttribute('aria-expanded','false');nav.classList.remove('open');};
+ toggle.addEventListener('click',()=>{const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));nav.classList.toggle('open',open);});
+ nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',close));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&toggle.getAttribute('aria-expanded')==='true'){close();toggle.focus();}});
+ document.addEventListener('click',e=>{if(e.target instanceof Node&&!nav.contains(e.target)&&!toggle.contains(e.target))close();});
+}
+</script>
 <style>
-  .site-header {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: rgba(246, 243, 238, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-  .inner {
-    padding-top: 16px;
-    padding-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 32px;
-    flex-wrap: wrap;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-right: auto;
-    color: var(--ink);
-  }
-  .brand img {
-    width: 34px;
-    height: 34px;
-    flex: none;
-    display: block;
-  }
-  .brand-name {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 17px;
-    letter-spacing: -0.01em;
-  }
-  .brand-suffix {
-    font-size: 13px;
-    color: var(--muted);
-    margin-left: 2px;
-  }
-  nav {
-    display: flex;
-    align-items: center;
-    gap: 26px;
-    font-size: 15px;
-    font-weight: 500;
-    flex-wrap: wrap;
-  }
-  .nav-link {
-    color: var(--text);
-    transition: color 0.16s ease;
-  }
-  .nav-link:hover,
-  .nav-link.current {
-    color: var(--ink);
-  }
-  .cta {
-    background: var(--ink);
-    color: var(--bg);
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-weight: 600;
-    transition: background-color 0.18s ease;
-    white-space: nowrap;
-  }
-  .cta:hover {
-    background: var(--accent);
-    color: #fff;
-  }
-  @media (max-width: 720px) {
-    .inner {
-      gap: 12px 20px;
-      padding-top: 12px;
-      padding-bottom: 12px;
-    }
-    nav {
-      width: 100%;
-      justify-content: space-between;
-      gap: 14px;
-      font-size: 14px;
-    }
-    .cta {
-      padding: 9px 14px;
-      font-size: 13.5px;
-    }
-  }
+.site-header{position:sticky;top:0;z-index:50;background:#f6f3eef5;border-bottom:1px solid var(--border);backdrop-filter:blur(12px)}.inner{display:flex;align-items:center;gap:28px;min-height:78px}.brand{display:flex;align-items:center;gap:10px;color:var(--ink);margin-right:auto}.brand>span{font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:-.02em}.brand small{font-family:var(--font-body);font-weight:400;font-size:12px;color:var(--muted);margin-left:6px}nav{display:flex;align-items:center;gap:25px;font-size:14px}.nav-link{color:var(--text);padding:12px 0}.nav-link.current{text-decoration:underline;text-underline-offset:6px;color:var(--ink)}.account{border:1px solid var(--border-2);border-radius:999px;color:var(--ink);font-weight:600;padding:11px 17px}.account:hover{border-color:var(--ink)}.menu-toggle{display:none}@media(max-width:850px){.inner{flex-wrap:wrap;gap:0;min-height:70px;padding-top:12px;padding-bottom:12px}.brand>span{font-size:15px}.brand small{display:none}.brand img{width:30px;height:30px}nav{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:0;padding-top:14px}.nav-link{padding:13px 4px}.account{margin:8px 0;align-self:start}:global(.nav-ready) nav:not(.open){display:none}:global(.nav-ready) .menu-toggle{display:flex;align-items:center;gap:10px;border:1px solid var(--border-2);background:var(--bg);color:var(--ink);border-radius:8px;padding:10px 12px;min-height:44px;font:inherit;font-size:14px;cursor:pointer}}
 </style>

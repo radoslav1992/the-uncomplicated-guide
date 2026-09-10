@@ -41,9 +41,12 @@ export async function verify(secret: string, data: string, signature: string): P
   return diff === 0;
 }
 
-/** Secret used to sign sign-in sessions, magic links and unsubscribe links. Falls back so dev works without configuration. */
+/** Never accept public/default signing keys, including when configuration is incomplete. */
 export const signingSecret = (env: Env) => {
-  if (env.AUTH_SECRET) return env.AUTH_SECRET;
-  console.warn('[auth] AUTH_SECRET is not set — using an insecure development fallback');
-  return env.STRIPE_WEBHOOK_SECRET || 'dev-only-insecure-secret';
+  if (!env.AUTH_SECRET || env.AUTH_SECRET.length < 32 || env.AUTH_SECRET.startsWith('change-me')) throw new Error('AUTH_SECRET must contain at least 32 characters');
+  return env.AUTH_SECRET;
 };
+
+export async function digest(value: string): Promise<string> {
+  return base64url(new Uint8Array(await crypto.subtle.digest('SHA-256', enc.encode(value))));
+}

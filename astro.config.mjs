@@ -64,6 +64,7 @@ export default defineConfig({
         !page.includes('/thank-you') &&
         !page.includes('/download/') &&
         !page.includes('/account') &&
+        !page.includes('/checkout') &&
         !page.includes('/admin/') &&
         !page.includes('/api/'),
       serialize(item) {

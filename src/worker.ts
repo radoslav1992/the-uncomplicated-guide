@@ -7,6 +7,7 @@
  *   forwarded to CONTACT_TO, which must be a verified destination address.
  * - `scheduled`: the cron trigger in wrangler.jsonc; delivers queued newsletter batches.
  */
+import { deliverPurchases } from './lib/delivery';
 import { handle } from '@astrojs/cloudflare/handler';
 import { deliverPending, oneClickUnsubscribe, purgeUnconfirmed } from './lib/newsletter';
 
@@ -19,7 +20,17 @@ export default {
       const url = new URL(request.url);
       if (url.pathname === '/api/newsletter/unsubscribe') return oneClickUnsubscribe(env, url);
     }
-    return handle(request, env, ctx);
+    const response = await handle(request, env, ctx);
+    const headers = new Headers(response.headers);
+    headers.set('X-Content-Type-Options', 'nosniff');
+    headers.set('X-Frame-Options', 'DENY');
+    headers.set('Referrer-Policy', 'no-referrer');
+    const path = new URL(request.url).pathname;
+    if (/^\/(api|admin|account|thank-you|download|checkout)(\/|$)/.test(path)) {
+      headers.set('Cache-Control', 'private, no-store');
+      headers.set('X-Robots-Tag', 'noindex, nofollow');
+    }
+    return new Response(response.body, {status:response.status, statusText:response.statusText, headers});
   },
 
   async email(message, env) {
@@ -44,6 +55,11 @@ export default {
 
   async scheduled(_event, env, ctx) {
     const origin = (env.SITE_URL || '').replace(/\/$/, '');
+    ctx.waitUntil(deliverPurchases(env, origin));
+    ctx.waitUntil(env.DB.batch([
+      env.DB.prepare('DELETE FROM login_tokens WHERE expires_at < ?1').bind(Date.now()),
+      env.DB.prepare('DELETE FROM rate_limits WHERE expires_at < ?1').bind(Date.now()),
+    ]));
     ctx.waitUntil(
       deliverPending(env, origin).then((n) => {
         if (n) console.info('[newsletter] cron delivered', n);

@@ -4,7 +4,7 @@
  */
 import { site } from '../data/site';
 import { sendEmail, textToHtml } from './email';
-import { base64url, base64urlDecode, sign, signingSecret, verify } from './tokens';
+import { randomToken, base64url, base64urlDecode, sign, signingSecret, verify } from './tokens';
 import { now, type SignupRow } from './db';
 
 export interface Subscriber extends SignupRow {
@@ -74,7 +74,7 @@ export async function subscribe(env: Env, origin: string, email: string, interes
 
   if (existing?.confirmed_at) return { status: 'already-confirmed' as const };
 
-  await sendEmail(env, {
+  const delivery = await sendEmail(env, {
     to: email,
     subject: `Please confirm — ${site.name} newsletter`,
     text: `One click and you are on the list:
@@ -87,7 +87,7 @@ If you did not ask for this, ignore it — nothing is sent without the click.
 ${site.author.name}
 ${site.name}`,
   });
-  return { status: 'confirmation-sent' as const };
+  return { status: delivery.ok ? 'confirmation-sent' as const : 'delivery-failed' as const };
 }
 
 export async function confirmSubscriber(env: Env, email: string): Promise<boolean> {
@@ -100,7 +100,10 @@ export async function confirmSubscriber(env: Env, email: string): Promise<boolea
 }
 
 export async function removeSubscriber(env: Env, email: string) {
-  await env.DB.prepare('DELETE FROM signups WHERE email = ?1').bind(email.toLowerCase()).run();
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM signups WHERE email = ?1').bind(email.toLowerCase()),
+    env.DB.prepare("UPDATE newsletter_recipients SET error = 'unsubscribed' WHERE email = ?1 AND sent_at IS NULL").bind(email.toLowerCase()),
+  ]);
 }
 
 /** Privacy policy promise: addresses that never confirmed are deleted after ninety days. */
@@ -192,37 +195,45 @@ export async function sendTestLetter(env: Env, origin: string, n: Pick<Newslette
 export async function deliverPending(env: Env, origin: string, budgetMs = 20_000, batch = 25): Promise<number> {
   const started = Date.now();
   let attempted = 0;
-  while (Date.now() - started < budgetMs) {
-    const letter = await env.DB.prepare(
-      'SELECT * FROM newsletters WHERE finished_at IS NULL AND started_at IS NOT NULL ORDER BY id LIMIT 1',
-    ).first<Newsletter>();
-    if (!letter) break;
-    const pending = await env.DB.prepare(
-      'SELECT email FROM newsletter_recipients WHERE newsletter_id = ?1 AND sent_at IS NULL AND error IS NULL LIMIT ?2',
-    )
-      .bind(letter.id, batch)
-      .all<{ email: string }>();
-    if (!pending.results.length) {
-      await env.DB.prepare('UPDATE newsletters SET finished_at = ?2 WHERE id = ?1').bind(letter.id, now()).run();
+  const pending = await env.DB.prepare(`SELECT r.newsletter_id, r.email FROM newsletter_recipients r
+    JOIN newsletters n ON n.id = r.newsletter_id WHERE n.started_at IS NOT NULL AND n.finished_at IS NULL
+    AND r.sent_at IS NULL AND r.error IS NULL AND r.lease_until < ?1 ORDER BY n.id LIMIT ?2`)
+    .bind(Math.floor(Date.now()/1000), batch).all<{newsletter_id:number; email:string}>();
+  for (const row of pending.results) {
+    if (Date.now() - started >= budgetMs) break;
+    const lease = randomToken();
+    const claim = await env.DB.prepare(`UPDATE newsletter_recipients SET lease_id = ?3, lease_until = ?4
+      WHERE newsletter_id = ?1 AND email = ?2 AND sent_at IS NULL AND error IS NULL AND lease_until < ?5 RETURNING email`)
+      .bind(row.newsletter_id, row.email, lease, Math.floor(Date.now()/1000)+300, Math.floor(Date.now()/1000)).first();
+    if (!claim) continue;
+    const subscriber = await getSubscriber(env, row.email);
+    if (!subscriber?.confirmed_at) {
+      await env.DB.prepare("UPDATE newsletter_recipients SET error = 'unsubscribed', lease_until = 0 WHERE newsletter_id = ?1 AND email = ?2 AND lease_id = ?3").bind(row.newsletter_id,row.email,lease).run();
       continue;
     }
-    for (const { email } of pending.results) {
-      if (Date.now() - started >= budgetMs) return attempted;
-      const mail = await renderLetter(env, origin, letter, email);
-      const r = await sendEmail(env, { to: email, ...mail });
-      attempted++;
-      if (r.ok) {
-        await env.DB.batch([
-          env.DB.prepare('UPDATE newsletter_recipients SET sent_at = ?3 WHERE newsletter_id = ?1 AND email = ?2').bind(letter.id, email, now()),
-          env.DB.prepare('UPDATE newsletters SET sent = sent + 1 WHERE id = ?1').bind(letter.id),
-        ]);
-      } else {
-        await env.DB.batch([
-          env.DB.prepare('UPDATE newsletter_recipients SET error = ?3 WHERE newsletter_id = ?1 AND email = ?2').bind(letter.id, email, r.error ?? 'send failed'),
-          env.DB.prepare('UPDATE newsletters SET failed = failed + 1 WHERE id = ?1').bind(letter.id),
-        ]);
-      }
-    }
+    const letter = await getNewsletter(env, row.newsletter_id);
+    if (!letter) continue;
+    const mail = await renderLetter(env, origin, letter, row.email);
+    const r = await sendEmail(env, {to:row.email, ...mail});
+    attempted++;
+    await env.DB.prepare(`UPDATE newsletter_recipients SET sent_at = ?4, error = ?5, lease_until = 0
+      WHERE newsletter_id = ?1 AND email = ?2 AND lease_id = ?3`)
+      .bind(row.newsletter_id,row.email,lease,r.ok ? now() : null,r.ok ? null : 'send failed; retry from admin').run();
   }
+  // Recount from rows, never increment counters independently of a claimed delivery.
+  await env.DB.prepare(`UPDATE newsletters SET
+    sent = (SELECT COUNT(*) FROM newsletter_recipients r WHERE r.newsletter_id = newsletters.id AND r.sent_at IS NOT NULL),
+    failed = (SELECT COUNT(*) FROM newsletter_recipients r WHERE r.newsletter_id = newsletters.id AND r.error IS NOT NULL),
+    finished_at = CASE WHEN NOT EXISTS (SELECT 1 FROM newsletter_recipients r WHERE r.newsletter_id = newsletters.id AND r.sent_at IS NULL AND r.error IS NULL) THEN ?1 ELSE NULL END
+    WHERE started_at IS NOT NULL`).bind(now()).run();
   return attempted;
+}
+
+export async function retryFailedLetters(env: Env) {
+  await env.DB.batch([
+    env.DB.prepare(`UPDATE newsletter_recipients SET error = NULL, lease_until = 0
+      WHERE error LIKE 'send failed%' AND EXISTS (SELECT 1 FROM signups s WHERE s.email = newsletter_recipients.email AND s.confirmed_at IS NOT NULL)`),
+    env.DB.prepare(`UPDATE newsletters SET finished_at = NULL WHERE EXISTS
+      (SELECT 1 FROM newsletter_recipients r WHERE r.newsletter_id = newsletters.id AND r.sent_at IS NULL AND r.error IS NULL)`),
+  ]);
 }
