@@ -1,0 +1,43 @@
+<script>
+  // Keep content visible by default, including when JavaScript is unavailable.
+  const motionPreference = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  );
+  if (!motionPreference.matches && "IntersectionObserver" in window) {
+    const active = new Set<Animation>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
+          if (motionPreference.matches) return;
+          const animation = entry.target.animate(
+            [
+              { opacity: 0.35, transform: "translateY(22px)" },
+              { opacity: 1, transform: "translateY(0)" },
+            ],
+            { duration: 650, easing: "cubic-bezier(.2,.7,.2,1)" },
+          );
+          active.add(animation);
+          animation.finished
+            .finally(() => active.delete(animation))
+            .catch(() => {});
+        });
+      },
+      { threshold: 0.08 },
+    );
+    document
+      .querySelectorAll("[data-reveal]")
+      .forEach((element) => observer.observe(element));
+    motionPreference.addEventListener("change", (event) => {
+      if (event.matches) {
+        observer.disconnect();
+        active.forEach((animation) => animation.cancel());
+        active.clear();
+      }
+    });
+    window.addEventListener("pagehide", () => observer.disconnect(), {
+      once: true,
+    });
+  }
+</script>
