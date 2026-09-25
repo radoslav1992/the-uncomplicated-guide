@@ -1,20 +1,31 @@
 ---
-import { site } from '../data/site';
-import { availableGuides } from '../data/guides';
-import SignupForm from './SignupForm.astro';
+import { site } from "../data/site";
+import { availableGuides } from "../data/guides";
+import SignupForm from "./SignupForm.astro";
 
 const year = new Date().getFullYear();
 const nav = [
-  { label: 'Library', href: '/guides' },
-  ...availableGuides.map((g) => ({ label: g.title, href: `/guides/${g.slug}` })),
-  { label: 'Blog', href: '/blog' },
-  { label: 'Your guides', href: '/account' },
-  { label: 'About', href: '/#author' },
-  { label: 'Contact', href: '/contact' },
+  { label: "Library", href: "/guides" },
+  ...availableGuides.map((g) => ({
+    label: g.title,
+    href: `/guides/${g.slug}`,
+  })),
+  { label: "Blog", href: "/blog" },
+  { label: "Your guides", href: "/account" },
+  { label: "About", href: "/#author" },
+  { label: "Contact", href: "/contact" },
 ];
 ---
 
 <footer class="site-footer">
+  <div class="container footer-top">
+    <p>
+      Good ideas deserve
+      <br />
+      <em>a useful next step.</em>
+    </p>
+    <a href="/guides">Find yours in the library ↗</a>
+  </div>
   <div class="container cols">
     <div class="col">
       <p class="brand">
@@ -35,30 +46,105 @@ const nav = [
     </div>
     <nav class="col" aria-label="Footer navigation">
       <p class="heading">Navigation</p>
-      {nav.map((it) => <a href={it.href}>{it.label}</a>)}
+      {nav.map((it) => (
+        <a href={it.href}>{it.label}</a>
+      ))}
     </nav>
     <div class="col">
       <p class="heading">Terms</p>
-      {site.legalNav.map((it) => <a href={it.href}>{it.label}</a>)}
+      {site.legalNav.map((it) => (
+        <a href={it.href}>{it.label}</a>
+      ))}
       <p class="muted">{site.footerPromise}</p>
     </div>
   </div>
   <div class="container bottom">
-    <p class="muted">© {year} {site.name}. All rights reserved.</p>
+    <p class="muted">
+      © {year} {site.name}. All rights reserved.
+    </p>
   </div>
 </footer>
 
 <style>
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 28px;
+    padding-top: 50px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #ffffff24;
+  }
+  .footer-top p {
+    font-size: 30px;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+  .footer-top em {
+    font-family: var(--font-editorial);
+    font-weight: 400;
+    color: #efd0a0;
+  }
+  .footer-top a {
+    font-size: 13px;
+    color: #efd0a0;
+  }
+  .site-footer :global(.btn-accent) {
+    background: #efd0a0;
+    color: #192c37;
+  }
+  .site-footer :global(.btn-accent:hover) {
+    background: #f6deba;
+    color: #192c37;
+  }
+  .site-footer :global(.notice) {
+    color: #192c37;
+  }
+  .site-footer :global(.notice-error) {
+    color: #ffd4ca;
+  }
+  .site-footer :global(.fields) {
+    grid-template-columns: 1fr;
+  }
+  .site-footer :global(.input) {
+    min-width: 0;
+  }
+  .col {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 640px) {
+    .footer-top {
+      align-items: start;
+      flex-direction: column;
+    }
+    .footer-top p {
+      font-size: 27px;
+    }
+  }
+
   .site-footer {
     border-top: 1px solid var(--border);
-    background: var(--bg-alt);
+    background: #192c37;
+    --ink: #fcfaf5;
+    --text: #d0d9dc;
+    --text-2: #d0d9dc;
+    --text-3: #d0d9dc;
+    --muted: #b1bfc2;
+    --border: #ffffff24;
+    --border-input: #64747c;
+    --bg-input: #253d4b;
+    --accent: #efd0a0;
+    --accent-link-hover: #ffffff;
+    color: #fcfaf5;
     margin-top: auto;
   }
   .cols {
     padding-top: 48px;
     padding-bottom: 28px;
     display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr 1.2fr;
+    grid-template-columns: 1.6fr 1.2fr 0.85fr 1fr;
     gap: 32px;
   }
   .col {

@@ -1,81 +1,114 @@
 ---
-import GuideSample from '../../components/GuideSample.astro';
-import Faq from '../../components/Faq.astro';
-import Base from '../../layouts/Base.astro';
-import GuideCover from '../../components/GuideCover.astro';
-import BuyButton from '../../components/BuyButton.astro';
-import PartsList from '../../components/PartsList.astro';
-import WhoFor from '../../components/WhoFor.astro';
-import SignupForm from '../../components/SignupForm.astro';
-import Reviews from '../../components/Reviews.astro';
-import { site, formatPrice } from '../../data/site';
-import { guides } from '../../data/guides';
+import GuideSample from "../../components/GuideSample.astro";
+import Faq from "../../components/Faq.astro";
+import Base from "../../layouts/Base.astro";
+import GuideCover from "../../components/GuideCover.astro";
+import BuyButton from "../../components/BuyButton.astro";
+import PartsList from "../../components/PartsList.astro";
+import WhoFor from "../../components/WhoFor.astro";
+import SignupForm from "../../components/SignupForm.astro";
+import Reviews from "../../components/Reviews.astro";
+import { site, formatPrice } from "../../data/site";
+import { guides } from "../../data/guides";
 
 export function getStaticPaths() {
   return guides.map((g) => ({ params: { slug: g.slug }, props: { guide: g } }));
 }
 
 const { guide } = Astro.props;
-const sellable = guide.status === 'available';
+const sellable = guide.status === "available";
 const price = formatPrice(guide.price, guide.currency);
-const others = guides.filter((g) => g.slug !== guide.slug && g.status === 'available');
-const metaLine = [guide.pages && `${guide.pages} pages`, 'PDF', guide.edition].filter(Boolean).join(' · ');
+const others = guides.filter(
+  (g) => g.slug !== guide.slug && g.status === "available",
+);
+const metaLine = [guide.pages && `${guide.pages} pages`, "PDF", guide.edition]
+  .filter(Boolean)
+  .join(" · ");
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
-const origin = (Astro.site ?? new URL(Astro.url.origin)).href.replace(/\/$/, '');
+const origin = (Astro.site ?? new URL(Astro.url.origin)).href.replace(
+  /\/$/,
+  "",
+);
 
 const jsonLd = [
   {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
+    "@context": "https://schema.org",
+    "@type": "Product",
     name: guide.title,
     description: guide.short,
     image: guide.cover ? new URL(guide.cover.src, Astro.site).href : undefined,
-    brand: { '@type': 'Brand', name: site.name },
-    author: { '@type': 'Person', name: site.author.name },
+    brand: { "@type": "Brand", name: site.name },
+    author: { "@type": "Person", name: site.author.name },
     offers: sellable
       ? {
-          '@type': 'Offer',
+          "@type": "Offer",
           price: (guide.price / 100).toFixed(2),
           priceCurrency: guide.currency,
-          availability: 'https://schema.org/InStock',
+          availability: "https://schema.org/InStock",
           url: canonical,
         }
       : undefined,
   },
   {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
-      { '@type': 'ListItem', position: 2, name: 'Library', item: `${origin}/guides` },
-      { '@type': 'ListItem', position: 3, name: guide.title, item: canonical },
+      { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Library",
+        item: `${origin}/guides`,
+      },
+      { "@type": "ListItem", position: 3, name: guide.title, item: canonical },
     ],
   },
 ];
 ---
 
-<Base title={guide.title} description={guide.short} current="Library" image={sellable ? `/social/${guide.slug}.png` : undefined} jsonLd={jsonLd}>
+<Base
+  title={guide.title}
+  description={guide.short}
+  current="Library"
+  image={sellable ? `/social/${guide.slug}.png` : undefined}
+  jsonLd={jsonLd}
+>
   <section class="hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="container hero-grid">
       <div>
-        <a href="/guides" class="back">← All guides</a>
+        <a href="/guides" class="back">
+          ← All guides
+        </a>
         <h1 class="display hero-title">{guide.title}</h1>
-        <p class="sub hero-in" style="--s: 1">{guide.subtitle}</p>
-        <p class="desc hero-in" style="--s: 2">{guide.description}</p>
+        <p class="sub hero-in" style="--s: 1">
+          {guide.subtitle}
+        </p>
+        <p class="desc hero-in" style="--s: 2">
+          {guide.description}
+        </p>
         <div class="meta hero-in" style="--s: 3">
-          {sellable ? <span class="price-badge">{price}</span> : <span class="soon-badge">Soon</span>}
+          {sellable ? (
+            <span class="price-badge">{price}</span>
+          ) : (
+            <span class="soon-badge">Soon</span>
+          )}
           <span class="small">{metaLine}</span>
         </div>
         <div class="cta hero-in" style="--s: 4">
-          {
-            sellable ? (
-              <Fragment><BuyButton guide={guide} /><a href="#sample" class="btn btn-outline">Read a free sample</a></Fragment>
-            ) : (
-              <a href="#notify" class="btn btn-accent">Tell me when it's out →</a>
-            )
-          }
+          {sellable ? (
+            <Fragment>
+              <BuyButton guide={guide} />
+              <a href="#sample" class="btn btn-outline">
+                Read a free sample
+              </a>
+            </Fragment>
+          ) : (
+            <a href="#notify" class="btn btn-accent">
+              Tell me when it's out →
+            </a>
+          )}
         </div>
       </div>
       <GuideCover guide={guide} class="hero-in" />
@@ -89,133 +122,218 @@ const jsonLd = [
       <div class="sticky reveal">
         <p class="eyebrow">What's inside</p>
         <h2 class="display">Four parts, in the order the work happens</h2>
-        <p>Not by topic, but by the flow of the job. Each part ends where the next one begins.</p>
+        <p>
+          Not by topic, but by the flow of the job. Each part ends where the
+          next one begins.
+        </p>
       </div>
       <PartsList parts={guide.parts} />
     </div>
   </section>
 
-  {
-    guide.outcomes && (
-      <section class="section-dark outcomes">
-        <div class="container">
-          <p class="eyebrow">After the guide</p>
-          <h2 class="display">What this guide helps you do</h2>
-          <ul>
-            {guide.outcomes.map((o, i) => (
-              <li class="reveal" style={`--i: ${i}`}>
-                <span aria-hidden="true">→</span>
-                {o}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    )
-  }
+  {guide.outcomes && (
+    <section class="section-dark outcomes">
+      <div class="container">
+        <p class="eyebrow">After the guide</p>
+        <h2 class="display">What this guide helps you do</h2>
+        <ul>
+          {guide.outcomes.map((o, i) => (
+            <li class="reveal" style={`--i: ${i}`}>
+              <span aria-hidden="true">→</span>
+              {o}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
 
   <WhoFor forWho={guide.forWho} notFor={guide.notFor} />
 
-  {
-    guide.authorNote && (
-      <section class="section-alt author-note">
-        <div class="container">
-          <div class="inner reveal">
-            <p class="eyebrow">Who wrote it</p>
-            {guide.authorNote.map((p) => <p class="note">{p}</p>)}
-            <p class="imprint">
-              Published under the <strong>{site.imprint}</strong> imprint — same author, same text.
-              That is the name you will see in the copyright line inside the file.
+  {guide.authorNote && (
+    <section class="section-alt author-note">
+      <div class="container">
+        <div class="inner reveal">
+          <p class="eyebrow">Who wrote it</p>
+          {guide.authorNote.map((p) => (
+            <p class="note">{p}</p>
+          ))}
+          <p class="imprint">
+            Published under the <strong>{site.imprint}</strong> imprint — same
+            author, same text. That is the name you will see in the copyright
+            line inside the file.
+          </p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {sellable ? (
+    <section id="buy" class="section">
+      <div class="container">
+        <div class="panel buy-panel">
+          <div>
+            <h2 class="display">{price}, once.</h2>
+            <p class="p">
+              {guide.pages}-page PDF in English. Payment goes through Stripe —
+              your card never enters this site. The file arrives right after
+              payment and again by email, so it does not get lost.
+            </p>
+            <p class="small">
+              Current as of {guide.currentAsOf}. Read and print on all your
+              devices, use the templates with your own clients; only the file
+              itself is not shared or resold.
             </p>
           </div>
-        </div>
-      </section>
-    )
-  }
-
-  {
-    sellable ? (
-      <section id="buy" class="section">
-        <div class="container">
-          <div class="panel buy-panel">
-            <div>
-              <h2 class="display">{price}, once.</h2>
-              <p class="p">
-                {guide.pages}-page PDF in English. Payment goes through Stripe — your card never
-                enters this site. The file arrives right after payment and again by email, so it
-                does not get lost.
-              </p>
-              <p class="small">
-                Current as of {guide.currentAsOf}. Read and print on all your devices, use the
-                templates with your own clients; only the file itself is not shared or resold.
-              </p>
-            </div>
-            <div class="buy-action">
-              <BuyButton guide={guide} />
-            </div>
+          <div class="buy-action">
+            <BuyButton guide={guide} />
           </div>
         </div>
-      </section>
-    ) : (
-      <section id="notify" class="section">
-        <div class="container">
-          <div class="panel buy-panel">
-            <div>
-              <h2 class="display">Not on sale yet.</h2>
-              <p class="p">
-                This guide is in progress. Subscribe and I will write on the day it comes out —
-                plus the occasional short note; never more than a couple of emails a month.
-              </p>
-            </div>
-            <SignupForm guide={guide.slug} buttonLabel="Tell me" source={`guide:${guide.slug}`} />
+      </div>
+    </section>
+  ) : (
+    <section id="notify" class="section">
+      <div class="container">
+        <div class="panel buy-panel">
+          <div>
+            <h2 class="display">Not on sale yet.</h2>
+            <p class="p">
+              This guide is in progress. Subscribe and I will write on the day
+              it comes out — plus the occasional short note; never more than a
+              couple of emails a month.
+            </p>
           </div>
+          <SignupForm
+            guide={guide.slug}
+            buttonLabel="Tell me"
+            source={`guide:${guide.slug}`}
+          />
         </div>
-      </section>
-    )
-  }
+      </div>
+    </section>
+  )}
 
-  {sellable && <section class="section"><div class="container"><h2 class="display">Before you buy</h2><Faq items={[
-    {q:'What is included?',a:`${guide.pages} pages in English, with the prompts, checklists, planning tables and examples described above. This is a PDF playbook. Tool subscriptions, one-to-one support and ready-to-run integrations or editable media projects are not included.`},
-    {q:'How much experience do I need?',a:guide.slug === 'ai-assistants' ? 'You should be comfortable configuring web tools. Connecting a live calendar or CRM requires API or automation experience beyond this guide.' : 'You should be comfortable using creative web tools and reviewing audio and video. Start manually; the automation chapter is a workflow outline, not an importable project.'},
-    {q:'How do downloads and updates work?',a:'Download after payment and receive the link by email. Links last seven days; recover a fresh link from My guides with your purchase email. Published updates within edition 1.x are included.'},
-    {q:'Can I ask a question or request a refund?',a:'Email hello@uncomplicatedguide.com. Our refund policy includes an additional 14-day not-as-described promise; your statutory consumer rights remain unaffected.'},
-  ]} /></div></section>}
-  {sellable && <div class="mobile-buy"><span>{price} <small>USD · PDF</small></span><BuyButton guide={guide} label="Get the guide →" /></div>}
+  {sellable && (
+    <section class="section">
+      <div class="container">
+        <h2 class="display">Before you buy</h2>
+        <Faq
+          items={[
+            {
+              q: "What is included?",
+              a: `${guide.pages} pages in English, with the prompts, checklists, planning tables and examples described above. This is a PDF playbook. Tool subscriptions, one-to-one support and ready-to-run integrations or editable media projects are not included.`,
+            },
+            {
+              q: "How much experience do I need?",
+              a:
+                guide.slug === "ai-assistants"
+                  ? "You should be comfortable configuring web tools. Connecting a live calendar or CRM requires API or automation experience beyond this guide."
+                  : "You should be comfortable using creative web tools and reviewing audio and video. Start manually; the automation chapter is a workflow outline, not an importable project.",
+            },
+            {
+              q: "How do downloads and updates work?",
+              a: "Download after payment and receive the link by email. Links last seven days; recover a fresh link from My guides with your purchase email. Published updates within edition 1.x are included.",
+            },
+            {
+              q: "Can I ask a question or request a refund?",
+              a: "Email hello@uncomplicatedguide.com. Our refund policy includes an additional 14-day not-as-described promise; your statutory consumer rights remain unaffected.",
+            },
+          ]}
+        />
+      </div>
+    </section>
+  )}
+  {sellable && (
+    <div class="mobile-buy">
+      <span>
+        {price} <small>USD · PDF</small>
+      </span>
+      <BuyButton guide={guide} label="Get the guide →" />
+    </div>
+  )}
   {/* Rendered per request so a new review shows up without waiting for a deploy. */}
   {sellable && <Reviews guide={guide.slug} server:defer />}
 
-  {
-    others.length > 0 && (
-      <section class="next">
-        <div class="container">
-          <h2 class="display">Also in the library</h2>
-          <ul>
-            {others.map((g) => (
-              <li>
-                <a href={`/guides/${g.slug}`}>
-                  <span class="t">{g.title}</span>
-                  <span class="d">{g.short}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    )
-  }
+  {others.length > 0 && (
+    <section class="next">
+      <div class="container">
+        <h2 class="display">Also in the library</h2>
+        <ul>
+          {others.map((g) => (
+            <li>
+              <a href={`/guides/${g.slug}`}>
+                <span class="t">{g.title}</span>
+                <span class="d">{g.short}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
 </Base>
 
 <style>
-  .mobile-buy{display:none}.cta{display:flex;flex-wrap:wrap;gap:12px}
-  @media(max-width:640px){.mobile-buy{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:45;background:var(--bg);border-top:1px solid var(--border-2);padding:12px max(16px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom));align-items:center;justify-content:space-between;gap:12px}.mobile-buy>span{font-size:22px;font-weight:700}.mobile-buy small{display:block;font-size:11px;color:var(--text);font-weight:400}:global(body:has(.mobile-buy)){padding-bottom:92px}}
+  .mobile-buy {
+    display: none;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 640px) {
+    .mobile-buy {
+      display: flex;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 45;
+      background: var(--bg);
+      border-top: 1px solid var(--border-2);
+      padding: 12px max(16px, env(safe-area-inset-right))
+        calc(12px + env(safe-area-inset-bottom));
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .mobile-buy > span {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .mobile-buy small {
+      display: block;
+      font-size: 11px;
+      color: var(--text);
+      font-weight: 400;
+    }
+    :global(body:has(.mobile-buy)) {
+      padding-bottom: 92px;
+    }
+  }
 
   @keyframes hero-in {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
   @keyframes title-in {
-    from { opacity: 0; clip-path: inset(0 0 105% 0); transform: translateY(0.14em); }
-    to { opacity: 1; clip-path: inset(0 0 -20% 0); transform: none; }
+    from {
+      opacity: 0;
+      clip-path: inset(0 0 105% 0);
+      transform: translateY(0.14em);
+    }
+    to {
+      opacity: 1;
+      clip-path: inset(0 0 -20% 0);
+      transform: none;
+    }
   }
   .hero-title {
     animation: title-in 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -235,8 +353,16 @@ const jsonLd = [
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(60% 55% at 78% 42%, rgba(226, 84, 43, 0.14), transparent 70%),
-      radial-gradient(45% 40% at 88% 70%, rgba(226, 84, 43, 0.07), transparent 70%);
+      radial-gradient(
+        60% 55% at 78% 42%,
+        rgba(233, 181, 108, 0.22),
+        transparent 70%
+      ),
+      radial-gradient(
+        45% 40% at 88% 70%,
+        rgba(233, 181, 108, 0.1),
+        transparent 70%
+      );
     pointer-events: none;
   }
   .hero-grid {
@@ -258,7 +384,7 @@ const jsonLd = [
   }
   .hero h1 {
     font-size: clamp(36px, 6.4vw, 76px);
-    line-height: 0.98;
+    line-height: 1.08;
     letter-spacing: -0.05em;
     margin: 0;
   }

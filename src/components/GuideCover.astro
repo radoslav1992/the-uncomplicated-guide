@@ -1,45 +1,72 @@
 ---
-import { Image } from 'astro:assets';
-import type { Guide } from '../data/guides';
+import { Image } from "astro:assets";
+import type { Guide } from "../data/guides";
 
 interface Props {
   guide: Guide;
   /** Rendered width of the cover in px (used for srcset sizing). */
   width?: number;
   /** Large hero cover vs small shelf thumbnail. */
-  size?: 'hero' | 'shelf';
+  size?: "hero" | "shelf";
   href?: string;
   class?: string;
 }
-const { guide, size = 'hero', href, class: className } = Astro.props;
+const { guide, size = "hero", href, class: className } = Astro.props;
 const alt = `Cover of ${guide.title} — ${guide.subtitle.toLowerCase()}`;
-const Tag = href ? 'a' : 'div';
+const Tag = href ? "a" : "div";
 ---
 
-<div class:list={['cover-wrap', size, className]}>
+<div class:list={["cover-wrap", size, className]}>
   <div class="glow" aria-hidden="true"></div>
   <Tag href={href} class="cover">
-    {
-      guide.cover ? (
-        <Image
-          src={guide.cover}
-          alt={alt}
-          widths={size === 'hero' ? [380, 760, 1140] : [200, 400]}
-          sizes={size === 'hero' ? '(max-width: 860px) 78vw, 380px' : '200px'}
-          loading={size === 'hero' ? 'eager' : 'lazy'}
-          fetchpriority={size === 'hero' ? 'high' : undefined}
-        />
-      ) : (
-        <div class="placeholder" aria-hidden="true">
-          {guide.title}
-        </div>
-      )
-    }
+    {guide.cover ? (
+      <Image
+        src={guide.cover}
+        alt={alt}
+        widths={size === "hero" ? [380, 760, 1140] : [200, 400]}
+        sizes={size === "hero" ? "(max-width: 860px) 78vw, 380px" : "200px"}
+        loading={size === "hero" ? "eager" : "lazy"}
+        fetchpriority={size === "hero" ? "high" : undefined}
+      />
+    ) : (
+      <div class="placeholder" aria-hidden="true">
+        {guide.title}
+      </div>
+    )}
   </Tag>
   <slot />
 </div>
 
 <style>
+  .cover::before {
+    content: "";
+    position: absolute;
+    left: 100%;
+    top: 3px;
+    bottom: 3px;
+    width: 10px;
+    background: repeating-linear-gradient(
+      90deg,
+      #fffcf2 0 2px,
+      #d8cfbe 2px 3px
+    );
+    transform: skewY(25deg);
+    transform-origin: left;
+  }
+  .cover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      #13293755,
+      transparent 4%,
+      #ffffff2b 5%,
+      transparent 9%
+    );
+    pointer-events: none;
+  }
+
   .cover-wrap {
     position: relative;
     display: grid;
@@ -49,15 +76,19 @@ const Tag = href ? 'a' : 'div';
   .glow {
     position: absolute;
     inset: -6%;
-    background: radial-gradient(closest-side, rgba(226, 84, 43, 0.22), transparent 78%);
+    background: radial-gradient(
+      closest-side,
+      rgba(233, 181, 108, 0.34),
+      transparent 78%
+    );
     pointer-events: none;
   }
   .cover {
     position: relative;
     display: block;
-    transform: rotate(-2.2deg);
+    transform: perspective(1000px) rotateY(-10deg) rotateZ(-4deg);
     filter: drop-shadow(0 26px 44px rgba(22, 19, 15, 0.3));
-    transition: transform 0.2s ease;
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     color: inherit;
   }
   a.cover:hover {
@@ -68,7 +99,7 @@ const Tag = href ? 'a' : 'div';
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 10px;
+    border-radius: 3px;
   }
   .hero {
     padding: 16px 0;
