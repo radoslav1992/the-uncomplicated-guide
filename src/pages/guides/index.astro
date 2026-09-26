@@ -92,20 +92,22 @@ import { availableGuides, upcomingGuides } from "../../data/guides";
 </Base>
 <style>
   .library-intro {
-    background: linear-gradient(110deg, #fcfaf5, #f1e5d0);
+    background: var(--bg-alt);
     padding: 62px 0 48px;
     border-bottom: 1px solid var(--border);
   }
   h1 {
     font-family: var(--font-display);
-    font-weight: 600;
-    font-size: clamp(39px, 5.4vw, 66px);
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(39px, 6.4vw, 88px);
     line-height: 1.12;
-    letter-spacing: -0.055em;
+    letter-spacing: -0.025em;
     margin: 18px 0 22px;
   }
   em {
     font-family: var(--font-editorial);
+    font-style: normal;
     font-weight: 400;
     letter-spacing: -0.045em;
   }
@@ -169,7 +171,7 @@ import { availableGuides, upcomingGuides } from "../../data/guides";
     padding: 22px 25px;
     background: var(--bg-alt);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 0;
     margin-top: 28px;
     display: flex;
     justify-content: space-between;
@@ -221,9 +223,10 @@ import { availableGuides, upcomingGuides } from "../../data/guides";
   }
   .upcoming-number {
     font-family: var(--font-editorial);
+    font-style: normal;
     font-style: italic;
     font-size: 30px;
-    color: #9c8060;
+    color: var(--accent);
   }
   h3 {
     font-size: 21px;

@@ -2,10 +2,11 @@
 import "@fontsource-variable/onest";
 import onestLatin from "@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url";
 import "../styles/global.css";
+import "../styles/adon.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CookieConsent from "../components/CookieConsent.astro";
-import ScrollReveal from "../components/ScrollReveal.astro";
+import AgencyMotion from "../components/AgencyMotion.astro";
 import { site } from "../data/site";
 import type { ImageMetadata } from "astro";
 
@@ -197,7 +198,7 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
       <slot />
     </main>
     <Footer />
-    <ScrollReveal />
+    <AgencyMotion />
     {gaId && <CookieConsent />}
   </body>
 </html>
