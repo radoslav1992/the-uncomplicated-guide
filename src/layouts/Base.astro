@@ -68,9 +68,19 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
-    <link rel="icon" href="/favicon-192.png" sizes="192x192" type="image/png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link
+      rel="icon"
+      href="/brand/next-chapter-32.png"
+      sizes="32x32"
+      type="image/png"
+    />
+    <link
+      rel="icon"
+      href="/brand/next-chapter-192.png"
+      sizes="192x192"
+      type="image/png"
+    />
+    <link rel="apple-touch-icon" href="/brand/next-chapter-touch.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link
       rel="alternate"
@@ -78,7 +88,7 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
       title={`${site.name} — blog`}
       href="/rss.xml"
     />
-    <meta name="theme-color" content="#fcfaf5" />
+    <meta name="theme-color" content="#111111" />
 
     <meta property="og:type" content={article ? "article" : "website"} />
     <meta property="og:site_name" content={site.name} />
