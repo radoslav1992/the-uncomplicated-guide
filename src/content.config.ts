@@ -15,6 +15,9 @@ const blog = defineCollection({
     /** Set when a post is materially revised, not for typo fixes. */
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
+    /** Optional hero/social image. Root-relative paths and absolute URLs are supported. */
+    image: z.string().optional(),
+    imageAlt: z.string().optional(),
     /**
      * Slug of the guide this post belongs with (see `src/data/guides.ts`).
      * Drives the guide card at the end of the post and the social image.
