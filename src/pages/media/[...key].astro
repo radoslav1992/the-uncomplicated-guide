@@ -1,0 +1,52 @@
+---
+import { env } from 'cloudflare:workers';
+
+export const prerender = false;
+
+const rawKey = Astro.params.key ?? '';
+let key = '';
+try {
+  key = decodeURIComponent(rawKey);
+} catch {
+  key = rawKey;
+}
+
+const allowed =
+  key.startsWith('article-images/') &&
+  /\.(png|jpe?g|webp|gif|avif)$/i.test(key);
+
+if (!allowed) {
+  return new Response('Not found', {
+    status: 404,
+    headers: { 'x-robots-tag': 'noindex' },
+  });
+}
+
+const object = await env.GUIDE_FILES.get(key);
+if (!object) {
+  return new Response('Not found', {
+    status: 404,
+    headers: { 'x-robots-tag': 'noindex' },
+  });
+}
+
+const headers = new Headers();
+object.writeHttpMetadata(headers);
+if (!headers.has('content-type')) {
+  const ext = key.split('.').pop()?.toLowerCase();
+  const types: Record<string, string> = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    gif: 'image/gif',
+    avif: 'image/avif',
+  };
+  headers.set('content-type', types[ext ?? ''] ?? 'application/octet-stream');
+}
+headers.set('content-length', String(object.size));
+headers.set('etag', object.httpEtag);
+headers.set('cache-control', 'public, max-age=86400, s-maxage=604800, immutable');
+
+return new Response(object.body, { headers });
+---
