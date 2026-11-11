@@ -11,7 +11,8 @@ live in R2, email goes out through Cloudflare Email Service and comes in through
 Routing. A small admin page sends the newsletter in batches driven by a cron trigger.
 
 Until November 2026 the site sold two guides as PDFs. Those are now free articles, and every shop
-URL redirects to its replacement.
+URL redirects to its replacement. One of the PDFs lives on as the free guide every newsletter
+subscriber is sent (see [Newsletter](#newsletter)).
 
 **Setting up Cloudflare?** Follow [docs/cloudflare-setup.md](docs/cloudflare-setup.md).
 Design tokens, fonts and colours are documented in [docs/design.md](docs/design.md).
@@ -24,8 +25,9 @@ src/
   data/categories.ts    ← the article categories, with the intro text of each category page
   pages/                ← / , /blog, /blog/[slug], /blog/category/[category], /newsletter, /contact, legal pages,
                           /admin/newsletter, /media/[...key] (R2 images), /rss.xml
-  pages/api/            ← newsletter/{subscribe,confirm,unsubscribe}, contact
-  components/           ← Header, Footer, ArticleCard, FeaturedArticle, Cover, CategoryNav, SignupForm…
+  pages/api/            ← newsletter/{subscribe,confirm,unsubscribe,guide}, contact
+  components/           ← Header, Footer, ArticleCard, FeaturedArticle, Cover, CategoryNav, SignupForm,
+                          GuideOffer (the subscribers' PDF, offered on Voice AI articles)…
   lib/                  ← blog helpers, newsletter, email, tokens, rate limiting
   styles/               ← global.css (tokens, type, prose, forms), blog.css (listings, home)
   assets/fonts/         ← BDO Grotesk and PP Editorial New Italic from the Adon theme (WOFF2)
@@ -34,6 +36,7 @@ src/
 public/
   articles/             ← 16:9 hero images for articles kept in the repository
   social/               ← 1200×630 social cards
+  covers/               ← cover of the subscribers' PDF
   theme/                ← shapes and icons from the Adon theme (stat cards, covers)
   _redirects            ← wildcard redirects for retired shop URLs (the rest are in astro.config.mjs)
 migrations/             ← D1 schema (applied by the deploy command)
@@ -54,8 +57,11 @@ npm run preview                     # astro build + wrangler dev (workerd)
 Emails sent locally are written to `.wrangler/tmp/email/` instead of being delivered — that is where
 the newsletter confirmation links end up during development.
 
-Other scripts: `npm run check` (type-check Astro + TS), `npm test` (newsletter, rate-limit and
-content-integrity tests), `npm run build`.
+To try the PDF download locally, put any PDF into the local R2 emulator under the configured name:
+`npx wrangler r2 object put "kova-guides/<site.freeGuide.fileKey>" --file some.pdf --local`.
+
+Other scripts: `npm run check` (type-check Astro + TS), `npm test` (newsletter, PDF delivery,
+rate-limit and content-integrity tests), `npm run build`.
 
 ## Deploying to Cloudflare
 
@@ -154,6 +160,29 @@ confirmation link and only confirmed addresses receive letters. `/admin/newslett
 subscriber. Delivery runs in batches of 25: the first batch right away, the rest by the cron trigger
 every five minutes. Every letter carries a signed one-click unsubscribe link and `List-Unsubscribe`
 headers; unsubscribing deletes the address. Unconfirmed addresses are purged after ninety days.
+
+### The free PDF for subscribers
+
+Everyone who confirms their address gets a PDF guide, described in `site.freeGuide`
+(`src/data/site.ts`): title, page count, cover, the article on the same subject, and `fileKey` — the
+exact name of the file in the R2 bucket.
+
+- The click that confirms an address sends a second email with the download link and lands on a
+  thank-you page with a download button. Opening the confirmation link again shows the button again
+  but sends no second email.
+- The link is `/api/newsletter/guide?e=…&t=…`: signed with `AUTH_SECRET` for that address, so it needs
+  no account and cannot be guessed. The Worker streams the file from R2; the bucket stays private.
+  Rotating `AUTH_SECRET` invalidates links already sent — readers get a fresh one by entering their
+  address in any signup form.
+- A subscriber who is already confirmed and signs up again is sent the link again, at most once a
+  day per address.
+- If the file is missing from R2, the link leads to a notice that points at the article and the
+  contact address, and the Worker logs `[guide] PDF is not in the R2 bucket`.
+- The offer is shown on `/newsletter`, in the footer, and at the end of every Voice AI article
+  (`GuideOffer.astro`).
+
+Uploading or replacing the file is described in [docs/cloudflare-setup.md](docs/cloudflare-setup.md),
+section 3.
 
 ## Data (D1, see `migrations/`)
 

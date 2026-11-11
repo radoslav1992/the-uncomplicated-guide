@@ -1,23 +1,48 @@
 ---
 /**
- * Newsletter landing + status page (?status=check|confirmed|unsubscribed|invalid).
+ * Newsletter landing + status page
+ * (?status=check|confirmed|already|unsubscribed|invalid|guide-unavailable).
+ *
+ * The landing page leads with the free PDF every subscriber gets (`site.freeGuide`).
+ * After confirming, the reader lands on ?status=confirmed with the signed pair for
+ * their download link, so the PDF is one click away without opening the inbox again.
  */
+import { env } from 'cloudflare:workers';
 import Base from '../../layouts/Base.astro';
 import SignupForm from '../../components/SignupForm.astro';
 import { site } from '../../data/site';
+import { GUIDE_PATH, verifySignedLink } from '../../lib/newsletter';
 
 export const prerender = false;
 Astro.response.headers.set('cache-control', 'private, no-store');
 
-const status = Astro.url.searchParams.get('status') ?? '';
+const guide = site.freeGuide;
+const params = Astro.url.searchParams;
+const status = params.get('status') ?? '';
+
+// The download button is shown only for a signed pair this site issued.
+const e = params.get('e') ?? '';
+const t = params.get('t') ?? '';
+const download =
+  status === 'confirmed' && e && t && (await verifySignedLink(env, e, t, 'guide'))
+    ? `${GUIDE_PATH}?e=${encodeURIComponent(e)}&t=${encodeURIComponent(t)}`
+    : '';
+const emailed = params.get('emailed') !== '0';
+
 const messages: Record<string, { title: string; text: string }> = {
   check: {
     title: 'One more click.',
-    text: 'A confirmation email is on its way. Open it and click the link — nothing is sent until you do. If it does not arrive within a few minutes, check the spam folder.',
+    text: 'A confirmation email is on its way. Open it and click the link: the download link for your PDF follows in a second email straight after. Nothing is sent until you confirm. If the email does not arrive within a few minutes, check the spam folder.',
   },
   confirmed: {
     title: 'You are on the list.',
-    text: 'Thank you. You will hear from me when a new article is published, and now and then with a short note. Every email has an unsubscribe link.',
+    text: download
+      ? `Thank you. Your copy of “${guide.title}” is ready — PDF, ${guide.pages} pages.`
+      : `Thank you. The download link for “${guide.title}” is in the email that followed your confirmation. You will hear from me when a new article is published, and now and then with a short note.`,
+  },
+  already: {
+    title: 'You are already on the list.',
+    text: `Nothing more to do. The download link for “${guide.title}” has been sent to your inbox again — it is re-sent at most once a day, so if nothing arrives, look for the earlier email.`,
   },
   unsubscribed: {
     title: 'Unsubscribed.',
@@ -25,48 +50,148 @@ const messages: Record<string, { title: string; text: string }> = {
   },
   invalid: {
     title: 'That link is not valid.',
-    text: 'It may have been altered or it belongs to an address that is no longer on the list. Subscribe again below if you want to be.',
+    text: 'It may have been altered or it belongs to an address that is no longer on the list. Subscribe again below and a fresh link is sent to you.',
+  },
+  'guide-unavailable': {
+    title: 'The PDF is not available right now.',
+    text: 'That is a fault on my side, not yours. The same guide is free to read as an article in the meantime — and if you write to me, I will send you the file by hand.',
   },
 };
 const msg = messages[status];
 ---
 
-<Base title="Newsletter" description="One email when a new free article is published, and now and then a short note. Nothing else." noindex={Boolean(msg)} hideFooterSignup>
+<Base
+  title={`Newsletter + free PDF: ${guide.title}`}
+  description={`Subscribe and get “${guide.title}: ${guide.subtitle}” as a free ${guide.pages}-page PDF. After that, one email when a new article is published.`}
+  noindex={Boolean(msg)}
+  hideFooterSignup
+>
   <div class="container wrap">
-    <span class="pill">Newsletter</span>
     {
       msg ? (
-        <Fragment>
+        <div class:list={['status', { 'with-cover': download }]}>
+          <div class="status-copy">
+          <span class="pill">Newsletter</span>
           <h1 class="title-lg">{msg.title}</h1>
           <p class="lead">{msg.text}</p>
+          {download && (
+            <div class="download">
+              <a class="btn btn-accent" href={download} data-text="Download the PDF">
+                <span>Download the PDF</span>
+              </a>
+              <p class="small">
+                {emailed
+                  ? 'The same link is in your inbox, so you can come back to it later.'
+                  : 'Save the file now: the email with this link could not be sent. Enter your address in the form on any page later and it is sent again.'}
+              </p>
+              <p class="after">
+                From here on you will hear from me when a new article is published, and now and then with a
+                short note. Every email has an unsubscribe link.
+              </p>
+            </div>
+          )}
           {(status === 'invalid' || status === 'unsubscribed') && (
             <div class="panel form-panel">
               <SignupForm redirect="/newsletter?status=check" source="newsletter-page" />
             </div>
           )}
           <p class="small links">
-            <a class="arrow-link" href="/blog">Read the articles</a>
+            {status === 'guide-unavailable' ? (
+              <Fragment>
+                <a class="arrow-link" href={guide.article}>Read the guide as an article</a>
+                <a href={`mailto:${site.email}?subject=${encodeURIComponent(`PDF: ${guide.title}`)}`}>{site.email}</a>
+              </Fragment>
+            ) : (
+              <a class="arrow-link" href="/blog">Read the articles</a>
+            )}
           </p>
-        </Fragment>
+          </div>
+          {download && (
+            <figure class="offer-cover">
+              <img src={guide.cover} alt={`Cover of the PDF guide “${guide.title}”`} width="720" height="1018" decoding="async" />
+              <figcaption>
+                <span class="chip">PDF</span>
+                <span class="chip">{guide.pages} pages</span>
+                <span class="chip">{guide.edition}</span>
+              </figcaption>
+            </figure>
+          )}
+        </div>
       ) : (
         <Fragment>
-          <h1 class="title-xl">Hear when the next <em>one</em> is out</h1>
-          <p class="lead">
-            {site.upcoming.length} more long reads are on the writing desk. Subscribe and you get one email on the day
-            an article is published, plus the occasional short note about something learned building
-            with AI. Never more than a couple a month, and everything stays free to read.
-          </p>
-          <ul class="upcoming">
-            {site.upcoming.map((item) => (
-              <li><strong>{item.title}</strong> — {item.text}</li>
-            ))}
-          </ul>
-          <div class="panel form-panel">
-            <SignupForm redirect="/newsletter?status=check" source="newsletter-page" />
+          <div class="offer">
+            <div class="offer-copy">
+              <span class="pill">Newsletter</span>
+              <h1 class="title-xl">Subscribe, get the guide as a free <em>PDF</em></h1>
+              <p class="lead">
+                Join the newsletter and <strong>{guide.title}</strong> — {guide.subtitle.charAt(0).toLowerCase() + guide.subtitle.slice(1)} —
+                is yours as a {guide.pages}-page PDF. It was sold here for {guide.formerPrice} until November 2026.
+                The download link is emailed the moment you confirm your address.
+              </p>
+              <div class="panel form-panel">
+                <SignupForm redirect="/newsletter?status=check" source="newsletter-page" buttonLabel="Send me the PDF" />
+                <p class="small terms">
+                  You are joining the newsletter: one email when a new article is published, never more
+                  than a couple a month. Unsubscribe with one click — the PDF stays yours.
+                </p>
+              </div>
+            </div>
+            <figure class="offer-cover">
+              <img
+                src={guide.cover}
+                alt={`Cover of the PDF guide “${guide.title}: ${guide.subtitle}”`}
+                width="720"
+                height="1018"
+                decoding="async"
+                fetchpriority="high"
+              />
+              <figcaption>
+                <span class="chip">PDF</span>
+                <span class="chip">{guide.pages} pages</span>
+                <span class="chip">Free with the newsletter</span>
+              </figcaption>
+            </figure>
           </div>
-          <p class="small links">
-            No sequences, no sales. Questions: <a href={`mailto:${site.email}`}>{site.email}</a>.
-          </p>
+
+          <section class="block" aria-labelledby="inside-heading">
+            <div class="block-head">
+              <span class="pill">Inside the PDF</span>
+              <h2 id="inside-heading" class="title-md">Four parts, from the first question to the monthly invoice</h2>
+            </div>
+            <ol class="parts">
+              {guide.parts.map((part, i) => (
+                <li>
+                  <span class="no">{String(i + 1).padStart(2, '0')}</span>
+                  <strong>{part.title}</strong>
+                  <span class="text">{part.text}</span>
+                </li>
+              ))}
+            </ol>
+            <p class="small note">
+              Would you rather read first? The article written from the same guide is free:{' '}
+              <a href={guide.article}>AI receptionist: how to build, price and sell one</a>.
+            </p>
+          </section>
+
+          <section class="block" aria-labelledby="next-heading">
+            <div class="block-head">
+              <span class="pill">After the PDF</span>
+              <h2 id="next-heading" class="title-md">One email when the next one is out</h2>
+            </div>
+            <p class="lead">
+              {site.upcoming.length} more long reads are on the writing desk. You get one email on the day an
+              article is published, plus the occasional short note about something learned building with AI.
+              Everything stays free to read.
+            </p>
+            <ul class="upcoming">
+              {site.upcoming.map((item) => (
+                <li><strong>{item.title}</strong> — {item.text}</li>
+              ))}
+            </ul>
+            <p class="small note">
+              No sequences, no sales. Questions: <a href={`mailto:${site.email}`}>{site.email}</a>.
+            </p>
+          </section>
         </Fragment>
       )
     }
@@ -75,13 +200,101 @@ const msg = messages[status];
 
 <style>
   .wrap { padding-top: clamp(40px, 6vw, 88px); padding-bottom: clamp(72px, 10vw, 140px); }
-  h1 { max-width: 12ch; }
   h1 { margin: clamp(18px, 2.4vw, 30px) 0 clamp(20px, 3vw, 36px); }
+  .status h1 { max-width: 14ch; }
   .lead { max-width: 60ch; margin: 0 0 32px; }
+  .lead strong { color: var(--ink); font-weight: 500; }
   .form-panel { max-width: 560px; }
-  .links { margin-top: 22px; }
-  .links a:not(.arrow-link) { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-  .upcoming { list-style: none; max-width: 760px; margin: 0 0 40px; padding: 0; border-top: 1px solid var(--border); }
+  .terms { margin-top: 16px; line-height: 1.55; }
+  .links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; margin-top: 22px; }
+  .links a:not(.arrow-link), .note a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Landing and thank-you page: copy on the left, the cover on the right. */
+  .offer,
+  .with-cover {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: 40px clamp(32px, 6vw, 96px);
+    align-items: center;
+  }
+  .offer h1 { max-width: 11ch; font-size: clamp(42px, 6.2vw, 92px); }
+  .offer-cover {
+    display: grid;
+    justify-items: center;
+    gap: 26px;
+    margin: 0;
+    padding: clamp(28px, 4vw, 56px) clamp(20px, 3vw, 44px);
+    border-radius: var(--radius-lg);
+    background: #ecebe7;
+  }
+  .offer-cover img {
+    display: block;
+    width: min(100%, 340px);
+    border-radius: 6px;
+    box-shadow: 0 30px 60px -24px rgba(17, 17, 17, 0.55), 0 2px 6px rgba(17, 17, 17, 0.12);
+    transform: rotate(-3deg);
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .offer-cover:hover img { transform: rotate(0deg) translateY(-6px); }
+  .offer-cover figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .offer-cover .chip { background: #ffffff; color: #111111; }
+  .offer .offer-cover .chip:last-child { background: #fb7515; }
+  @media (prefers-color-scheme: dark) {
+    .offer-cover { background: #1c1c1c; }
+  }
+
+  .block { margin-top: clamp(64px, 9vw, 130px); }
+  .block-head { margin-bottom: clamp(24px, 3vw, 40px); }
+  .block-head .pill { margin-bottom: clamp(14px, 1.8vw, 22px); }
+  .block-head h2 { max-width: 22ch; }
+
+  .parts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(8px, 1vw, 14px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .parts li {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: clamp(20px, 2.2vw, 30px);
+    border-radius: var(--radius);
+    background: var(--bg-alt);
+  }
+  .parts .no { font-size: 14px; color: var(--muted); }
+  .parts strong {
+    margin-top: clamp(20px, 3vw, 44px);
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2vw, 28px);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .parts .text { font-size: 15.5px; line-height: 1.6; color: var(--text-2); }
+  .note { margin-top: 22px; }
+
+  .upcoming { list-style: none; max-width: 760px; margin: 0; padding: 0; border-top: 1px solid var(--border); }
   .upcoming li { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 16px; line-height: 1.6; color: var(--text-2); }
   .upcoming strong { color: var(--ink); font-weight: 500; }
+
+  /* Thank-you page: the download. */
+  .download { display: grid; justify-items: start; gap: 14px; margin: 0 0 12px; }
+  .download .btn { min-height: 56px; padding: 16px 34px; font-size: 16.5px; }
+  .download .after { max-width: 60ch; margin-top: 18px; font-size: 16px; line-height: 1.6; color: var(--text-2); }
+
+  @media (max-width: 1000px) {
+    .parts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 860px) {
+    .offer, .with-cover { grid-template-columns: 1fr; }
+    .offer-cover img { width: min(100%, 260px); }
+  }
+  @media (max-width: 520px) {
+    .parts { grid-template-columns: 1fr; }
+    .parts strong { margin-top: 6px; }
+  }
 </style>

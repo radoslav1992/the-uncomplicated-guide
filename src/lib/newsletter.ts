@@ -6,6 +6,7 @@ import { site } from '../data/site';
 import { sendEmail, textToHtml } from './email';
 import { randomToken, base64url, base64urlDecode, sign, signingSecret, verify } from './tokens';
 import { now, type SignupRow } from './db';
+import { rateLimit } from './rate-limit';
 
 export interface Subscriber extends SignupRow {
   confirmed_at: string | null;
@@ -26,16 +27,28 @@ export interface Newsletter {
 
 // ─── Signed links ────────────────────────────────────────────────────────────
 
-async function signedLink(env: Env, origin: string, path: string, email: string, purpose: string) {
+/** The `e=…&t=…` pair that proves a link was issued for this address and this purpose. */
+async function signedQuery(env: Env, email: string, purpose: string) {
   const e = base64url(new TextEncoder().encode(email.toLowerCase()));
   const t = await sign(signingSecret(env), `${purpose}:${email.toLowerCase()}`);
-  return `${origin}${path}?e=${e}&t=${t}`;
+  return `e=${e}&t=${t}`;
+}
+
+async function signedLink(env: Env, origin: string, path: string, email: string, purpose: string) {
+  return `${origin}${path}?${await signedQuery(env, email, purpose)}`;
 }
 
 export const confirmUrl = (env: Env, origin: string, email: string) =>
   signedLink(env, origin, '/api/newsletter/confirm', email, 'confirm');
 export const unsubscribeUrl = (env: Env, origin: string, email: string) =>
   signedLink(env, origin, '/api/newsletter/unsubscribe', email, 'unsubscribe');
+
+/** Where the subscriber's PDF is served from (see `guideDownload`). */
+export const GUIDE_PATH = '/api/newsletter/guide';
+/** Query string for the PDF link. Only ever issued for an address that has been confirmed. */
+export const guideQuery = (env: Env, email: string) => signedQuery(env, email, 'guide');
+export const guideUrl = (env: Env, origin: string, email: string) =>
+  signedLink(env, origin, GUIDE_PATH, email, 'guide');
 
 /** Returns the email when the (e, t) pair is valid for the purpose, else null. */
 export async function verifySignedLink(env: Env, e: string, t: string, purpose: string): Promise<string | null> {
@@ -72,15 +85,23 @@ export async function subscribe(env: Env, origin: string, email: string, interes
     .bind(email, JSON.stringify([...guides]), t, source)
     .run();
 
-  if (existing?.confirmed_at) return { status: 'already-confirmed' as const };
+  if (existing?.confirmed_at) {
+    // Someone already on the list asking again gets the PDF link again — at most once a day per
+    // address, so the form cannot be used to fill somebody else's inbox.
+    const resent =
+      (await rateLimit(env, 'guide-resend', email, 1, 86_400_000)) && (await sendGuideEmail(env, origin, email)).ok;
+    return { status: 'already-confirmed' as const, resent };
+  }
 
   const delivery = await sendEmail(env, {
     to: email,
-    subject: `Please confirm — ${site.name} newsletter`,
+    subject: `Please confirm — your free PDF from ${site.name}`,
     text: `One click and you are on the list:
 ${await confirmUrl(env, origin, email)}
 
-What you get: one email when a new guide or article is published, and now and then a short note about something I learned building with AI. Never more than a couple a month; every email has an unsubscribe link.
+As soon as you confirm, the download link for your free PDF arrives in a second email: “${site.freeGuide.title}: ${site.freeGuide.subtitle}” (${site.freeGuide.pages} pages).
+
+After that: one email when a new article is published, and now and then a short note about something I learned building with AI. Never more than a couple a month; every email has an unsubscribe link.
 
 If you did not ask for this, ignore it — nothing is sent without the click.
 
@@ -90,13 +111,71 @@ ${site.name}`,
   return { status: delivery.ok ? 'confirmation-sent' as const : 'delivery-failed' as const };
 }
 
-export async function confirmSubscriber(env: Env, email: string): Promise<boolean> {
-  const r = await env.DB.prepare(
-    'UPDATE signups SET confirmed_at = COALESCE(confirmed_at, ?2), updated_at = ?2 WHERE email = ?1',
+/**
+ * Mark an address as confirmed. `confirmed` is returned exactly once per address — the click
+ * that actually confirmed it — so follow-up work (the PDF email) cannot be repeated by
+ * opening the link again.
+ */
+export async function confirmSubscriber(env: Env, email: string): Promise<'confirmed' | 'already-confirmed' | 'not-found'> {
+  email = email.toLowerCase();
+  const first = await env.DB.prepare(
+    'UPDATE signups SET confirmed_at = ?2, updated_at = ?2 WHERE email = ?1 AND confirmed_at IS NULL RETURNING email',
   )
-    .bind(email.toLowerCase(), now())
-    .run();
-  return (r.meta.changes ?? 0) > 0;
+    .bind(email, now())
+    .first();
+  if (first) return 'confirmed';
+  return (await getSubscriber(env, email)) ? 'already-confirmed' : 'not-found';
+}
+
+// ─── The subscriber's PDF ────────────────────────────────────────────────────
+
+/** Email the download link for the free PDF. Sent on confirmation and when a subscriber asks again. */
+export async function sendGuideEmail(env: Env, origin: string, email: string) {
+  const guide = site.freeGuide;
+  const unsub = await unsubscribeUrl(env, origin, email);
+  return sendEmail(env, {
+    to: email,
+    subject: `Your free PDF: ${guide.title}`,
+    text: `Thank you for subscribing. Here is your copy of “${guide.title}: ${guide.subtitle}” — PDF, ${guide.pages} pages:
+${await guideUrl(env, origin, email)}
+
+The link is tied to this address. If you lose it, enter your address in the subscribe form again and it is sent to you again.
+
+Prefer to read in the browser? The article written from the same guide is here:
+${origin}${guide.article}
+
+From now on you get one email when a new article is published, and now and then a short note about something I learned building with AI. Never more than a couple a month.
+
+${site.author.name}
+${site.name}
+
+—
+You get this because you subscribed at ${origin}. Unsubscribe in one click:
+${unsub}`,
+    headers: { 'List-Unsubscribe': `<${unsub}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' },
+  });
+}
+
+/**
+ * The PDF behind a signed guide link, streamed from R2. Returns `invalid` when the link was
+ * not issued by this site and `missing` when the object is not in the bucket.
+ */
+export async function guideDownload(env: Env, e: string, t: string): Promise<Response | 'invalid' | 'missing'> {
+  if (!(await verifySignedLink(env, e, t, 'guide'))) return 'invalid';
+  const object = await env.GUIDE_FILES.get(site.freeGuide.fileKey);
+  if (!object) {
+    console.error('[guide] PDF is not in the R2 bucket:', site.freeGuide.fileKey);
+    return 'missing';
+  }
+  return new Response(object.body, {
+    headers: {
+      'content-type': 'application/pdf',
+      'content-length': String(object.size),
+      'content-disposition': `attachment; filename="${site.freeGuide.fileName}"`,
+      'cache-control': 'private, no-store',
+      'x-robots-tag': 'noindex, nofollow',
+    },
+  });
 }
 
 export async function removeSubscriber(env: Env, email: string) {

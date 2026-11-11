@@ -201,6 +201,13 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
         document.head.appendChild(script);
       };
       document.addEventListener("cookie-consent:changed", start);
+      // A newsletter signup (SignupForm.astro), reported as GA4's recommended lead event.
+      document.addEventListener("newsletter:subscribed", (event) => {
+        if (permitted())
+          gtag("event", "generate_lead", {
+            lead_source: (event.detail && event.detail.source) || location.pathname,
+          });
+      });
       document.addEventListener("click", (event) => {
         const link =
           event.target instanceof Element

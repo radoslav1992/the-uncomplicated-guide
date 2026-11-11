@@ -62,3 +62,20 @@ test('featured articles have chapters, and redirects land on published articles'
     assert.ok(ids.has(target.replace('/blog/', '')), `redirect target ${target} is not a published article`);
   }
 });
+
+test("the subscribers' PDF points at a published article and a cover that exists", async () => {
+  const { site } = await import('../src/data/site.ts');
+  const guide = site.freeGuide;
+  assert.ok(ids.has(guide.article.replace('/blog/', '')), `${guide.article} is not a published article`);
+  assert.ok(existsSync(new URL(`../public${guide.cover}`, import.meta.url)), `${guide.cover} is missing`);
+  assert.match(guide.fileKey, /\.pdf$/);
+  assert.match(guide.fileName, /^[\w.-]+\.pdf$/, 'fileName goes into a Content-Disposition header');
+  // The download route must not sit under a path that public/_redirects sends elsewhere.
+  const { GUIDE_PATH } = await import('../src/lib/newsletter.ts');
+  const redirected = readFileSync(new URL('../public/_redirects', import.meta.url), 'utf8')
+    .split('\n')
+    .map((line) => line.trim().split(/\s+/)[0])
+    .filter((from) => from?.endsWith('/*'))
+    .map((from) => from.slice(0, -1));
+  assert.ok(!redirected.some((prefix) => GUIDE_PATH.startsWith(prefix)), `${GUIDE_PATH} is redirected`);
+});

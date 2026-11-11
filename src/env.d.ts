@@ -7,7 +7,10 @@
 interface Env {
   // Storage
   DB: D1Database;
-  /** R2 bucket; only `article-images/` is served, through /media/. */
+  /**
+   * R2 bucket. Two things are served from it: `article-images/` through /media/, and the
+   * subscribers' PDF (`site.freeGuide.fileKey`) through signed links at /api/newsletter/guide.
+   */
   GUIDE_FILES: R2Bucket;
   // Cloudflare Email Service
   SEND_EMAIL?: SendEmail;

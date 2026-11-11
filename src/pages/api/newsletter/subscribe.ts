@@ -8,7 +8,8 @@ export const prerender = false;
 
 /**
  * POST /api/newsletter/subscribe (email, optional topic, optional redirect)
- * Double opt-in: stores the address and sends a confirmation link.
+ * Double opt-in: stores the address and sends a confirmation link. An address that is
+ * already confirmed is sent the link to the free PDF again instead.
  */
 export const POST: APIRoute = async (ctx) => {
   const form = await ctx.request.formData().catch(() => null);
@@ -28,5 +29,10 @@ export const POST: APIRoute = async (ctx) => {
 
   const r = await subscribe(env, siteOrigin(env, ctx.request), email, topic, source);
   if (r.status === 'delivery-failed') return fail('Confirmation email could not be sent. Please try again later.', 503);
+  if (r.status === 'already-confirmed') {
+    // Without JavaScript the default "check your inbox" page would promise a confirmation email.
+    const target = redirect.startsWith('/newsletter?status=check') ? '/newsletter?status=already' : redirect;
+    return formResult(ctx, true, { redirect: target, data: { status: r.status, resent: r.resent } });
+  }
   return formResult(ctx, true, { redirect, data: { status: r.status } });
 };
