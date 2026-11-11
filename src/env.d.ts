@@ -7,7 +7,10 @@
 interface Env {
   // Storage
   DB: D1Database;
-  /** R2 bucket; only `article-images/` is served, through /media/. */
+  /**
+   * R2 bucket. Two things are served from it: `article-images/` through /media/, and the
+   * subscribers' PDF (`site.freeGuide.fileKey`) through signed links at /api/newsletter/guide.
+   */
   GUIDE_FILES: R2Bucket;
   // Cloudflare Email Service
   SEND_EMAIL?: SendEmail;
@@ -19,6 +22,7 @@ interface Env {
   EMAIL_FROM: string;
   EMAIL_FROM_NAME: string;
   CONTACT_TO: string;
+  PUBLIC_GTM_CONTAINER_ID?: string;
   PUBLIC_GA_MEASUREMENT_ID?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
 
@@ -33,6 +37,7 @@ declare namespace Cloudflare {
 }
 
 interface ImportMetaEnv {
+  readonly PUBLIC_GTM_CONTAINER_ID?: string;
   readonly PUBLIC_GA_MEASUREMENT_ID?: string;
   readonly PUBLIC_TURNSTILE_SITE_KEY?: string;
 }

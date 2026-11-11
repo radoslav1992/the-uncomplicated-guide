@@ -40,7 +40,9 @@ const nav = [
         ) : (
           <div class="footer-form">
             <SignupForm compact source={source} topic={topic} buttonLabel="Subscribe" />
-            <p class="small">{site.newsletterBlurb}</p>
+            <p class="small">
+              {site.newsletterBlurb} <a href="/newsletter">What is in the PDF</a>
+            </p>
           </div>
         )}
       </div>
@@ -105,6 +107,15 @@ const nav = [
     margin-top: clamp(24px, 3vw, 40px);
     display: grid;
     gap: 10px;
+  }
+  .footer-form .small {
+    line-height: 1.55;
+  }
+  .footer-form .small a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    white-space: nowrap;
   }
   .footer-cta > .arrow-link {
     margin-top: 28px;

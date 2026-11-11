@@ -9,7 +9,7 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
 | ---------------- | ----------------------------- | ------------------------- |
 | Worker           | `the-uncomplicated-guides`    | `name`                    |
 | D1 database      | `guides-db`                   | `d1_databases[0]`         |
-| R2 bucket        | `kova-guides` (shared with kova.bg; article images only) | `r2_buckets[0]` |
+| R2 bucket        | `kova-guides` (shared with kova.bg; article images and the subscribers' PDF) | `r2_buckets[0]` |
 | Email binding    | `SEND_EMAIL`                  | `send_email[0]`           |
 
 ## 1. Domain
@@ -27,9 +27,29 @@ Names used below (change them together with `wrangler.jsonc` if you prefer other
 
 - [x] The existing private bucket `kova-guides` is reused; nothing to create.
 - [ ] Article hero images go under the `article-images/` prefix (**R2 → kova-guides → Objects → Upload**).
-      They are served at `/media/article-images/<file name>`; nothing else in the bucket is reachable
-      from the site. Images can also live in the repository under `public/articles/`.
-- [ ] The guide PDFs from the old shop are no longer used. See `docs/LAUNCH.md` before deleting them.
+      They are served at `/media/article-images/<file name>`. Images can also live in the repository
+      under `public/articles/`.
+- [ ] **The subscribers' PDF** must be in the bucket under the exact name in `site.freeGuide.fileKey`
+      (`src/data/site.ts`) — currently `247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf`, the file the
+      shop used to sell. It is only reachable through the signed links sent to confirmed subscribers
+      (`/api/newsletter/guide`). Check that it is there:
+
+      ```bash
+      npx wrangler r2 object get "kova-guides/247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" --file check.pdf --remote
+      ```
+
+      If it is not (or to replace it), upload the file:
+
+      ```bash
+      npx wrangler r2 object put "kova-guides/247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" --file "path/to/the-guide.pdf" --content-type application/pdf --remote
+      ```
+
+      To give away a different file, upload it under its own name and change `fileKey`, `fileName`,
+      `title`, `pages` and the rest of `site.freeGuide`. While the object is missing, the download link
+      leads to a page that says so and points at the article — nobody gets an error page, but nobody
+      gets the PDF either.
+- [ ] Nothing else in the bucket is reachable from the site. The second PDF from the old shop is no
+      longer used; see `docs/LAUNCH.md` before deleting it.
 
 ## 4. Worker deployed from GitHub
 
@@ -97,8 +117,32 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 - [ ] **Turnstile** (contact-form spam protection): **Turnstile → Add widget**, mode *Managed*, add your
       domain. Site key → `wrangler.jsonc` `PUBLIC_TURNSTILE_SITE_KEY`; secret key → secret `TURNSTILE_SECRET_KEY`.
-- [ ] **Google Analytics**: set `PUBLIC_GA_MEASUREMENT_ID` in `wrangler.jsonc`. This turns on the cookie
-      banner and Consent Mode. Leave empty to ship without analytics.
+- [x] **Analytics (Google Tag Manager)**: `PUBLIC_GTM_CONTAINER_ID` in `wrangler.jsonc` holds the
+      container id (`GTM-M9K8ZPJC`). The site shows the cookie banner and loads the container only
+      after a visitor allows analytics; nothing is requested from Google before that or after a
+      refusal, and status pages with signed links (`/newsletter?status=…`) are never tracked.
+      Consent Mode starts with analytics granted and advertising storage denied.
+
+      The site only loads the container — **what gets measured is set up inside Tag Manager**
+      (tagmanager.google.com), and nothing is recorded until the container is published:
+
+      1. **Google tag** with the GA4 measurement id (`G-XXXXXXXXXX`, from **GA4 → Admin → Data streams**),
+         trigger **Initialization – All Pages**. This sends page views.
+      2. **Signups** (optional): a *Data Layer Variable* named `lead_source`; a *Custom Event* trigger
+         for the event name `generate_lead`; a **GA4 Event** tag named `generate_lead` with the
+         parameter `lead_source`, fired by that trigger. Then mark `generate_lead` as a key event in
+         GA4. The site pushes `{ event: "generate_lead", lead_source: "<form>" }` to the data layer
+         on every new newsletter signup.
+      3. **Submit → Publish** the container, then check **GA4 → Reports → Realtime** after allowing
+         analytics on the live site (Tag Manager's Preview mode works too).
+
+      Keep advertising and remarketing tags out of the container: the banner and the cookie policy
+      ask for analytics only, so those would need a wider consent first.
+
+      Without Tag Manager, leave `PUBLIC_GTM_CONTAINER_ID` empty and put the GA4 measurement id in
+      `PUBLIC_GA_MEASUREMENT_ID` instead: GA4 is then loaded directly, behind the same banner, and
+      signups arrive as the `generate_lead` event without any set-up. Leave both empty to ship
+      without analytics and without the banner.
 - [ ] **Observability**: already on (`observability.enabled`). Worker → **Logs** shows every request
       and email attempt (look for `[email]`, `[newsletter]`, `[inbound-email]`).
 - [ ] **Preview URLs**: Workers Builds gives every non-production branch a `*.workers.dev` preview.
@@ -113,5 +157,6 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
    (`curl -sI https://uncomplicatedguide.com/guides/ai-assistants`).
 3. Send yourself a message through the contact form and reply to it — the reply reaches the visitor.
 4. Send an email to `hello@uncomplicatedguide.com` from another mailbox; it arrives at `CONTACT_TO`.
-5. Subscribe to the newsletter from the footer, click the confirmation link, then open
+5. Subscribe to the newsletter from the footer and click the confirmation link. The thank-you page
+   offers the PDF and a second email carries the same link: download the file from both. Then open
    `/admin/newsletter`, send yourself a test, and send a first short letter to everyone.

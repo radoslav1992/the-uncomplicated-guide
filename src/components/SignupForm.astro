@@ -35,7 +35,7 @@ const {
     <button type="submit" class="btn btn-accent">{buttonLabel}</button>
   </div>
   <p class="notice" data-done hidden role="status">
-    One more click: a confirmation email is on its way. Nothing is sent until you open it.
+    One more click: a confirmation email is on its way. The link to your free PDF follows as soon as you confirm.
   </p>
   <p class="notice-error" data-error hidden role="alert"></p>
 </form>
@@ -93,13 +93,23 @@ const {
           body: new FormData(form),
           headers: { Accept: 'application/json' },
         });
-        const data = (await res.json()) as { ok: boolean; error?: string; status?: string };
+        const data = (await res.json()) as { ok: boolean; error?: string; status?: string; resent?: boolean };
         if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong.');
         if (fields) fields.hidden = true;
         if (done) {
-          if (data.status === 'already-confirmed') done.textContent = 'You are already on the list — nothing more to do.';
+          if (data.status === 'already-confirmed')
+            done.textContent = data.resent
+              ? 'You are already on the list. The link to the PDF has been sent to your inbox again.'
+              : 'You are already on the list. The link to the PDF was sent to you earlier today — look for that email.';
           done.hidden = false;
         }
+        // A new signup; Base.astro reports it to analytics when the reader has consented.
+        if (data.status === 'confirmation-sent')
+          document.dispatchEvent(
+            new CustomEvent('newsletter:subscribed', {
+              detail: { source: new FormData(form).get('source') || location.pathname },
+            }),
+          );
       } catch (ex) {
         if (err) {
           err.textContent = ex instanceof Error ? ex.message : 'Something went wrong.';

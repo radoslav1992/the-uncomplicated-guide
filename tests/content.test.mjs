@@ -62,3 +62,32 @@ test('featured articles have chapters, and redirects land on published articles'
     assert.ok(ids.has(target.replace('/blog/', '')), `redirect target ${target} is not a published article`);
   }
 });
+
+test("the subscribers' PDF points at a published article and a cover that exists", async () => {
+  const { site } = await import('../src/data/site.ts');
+  const guide = site.freeGuide;
+  assert.ok(ids.has(guide.article.replace('/blog/', '')), `${guide.article} is not a published article`);
+  assert.ok(existsSync(new URL(`../public${guide.cover}`, import.meta.url)), `${guide.cover} is missing`);
+  assert.match(guide.fileKey, /\.pdf$/);
+  assert.match(guide.fileName, /^[\w.-]+\.pdf$/, 'fileName goes into a Content-Disposition header');
+  // The download route must not sit under a path that public/_redirects sends elsewhere.
+  const { GUIDE_PATH } = await import('../src/lib/newsletter.ts');
+  const redirected = readFileSync(new URL('../public/_redirects', import.meta.url), 'utf8')
+    .split('\n')
+    .map((line) => line.trim().split(/\s+/)[0])
+    .filter((from) => from?.endsWith('/*'))
+    .map((from) => from.slice(0, -1));
+  assert.ok(!redirected.some((prefix) => GUIDE_PATH.startsWith(prefix)), `${GUIDE_PATH} is redirected`);
+});
+
+test('analytics ids in wrangler.jsonc are the right kind for their variable', () => {
+  const config = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8');
+  const value = (name) => config.match(new RegExp(`"${name}":\\s*"([^"]*)"`))?.[1];
+  const gtm = value('PUBLIC_GTM_CONTAINER_ID');
+  const ga = value('PUBLIC_GA_MEASUREMENT_ID');
+  assert.notEqual(gtm, undefined, 'PUBLIC_GTM_CONTAINER_ID is missing from vars');
+  assert.notEqual(ga, undefined, 'PUBLIC_GA_MEASUREMENT_ID is missing from vars');
+  // A Tag Manager id pasted into the GA4 variable (or the reverse) would silently load nothing.
+  if (gtm) assert.match(gtm, /^GTM-[A-Z0-9]+$/, 'PUBLIC_GTM_CONTAINER_ID must be a GTM-… container id');
+  if (ga) assert.match(ga, /^G-[A-Z0-9]+$/, 'PUBLIC_GA_MEASUREMENT_ID must be a G-… measurement id');
+});

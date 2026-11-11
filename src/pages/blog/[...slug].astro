@@ -3,6 +3,7 @@ import { render } from "astro:content";
 import { Image } from "astro:assets";
 import Base from "../../layouts/Base.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
+import GuideOffer from "../../components/GuideOffer.astro";
 import portrait from "../../assets/portrait.webp";
 import {
   getPosts,
@@ -196,6 +197,11 @@ const jsonLd = [
           <div class="prose" data-prose>
             <Content />
           </div>
+
+          {/* The subscriber PDF covers voice agents, so it is offered on those articles. */}
+          {post.data.category === "voice-ai" && (
+            <GuideOffer source={`guide-offer:${post.id}`} topic={post.data.category} />
+          )}
 
           <footer class="post-foot">
             {post.data.tags.length > 0 && (

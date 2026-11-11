@@ -8,6 +8,11 @@ guides are now articles (`/blog/ai-receptionist-guide` and
 The code change is self-contained: deploying it needs no new secrets and no database migration.
 What follows are the steps outside the repository, in the order that is safe.
 
+> **One PDF stays.** `247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf` is now the free guide every
+> newsletter subscriber is emailed a download link for (`site.freeGuide` in `src/data/site.ts`).
+> Keep it in R2 — or upload it again if it was already removed; the commands are in
+> `docs/cloudflare-setup.md`, section 3.
+
 ## 1. Before deleting anything: keep a copy of the PDFs
 
 The full PDFs exist only in the R2 bucket `kova-guides` — they were never committed, and there is
@@ -30,16 +35,18 @@ Merge and let Workers Builds deploy as usual. Then check:
   `location: /blog/ai-receptionist-guide`; likewise `/guides/ai-video-ads-ugc`,
   `/account`, `/thank-you`, `/checkout`, `/refunds`, `/download/anything` and `/samples/anything`.
 - `/api/checkout` and `/api/stripe/webhook` answer `404`.
-- The newsletter signup, confirmation link, contact form and `/admin/newsletter` still work.
+- The newsletter signup, confirmation link, contact form and `/admin/newsletter` still work, and
+  confirming a new address delivers the PDF (thank-you page and second email).
 
-## 3. Delete the PDFs from R2
+## 3. Delete the PDF that is no longer used from R2
 
-Only after step 1 and a successful deploy. Delete just the two guide objects — the `article-images/`
-prefix in the same bucket serves the blog's images and must stay. The bucket is shared with kova.bg,
-so do not delete anything else.
+Only after step 1 and a successful deploy. Delete just the AI video guide. **Do not delete
+`247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf`**: it is the subscribers' free PDF, and without it
+the download links sent to subscribers lead to a "not available" notice. The `article-images/` prefix
+in the same bucket serves the blog's images and must stay too. The bucket is shared with kova.bg, so
+do not delete anything else.
 
 ```bash
-npx wrangler r2 object delete "kova-guides/247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" --remote
 npx wrangler r2 object delete "kova-guides/AI_Video_Ads_UGC_Guide_EN_v1.0.pdf" --remote
 ```
 

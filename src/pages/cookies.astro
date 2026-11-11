@@ -1,21 +1,21 @@
 ---
 import Legal from '../layouts/Legal.astro';
 import { site } from '../data/site';
-const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
+import { analyticsEnabled, gtmId } from '../lib/analytics';
 ---
 
 <Legal title="Cookie policy" description="Which cookies this site uses and how to change your choice.">
   <h2>Which cookies this site uses</h2>
   <ul>
     <li><strong>Technical cookies</strong> — the infrastructure the site runs on (Cloudflare) may set cookies needed for security and performance. They are not used for profiling.</li>
-    <li><strong>Analytics cookies (Google Analytics 4)</strong> — set <strong>only after consent</strong> in the cookie banner. Used for aggregate statistics on which pages are visited (<code>_ga</code>-type cookies). Data is processed by Google; see <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>. The script loads in Consent Mode: before consent, or after refusal, no cookies are set and no identifiers are used.{!gaId && ' Analytics is currently switched off entirely.'}</li>
+    <li><strong>Analytics cookies (Google Analytics 4)</strong> — set <strong>only after consent</strong> in the cookie banner. Used for aggregate statistics on which pages are visited (<code>_ga</code>-type cookies). Data is processed by Google; see <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>. Nothing is loaded from Google before consent or after refusal: no cookies are set and no identifiers are used. After consent the script runs in Consent Mode with advertising storage denied.{gtmId && ' Google Analytics is loaded through Google Tag Manager, which is itself only loaded after consent.'}{!analyticsEnabled && ' Analytics is currently switched off entirely.'}</li>
   </ul>
   <p>The site has no accounts and sets no sign-in cookies. It uses no marketing cookies and no advertising networks.</p>
 
   <h2>Changing your choice</h2>
   <p>Your choice is stored on your device. You can change it any time with the button below — the banner will appear again.</p>
   <p>
-    <button type="button" class="change" id="change-consent" disabled={!gaId}>Change my choice</button>
+    <button type="button" class="change" id="change-consent" disabled={!analyticsEnabled}>Change my choice</button>
   </p>
 
   <h2>Questions</h2>
