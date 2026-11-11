@@ -1,7 +1,8 @@
 ---
 /**
- * Minimal consent banner for Google Analytics 4 (Consent Mode v2).
- * Only rendered when PUBLIC_GA_MEASUREMENT_ID is set. The choice is stored in
+ * Minimal consent banner for Google Analytics 4 (Consent Mode v2), whether it is loaded
+ * directly or through Google Tag Manager. Only rendered when analytics is configured
+ * (src/lib/analytics.ts). The choice is stored in
  * localStorage under "cookie-consent" ("granted" | "denied"). The cookie policy
  * page has a button that dispatches "cookie-consent:open" to show it again.
  */
@@ -36,10 +37,12 @@
       try {
         localStorage.setItem(KEY, value);
       } catch {}
+      el.hidden = true;
+      // First the loader in Base.astro (which sets the consent defaults), then the update:
+      // Consent Mode expects `default` before `update`.
+      document.dispatchEvent(new Event('cookie-consent:changed'));
       const w = window as unknown as { gtag?: (...args: unknown[]) => void };
       w.gtag?.('consent', 'update', { analytics_storage: value });
-      el.hidden = true;
-      document.dispatchEvent(new Event('cookie-consent:changed'));
     };
     if (!read()) show();
     el.querySelectorAll<HTMLButtonElement>('[data-consent]').forEach((b) =>

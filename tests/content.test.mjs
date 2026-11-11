@@ -79,3 +79,15 @@ test("the subscribers' PDF points at a published article and a cover that exists
     .map((from) => from.slice(0, -1));
   assert.ok(!redirected.some((prefix) => GUIDE_PATH.startsWith(prefix)), `${GUIDE_PATH} is redirected`);
 });
+
+test('analytics ids in wrangler.jsonc are the right kind for their variable', () => {
+  const config = readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8');
+  const value = (name) => config.match(new RegExp(`"${name}":\\s*"([^"]*)"`))?.[1];
+  const gtm = value('PUBLIC_GTM_CONTAINER_ID');
+  const ga = value('PUBLIC_GA_MEASUREMENT_ID');
+  assert.notEqual(gtm, undefined, 'PUBLIC_GTM_CONTAINER_ID is missing from vars');
+  assert.notEqual(ga, undefined, 'PUBLIC_GA_MEASUREMENT_ID is missing from vars');
+  // A Tag Manager id pasted into the GA4 variable (or the reverse) would silently load nothing.
+  if (gtm) assert.match(gtm, /^GTM-[A-Z0-9]+$/, 'PUBLIC_GTM_CONTAINER_ID must be a GTM-… container id');
+  if (ga) assert.match(ga, /^G-[A-Z0-9]+$/, 'PUBLIC_GA_MEASUREMENT_ID must be a G-… measurement id');
+});

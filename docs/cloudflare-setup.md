@@ -117,13 +117,32 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 - [ ] **Turnstile** (contact-form spam protection): **Turnstile → Add widget**, mode *Managed*, add your
       domain. Site key → `wrangler.jsonc` `PUBLIC_TURNSTILE_SITE_KEY`; secret key → secret `TURNSTILE_SECRET_KEY`.
-- [ ] **Google Analytics 4**: not active until `PUBLIC_GA_MEASUREMENT_ID` in `wrangler.jsonc` holds the
-      measurement ID (`G-XXXXXXXXXX`, from **GA4 → Admin → Data streams → your web stream**). Setting it
-      and deploying turns on the cookie banner and Consent Mode: nothing is sent to Google until a
-      visitor allows analytics. Besides page views, a newsletter signup is reported as `generate_lead`
-      (with `lead_source`, the form it came from) — mark it as a key event in GA4 to count signups.
-      Status pages with signed links (`/newsletter?status=…`) are never tracked. Leave the variable
-      empty to ship without analytics.
+- [x] **Analytics (Google Tag Manager)**: `PUBLIC_GTM_CONTAINER_ID` in `wrangler.jsonc` holds the
+      container id (`GTM-M9K8ZPJC`). The site shows the cookie banner and loads the container only
+      after a visitor allows analytics; nothing is requested from Google before that or after a
+      refusal, and status pages with signed links (`/newsletter?status=…`) are never tracked.
+      Consent Mode starts with analytics granted and advertising storage denied.
+
+      The site only loads the container — **what gets measured is set up inside Tag Manager**
+      (tagmanager.google.com), and nothing is recorded until the container is published:
+
+      1. **Google tag** with the GA4 measurement id (`G-XXXXXXXXXX`, from **GA4 → Admin → Data streams**),
+         trigger **Initialization – All Pages**. This sends page views.
+      2. **Signups** (optional): a *Data Layer Variable* named `lead_source`; a *Custom Event* trigger
+         for the event name `generate_lead`; a **GA4 Event** tag named `generate_lead` with the
+         parameter `lead_source`, fired by that trigger. Then mark `generate_lead` as a key event in
+         GA4. The site pushes `{ event: "generate_lead", lead_source: "<form>" }` to the data layer
+         on every new newsletter signup.
+      3. **Submit → Publish** the container, then check **GA4 → Reports → Realtime** after allowing
+         analytics on the live site (Tag Manager's Preview mode works too).
+
+      Keep advertising and remarketing tags out of the container: the banner and the cookie policy
+      ask for analytics only, so those would need a wider consent first.
+
+      Without Tag Manager, leave `PUBLIC_GTM_CONTAINER_ID` empty and put the GA4 measurement id in
+      `PUBLIC_GA_MEASUREMENT_ID` instead: GA4 is then loaded directly, behind the same banner, and
+      signups arrive as the `generate_lead` event without any set-up. Leave both empty to ship
+      without analytics and without the banner.
 - [ ] **Observability**: already on (`observability.enabled`). Worker → **Logs** shows every request
       and email attempt (look for `[email]`, `[newsletter]`, `[inbound-email]`).
 - [ ] **Preview URLs**: Workers Builds gives every non-production branch a `*.workers.dev` preview.

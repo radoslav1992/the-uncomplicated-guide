@@ -22,7 +22,12 @@
     // Where contact-form messages and forwarded inbound mail go.
     // Must be a verified destination address in Cloudflare Email Routing (same inbox as kova.bg).
     "CONTACT_TO": "radoslav.dodnikov@gmail.com",
-    // Optional: Google Analytics 4 id. Leave empty to ship without analytics and without the cookie banner.
+    // Analytics. Set ONE of the two; leave both empty to ship without analytics and without the cookie banner.
+    // Nothing is loaded from Google until a visitor allows analytics in the banner.
+    //  - Google Tag Manager container id (GTM-XXXXXXX). The container decides which tags run, so
+    //    GA4 is configured inside Tag Manager. Wins when both are set.
+    "PUBLIC_GTM_CONTAINER_ID": "GTM-M9K8ZPJC",
+    //  - Google Analytics 4 measurement id (G-XXXXXXXXXX), loaded directly without Tag Manager.
     "PUBLIC_GA_MEASUREMENT_ID": "",
     // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
     "PUBLIC_TURNSTILE_SITE_KEY": ""

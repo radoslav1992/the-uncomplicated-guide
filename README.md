@@ -152,6 +152,15 @@ published articles — the content tests check this. Wildcard rules go in `publi
   the feed. The build appends its own immutable `Cache-Control` rule for `/_astro/*`, so do not add a
   rule for that path by hand.
 
+## Analytics
+
+Google Tag Manager (`PUBLIC_GTM_CONTAINER_ID` in `wrangler.jsonc`) or, without it, GA4 directly
+(`PUBLIC_GA_MEASUREMENT_ID`). Either way nothing is loaded from Google until a visitor allows
+analytics in the cookie banner, and pages that are not indexed are never tracked. New newsletter
+signups are reported as `generate_lead`. The loader is in `src/layouts/Base.astro`, the banner in
+`src/components/CookieConsent.astro`; what Tag Manager needs is in
+[docs/cloudflare-setup.md](docs/cloudflare-setup.md), section 7.
+
 ## Newsletter
 
 Every signup form posts to `/api/newsletter/subscribe`. Double opt-in: the address gets a signed

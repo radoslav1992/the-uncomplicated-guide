@@ -22,6 +22,7 @@ interface Env {
   EMAIL_FROM: string;
   EMAIL_FROM_NAME: string;
   CONTACT_TO: string;
+  PUBLIC_GTM_CONTAINER_ID?: string;
   PUBLIC_GA_MEASUREMENT_ID?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
 
@@ -36,6 +37,7 @@ declare namespace Cloudflare {
 }
 
 interface ImportMetaEnv {
+  readonly PUBLIC_GTM_CONTAINER_ID?: string;
   readonly PUBLIC_GA_MEASUREMENT_ID?: string;
   readonly PUBLIC_TURNSTILE_SITE_KEY?: string;
 }
