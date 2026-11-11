@@ -97,60 +97,63 @@ const jsonLd = [
   jsonLd={jsonLd}
 >
   <article class="post">
-    <header class="head container">
-      <nav class="crumbs" aria-label="Breadcrumb">
-        <ol>
-          <li><a href="/">Home</a></li>
-          <li><a href="/blog">Articles</a></li>
-          <li><a href={categoryHref}>{category.name}</a></li>
-          <li aria-current="page">{post.data.title}</li>
-        </ol>
-      </nav>
-      <p class="meta">
-        <a class="kind" href={categoryHref}>{category.name}</a>
-        <span aria-hidden="true">·</span>
-        <time datetime={post.data.pubDate.toISOString()}>
-          {formatDate(post.data.pubDate)}
-        </time>
-        <span aria-hidden="true">·</span>
-        <span>{minutes} min read</span>
-        {showToc && (
-          <Fragment>
-            <span aria-hidden="true">·</span>
-            <span>{chapters.length} chapters</span>
-          </Fragment>
-        )}
-      </p>
-      <h1 class="display">{post.data.title}</h1>
-      <p class="standfirst">{post.data.description}</p>
-      <p class="byline-top">
-        By <a href="/#author">{site.author.name}</a>
-        {post.data.updatedDate && (
-          <Fragment>
-            {" "}· Updated{" "}
-            <time datetime={post.data.updatedDate.toISOString()}>
-              {formatDate(post.data.updatedDate)}
-            </time>
-          </Fragment>
-        )}
-      </p>
-    </header>
+    <div class:list={["container post-grid", { "with-toc": showToc, "with-hero": post.data.image }]}>
+      <header class="post-head">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="/">Home</a></li>
+            <li><a href="/blog">Articles</a></li>
+            <li><a href={categoryHref}>{category.name}</a></li>
+          </ol>
+        </nav>
+        <h1>{post.data.title}</h1>
+        <p class="standfirst">{post.data.description}</p>
+        <div class="byline">
+          <Image
+            src={portrait}
+            alt=""
+            width={44}
+            height={44}
+            widths={[44, 88]}
+            sizes="44px"
+            loading="eager"
+          />
+          <p>
+            <span class="byline-name">
+              By <a href="/#author">{site.author.name}</a>
+            </span>
+            <span class="byline-meta">
+              <time datetime={post.data.pubDate.toISOString()}>
+                {formatDate(post.data.pubDate)}
+              </time>
+              {post.data.updatedDate && (
+                <Fragment>
+                  {" "}· Updated{" "}
+                  <time datetime={post.data.updatedDate.toISOString()}>
+                    {formatDate(post.data.updatedDate)}
+                  </time>
+                </Fragment>
+              )}
+              {" "}· {minutes} min read
+            </span>
+          </p>
+        </div>
+      </header>
 
-    {post.data.image && (
-      <figure class="hero container">
-        <img
-          src={post.data.image}
-          alt={post.data.imageAlt ?? post.data.title}
-          width="1200"
-          height="675"
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-        />
-      </figure>
-    )}
+      {post.data.image && (
+        <figure class="post-hero">
+          <img
+            src={post.data.image}
+            alt={post.data.imageAlt ?? post.data.title}
+            width="1200"
+            height="675"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </figure>
+      )}
 
-    <div class:list={["layout container", { "with-toc": showToc }]}>
       {showToc && (
         <aside class="toc" aria-label="In this article">
           <details open data-toc>
@@ -168,7 +171,7 @@ const jsonLd = [
         </aside>
       )}
 
-      <div class="body">
+      <div class="post-body">
         {post.data.takeaways && post.data.takeaways.length > 0 && (
           <aside class="takeaways" aria-labelledby="takeaways-heading">
             <p class="takeaways-heading" id="takeaways-heading">Key takeaways</p>
@@ -183,70 +186,70 @@ const jsonLd = [
           <Content />
         </div>
       </div>
-    </div>
 
-    <footer class="foot container">
-      {post.data.tags.length > 0 && (
-        <ul class="tag-list" aria-label="Topics">
-          {post.data.tags.map((tag) => (
-            <li>{tag}</li>
-          ))}
-        </ul>
-      )}
-      <div class="author-box">
-        <Image
-          src={portrait}
-          alt=""
-          width={96}
-          height={96}
-          widths={[96, 192]}
-          sizes="96px"
-          loading="lazy"
-        />
-        <div>
-          <p class="author-label">Written by</p>
-          <p class="author-name">{site.author.name}</p>
-          <p class="author-bio">{site.author.bio}</p>
-          <a href="/contact" class="arrow-link">Ask a question ↗</a>
+      <footer class="post-foot">
+        {post.data.tags.length > 0 && (
+          <ul class="tag-list" aria-label="Topics">
+            {post.data.tags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        )}
+        <div class="author-box">
+          <Image
+            src={portrait}
+            alt=""
+            width={80}
+            height={80}
+            widths={[80, 160]}
+            sizes="80px"
+            loading="lazy"
+          />
+          <div>
+            <p class="author-label">Written by</p>
+            <p class="author-name">{site.author.name}</p>
+            <p class="author-bio">{site.author.bio}</p>
+            <a href="/contact" class="arrow-link">Ask a question →</a>
+          </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </div>
   </article>
 
-  {related.length > 0 && (
-    <section class="more">
-      <div class="frame journal more-frame">
-        <div class="more-head">
+  <div class="container post-after">
+    {related.length > 0 && (
+      <section class="related" aria-labelledby="related-heading">
+        <div class="section-head">
           <div>
-            <p class="section-index">[ KEEP READING ]</p>
-            <h2>Related articles</h2>
+            <p class="eyebrow">Keep reading</p>
+            <h2 id="related-heading">Related articles</h2>
           </div>
           <a href={categoryHref} class="arrow-link">
-            All {category.name} articles ↗
+            All {category.name} articles →
           </a>
         </div>
         <div class="card-grid">
-          {related.map((p, i) => (
-            <ArticleCard post={p} index={i} />
+          {related.map((p) => (
+            <ArticleCard post={p} />
           ))}
         </div>
+      </section>
+    )}
+
+    <section class="post-signup">
+      <div class="signup-box">
+        <div>
+          <p class="eyebrow">Newsletter</p>
+          <h2>Get the next one.</h2>
+          <p>
+            One email when a new article is published. A couple a month at most,
+            one click to leave.
+          </p>
+        </div>
+        <SignupForm source={`blog:${post.id}`.slice(0, 40)} />
       </div>
     </section>
-  )}
-
-  <section class="frame newsletter-section post-signup">
-    <div class="newsletter-copy">
-      <p class="section-index">[ NEWSLETTER ]</p>
-      <p class="signup-title">Get the next one.</p>
-      <p>
-        One email when a new article is published. A couple a month
-        at most, one click to leave.
-      </p>
-    </div>
-    <div class="newsletter-form">
-      <SignupForm source={`blog:${post.id}`.slice(0, 40)} />
-    </div>
-  </section>
+  </div>
 </Base>
 
 <script>
@@ -281,7 +284,7 @@ const jsonLd = [
   // On narrow screens the table of contents starts closed and closes after a jump.
   const toc = document.querySelector<HTMLDetailsElement>("[data-toc]");
   if (toc) {
-    const narrow = window.matchMedia("(max-width: 1050px)");
+    const narrow = window.matchMedia("(max-width: 1100px)");
     if (narrow.matches) toc.open = false;
     toc.addEventListener("click", (event) => {
       if (narrow.matches && (event.target as Element).closest("a")) toc.open = false;
@@ -312,133 +315,213 @@ const jsonLd = [
 </script>
 
 <style>
-  .head {
-    padding-top: clamp(32px, 5vw, 64px);
-    max-width: 860px;
+  .post-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 720px);
+    grid-template-areas:
+      "head"
+      "hero"
+      "toc"
+      "body"
+      "foot";
+    justify-content: center;
+    padding-top: clamp(28px, 5vw, 56px);
   }
+  .post-head {
+    grid-area: head;
+  }
+  .post-hero {
+    grid-area: hero;
+  }
+  .toc {
+    grid-area: toc;
+  }
+  .post-body {
+    grid-area: body;
+    min-width: 0;
+  }
+  .post-foot {
+    grid-area: foot;
+  }
+  @media (min-width: 1101px) {
+    .post-grid.with-toc {
+      grid-template-columns: minmax(0, 720px) 250px;
+      column-gap: 64px;
+      grid-template-areas:
+        "head ."
+        "hero hero"
+        "body toc"
+        "foot .";
+    }
+  }
+
+  /* Header */
   .crumbs ol {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin: 0 0 24px;
+    margin: 0 0 18px;
     padding: 0;
-    font-size: 12px;
-    color: var(--muted);
+    font-size: 14px;
   }
   .crumbs li {
     display: inline-flex;
     gap: 6px;
-    min-width: 0;
+    color: var(--muted);
   }
   .crumbs li + li::before {
     content: "/";
     color: var(--faint);
   }
-  .crumbs li[aria-current] {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 42ch;
-  }
   .crumbs a {
     color: var(--text-2);
   }
+  .crumbs li:last-child a {
+    color: var(--accent-text);
+    font-weight: 600;
+  }
   .crumbs a:hover {
-    color: var(--accent);
+    color: var(--accent-hover);
   }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
+  .post-head h1 {
+    font-size: clamp(32px, 4.4vw, 50px);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
     margin: 0;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .kind {
-    background: var(--accent);
-    color: #111;
-    font-weight: 700;
-    padding: 5px 8px;
-  }
-  .kind:hover {
-    background: var(--ink);
-    color: #111;
-  }
-  .head h1 {
-    font-size: clamp(32px, 5.4vw, 64px);
-    line-height: 1.04;
-    margin: 18px 0 0;
   }
   .standfirst {
-    font-size: clamp(17px, 1.9vw, 20px);
-    line-height: 1.6;
-    color: var(--text);
-    margin: 20px 0 0;
-    max-width: 62ch;
-  }
-  .byline-top {
-    font-size: 14px;
-    color: var(--muted);
     margin: 18px 0 0;
+    font-size: clamp(18px, 1.7vw, 21px);
+    line-height: 1.55;
+    color: var(--text-2);
   }
-  .byline-top a {
+  .byline {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding-bottom: 4px;
+  }
+  .byline :global(img) {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: none;
+  }
+  .byline p {
+    margin: 0;
+    display: grid;
+    gap: 2px;
+    font-size: 14.5px;
+    line-height: 1.4;
+  }
+  .byline-name {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .byline-name a {
     color: var(--ink);
   }
-  .hero {
-    max-width: 1100px;
-    margin: clamp(28px, 4vw, 44px) auto 0;
+  .byline-meta {
+    color: var(--muted);
   }
-  .hero img {
+
+  /* Hero */
+  .post-hero {
+    margin: clamp(28px, 4vw, 40px) 0 0;
+  }
+  .post-hero img {
     display: block;
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
+    border-radius: calc(var(--radius) + 4px);
     border: 1px solid var(--border);
   }
 
-  .layout {
-    max-width: 860px;
-    padding-top: clamp(28px, 4vw, 48px);
+  /* Body */
+  .post-body {
+    padding-top: clamp(28px, 4vw, 44px);
   }
-  .layout.with-toc {
-    max-width: 1180px;
+  .takeaways {
+    margin: 0 0 clamp(28px, 4vw, 40px);
+    padding: 20px 24px;
+    background: var(--tint);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .takeaways-heading {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .takeaways ul {
+    margin: 0;
+    padding-left: 20px;
     display: grid;
-    grid-template-columns: 260px minmax(0, 760px);
-    justify-content: center;
-    gap: 56px;
-    align-items: start;
+    gap: 8px;
   }
+  .takeaways li {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .takeaways li::marker {
+    color: var(--accent-text);
+  }
+  .post-body :global(.code-wrap) {
+    position: relative;
+  }
+  .post-body :global(.copy-code) {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .post-body :global(.copy-code:hover) {
+    border-color: var(--ink);
+  }
+
+  /* Table of contents */
   .toc {
-    position: sticky;
-    top: 112px;
-    max-height: calc(100vh - 140px);
-    overflow-y: auto;
-    border-top: 1px solid var(--border);
+    padding-top: clamp(28px, 4vw, 44px);
+  }
+  .toc details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    padding: 4px 16px;
   }
   .toc summary {
     list-style: none;
     cursor: pointer;
-    padding: 14px 0;
-    font-size: 11px;
+    padding: 12px 0;
+    font-size: 14.5px;
     font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
     color: var(--ink);
     display: flex;
     justify-content: space-between;
+    align-items: center;
   }
   .toc summary::-webkit-details-marker {
     display: none;
   }
   .toc summary::after {
     content: "+";
-    color: var(--accent);
-    font-size: 16px;
+    color: var(--accent-text);
+    font-size: 18px;
     line-height: 1;
   }
   .toc details[open] summary::after {
@@ -446,229 +529,88 @@ const jsonLd = [
   }
   .toc ol {
     list-style: none;
-    counter-reset: toc;
     margin: 0;
-    padding: 0 0 14px;
-  }
-  .toc li {
-    counter-increment: toc;
+    padding: 0 0 12px;
   }
   .toc a {
-    display: grid;
-    grid-template-columns: 26px 1fr;
-    gap: 6px;
-    padding: 7px 0;
-    font-size: 13.5px;
+    display: block;
+    padding: 6px 0 6px 12px;
+    border-left: 2px solid var(--border);
+    font-size: 14.5px;
     line-height: 1.4;
-    color: var(--text);
-    border-left: 2px solid transparent;
-    transition: color 0.2s;
+    color: var(--text-2);
   }
-  .toc a::before {
-    content: counter(toc, decimal-leading-zero);
-    font-size: 11px;
-    padding-top: 2px;
-    color: var(--muted);
+  .toc a:hover {
+    color: var(--ink);
   }
-  .toc a:hover,
   .toc a[aria-current] {
     color: var(--ink);
+    font-weight: 600;
+    border-left-color: var(--accent);
   }
-  .toc a[aria-current]::before {
-    color: var(--accent);
-  }
-  .body {
-    min-width: 0;
-  }
-  .takeaways {
-    margin: 0 0 clamp(28px, 4vw, 40px);
-    padding: 22px 24px 20px;
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--accent);
-    background: var(--card);
-  }
-  .takeaways-heading {
-    margin: 0 0 12px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .takeaways ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 10px;
-  }
-  .takeaways li {
-    position: relative;
-    padding-left: 22px;
-    font-size: 15.5px;
-    line-height: 1.55;
-    color: var(--ink);
-  }
-  .takeaways li::before {
-    content: "→";
-    position: absolute;
-    left: 0;
-    color: var(--accent);
-  }
-  .body :global(h2),
-  .body :global(h3) {
-    scroll-margin-top: 110px;
-  }
-  .body :global(.code-wrap) {
-    position: relative;
-  }
-  .body :global(.copy-code) {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 7px 10px;
-    border: 1px solid #0002;
-    background: #fff;
-    color: #111;
-    cursor: pointer;
-  }
-  .body :global(.copy-code:hover) {
-    background: var(--accent);
+  @media (min-width: 1101px) {
+    .toc details {
+      position: sticky;
+      top: calc(var(--header-h) + 24px);
+      max-height: calc(100vh - var(--header-h) - 48px);
+      overflow-y: auto;
+    }
   }
 
-  .foot {
-    max-width: 860px;
-    padding-top: 28px;
-    padding-bottom: clamp(48px, 7vw, 72px);
+  /* Footer */
+  .post-foot {
+    padding: 36px 0 clamp(40px, 6vw, 64px);
   }
-  /* Line the footer up with the text column, not the table of contents. */
-  .with-toc + .foot {
-    max-width: 1180px;
-    display: grid;
-    grid-template-columns: 260px minmax(0, 760px);
-    justify-content: center;
-    column-gap: 56px;
-  }
-  .with-toc + .foot > * {
-    grid-column: 2;
-  }
-  .foot .tag-list {
-    margin: 0 0 22px;
+  .post-foot .tag-list {
+    margin: 0 0 28px;
   }
   .author-box {
     display: grid;
-    grid-template-columns: 96px 1fr;
-    gap: 22px;
+    grid-template-columns: 80px 1fr;
+    gap: 20px;
     align-items: start;
-    padding-top: 26px;
-    border-top: 1px solid var(--border);
-    max-width: 760px;
+    padding: 24px;
+    background: var(--bg-alt);
+    border-radius: var(--radius);
   }
   .author-box :global(img) {
-    width: 96px;
-    height: 96px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
     object-fit: cover;
-    filter: grayscale(1);
   }
   .author-label {
     margin: 0;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: 13.5px;
     color: var(--muted);
   }
   .author-name {
-    margin: 4px 0 8px;
-    font-size: 19px;
-    font-weight: 600;
+    margin: 2px 0 8px;
+    font-size: 18px;
+    font-weight: 700;
     color: var(--ink);
   }
   .author-bio {
     margin: 0 0 12px;
-    font-size: 14.5px;
-    line-height: 1.7;
-    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--text-2);
   }
 
-
-  .more {
+  /* After the article */
+  .post-after {
     border-top: 1px solid var(--border);
   }
-  .more-frame {
-    width: calc(100% - var(--gutter) * 2);
-    max-width: 1320px;
-    margin-inline: auto;
-    border-inline: 1px solid var(--border);
+  .related {
+    padding: clamp(40px, 6vw, 64px) 0 0;
   }
-  .more-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 48px 22px 26px;
-  }
-  .more-head .arrow-link {
-    font-size: 12px;
-  }
-  .more-head .section-index {
-    margin: 0 0 12px;
-  }
-  .more-head h2 {
-    font: 300 clamp(26px, 3vw, 40px) / 1.05 var(--font-display);
-    text-transform: uppercase;
-    margin: 0;
-  }
-  .more :global(.card-grid > *) {
-    border-bottom: 0;
-  }
-
   .post-signup {
-    width: calc(100% - var(--gutter) * 2);
-    max-width: 1320px;
-    margin: 0 auto 70px;
-  }
-  .signup-title {
-    font: 300 clamp(28px, 3.4vw, 46px) / 1.05 var(--font-display) !important;
-    text-transform: uppercase;
-    margin: 0 0 12px;
+    padding: clamp(40px, 6vw, 64px) 0;
   }
 
-  @media (max-width: 1050px) {
-    .layout.with-toc {
-      display: block;
-      max-width: 860px;
-    }
-    .with-toc + .foot {
-      display: block;
-      max-width: 860px;
-    }
-    .toc {
-      position: static;
-      max-height: none;
-      margin-bottom: 32px;
-      border-bottom: 1px solid var(--border);
-    }
-  }
-  @media (max-width: 720px) {
+  @media (max-width: 600px) {
     .author-box {
-      grid-template-columns: 64px 1fr;
-      gap: 16px;
-    }
-    .author-box :global(img) {
-      width: 64px;
-      height: 64px;
-    }
-    .more-head {
-      padding: 36px 15px 20px;
-    }
-    .crumbs li[aria-current] {
-      max-width: 28ch;
+      grid-template-columns: 1fr;
     }
   }
 </style>

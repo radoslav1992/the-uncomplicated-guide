@@ -44,52 +44,45 @@ const jsonLd = [
   current="Articles"
   jsonLd={jsonLd}
 >
-  <div class="listing-page">
-    <section class="frame listing-intro">
-      <p class="section-index">[ THE JOURNAL ]</p>
-      <h1>
-        Notes from
-        <br />
-        <em>the work.</em>
-      </h1>
+  <div class="container">
+    <header class="page-head">
+      <p class="eyebrow">Articles</p>
+      <h1>Notes from the work</h1>
       <p class="lead">
         Practical articles on putting AI to work: what to build, what it costs,
         and what to check before you promise it to a client. Long step-by-step
         reads and short field notes, all free.
       </p>
-      <div class="listing-facts">
-        <span><i class="status-dot"></i>{posts.length} articles</span>
-        <span><i class="status-dot"></i>{categoryCount} categories</span>
-        <span><i class="status-dot"></i>Free to read</span>
-      </div>
-    </section>
+      <ul class="facts">
+        <li>{posts.length} articles</li>
+        <li>{categoryCount} categories</li>
+        <li>Free to read</li>
+      </ul>
+    </header>
 
-    <section class="frame listing-section journal" aria-labelledby="all-articles">
-      <div class="section-head">
-        <h2 id="all-articles">All articles</h2>
-        <p>Newest first</p>
-      </div>
+    <section aria-labelledby="all-articles">
+      <h2 id="all-articles" class="visually-hidden">All articles</h2>
       <CategoryNav posts={posts} />
       {posts.length === 0 && (
         <p class="lead">Nothing published yet. The first pieces are on their way.</p>
       )}
       <div class="card-grid">
-        {posts.map((post, i) => (
-          <ArticleCard post={post} index={i} headingLevel={3} />
+        {posts.map((post) => (
+          <ArticleCard post={post} headingLevel={3} />
         ))}
       </div>
     </section>
 
-    <section class="frame newsletter-section listing-signup">
-      <div class="newsletter-copy">
-        <p class="section-index">[ NEWSLETTER ]</p>
-        <h2 class="display">One email when there is something worth reading.</h2>
-        <p>
-          New articles go out on one list — a couple of emails a month at most,
-          and one click to leave.
-        </p>
-      </div>
-      <div class="newsletter-form">
+    <section class="home-section listing-signup">
+      <div class="signup-box">
+        <div>
+          <p class="eyebrow">Newsletter</p>
+          <h2>One email when there is something worth reading.</h2>
+          <p>
+            New articles go out on one list — a couple of emails a month at most,
+            and one click to leave.
+          </p>
+        </div>
         <SignupForm source="blog" />
       </div>
     </section>

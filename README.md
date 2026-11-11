@@ -14,6 +14,7 @@ Until November 2026 the site sold two guides as PDFs. Those are now free article
 URL redirects to its replacement.
 
 **Setting up Cloudflare?** Follow [docs/cloudflare-setup.md](docs/cloudflare-setup.md).
+Design tokens, fonts and colours are documented in [docs/design.md](docs/design.md).
 
 ```
 src/
@@ -26,7 +27,7 @@ src/
   pages/api/            ← newsletter/{subscribe,confirm,unsubscribe}, contact
   components/           ← Header, Footer, ArticleCard, FeaturedArticle, CategoryNav, SignupForm…
   lib/                  ← blog helpers, newsletter, email, tokens, rate limiting
-  styles/               ← global.css (base), adon.css (brand), blog.css (cards and listings)
+  styles/               ← global.css (tokens, type, prose, forms), blog.css (listings, home)
   worker.ts             ← Worker entry: Astro fetch handler, `email()` for Email Routing,
                           `scheduled()` for newsletter delivery
 public/

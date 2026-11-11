@@ -119,9 +119,10 @@ export default defineConfig({
       },
     }),
   ],
-  // Blog code blocks: a light theme so they sit on the site's paper, not a dark slab.
+  // Code blocks follow the reader's colour scheme: both themes are rendered and
+  // global.css switches to the dark one under prefers-color-scheme: dark.
   markdown: {
-    shikiConfig: { theme: 'github-light', wrap: true },
+    shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, wrap: true },
   },
   // Sessions are not used; keep the adapter from provisioning a KV namespace for them.
   session: false,

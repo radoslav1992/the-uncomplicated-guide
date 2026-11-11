@@ -15,10 +15,10 @@ const Heading = `h${headingLevel}` as "h2" | "h3";
 const url = postUrl(post);
 const category = postCategory(post);
 const chapters = chaptersOf(post);
-const shown = chapters.slice(0, 6);
+const shown = chapters.slice(0, 5);
 ---
 
-<article class="featured-article" data-reveal>
+<article class="featured-article">
   <a href={url} class="feature-media" tabindex="-1" aria-hidden="true">
     {post.data.image && (
       <img
@@ -30,29 +30,38 @@ const shown = chapters.slice(0, 6);
         decoding="async"
       />
     )}
-    <span class="feature-badge">{category.name}</span>
   </a>
   <div class="feature-body">
-    <div class="feature-meta">
-      <span>{chapters.length} chapters</span>
+    <p class="feature-meta">
+      <span class="feature-category">{category.name}</span>
+      <span aria-hidden="true">·</span>
       <span>{readingTime(post.body)} min read</span>
-    </div>
+      {chapters.length > 0 && (
+        <Fragment>
+          <span aria-hidden="true">·</span>
+          <span>{chapters.length} sections</span>
+        </Fragment>
+      )}
+    </p>
     <Heading class="feature-title">
       <a href={url}>{post.data.title}</a>
     </Heading>
     <p class="feature-desc">{post.data.description}</p>
     {shown.length > 0 && (
-      <ol class="feature-chapters" aria-label="Chapters">
-        {shown.map((chapter) => (
-          <li>{chapter}</li>
-        ))}
-        {chapters.length > shown.length && (
-          <li class="more">+ {chapters.length - shown.length} more</li>
-        )}
-      </ol>
+      <div class="feature-chapters">
+        <p>Inside:</p>
+        <ul>
+          {shown.map((chapter) => (
+            <li>{chapter}</li>
+          ))}
+          {chapters.length > shown.length && (
+            <li class="more">and {chapters.length - shown.length} more sections</li>
+          )}
+        </ul>
+      </div>
     )}
-    <a href={url} class="rr-btn-classic feature-cta">
-      Read the article <span class="button-arrow" aria-hidden="true">↗</span>
+    <a href={url} class="btn btn-accent feature-cta">
+      Read the article <span aria-hidden="true">→</span>
     </a>
   </div>
 </article>
@@ -65,13 +74,14 @@ const shown = chapters.slice(0, 6);
     height: 100%;
     background: var(--card);
     border: 1px solid var(--border);
+    border-radius: calc(var(--radius) + 4px);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
   }
   .feature-media {
-    position: relative;
     display: block;
-    overflow: hidden;
-    border-bottom: 1px solid var(--border);
     background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
   }
   .feature-media img {
     display: block;
@@ -79,96 +89,77 @@ const shown = chapters.slice(0, 6);
     height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-  .featured-article:hover .feature-media img {
-    transform: scale(1.03);
-  }
-  .feature-badge {
-    position: absolute;
-    left: 18px;
-    top: 18px;
-    background: var(--accent);
-    color: #111;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 7px 10px;
   }
   .feature-body {
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 24px 24px 26px;
+    padding: clamp(20px, 3vw, 28px);
   }
   .feature-meta {
     display: flex;
-    gap: 18px;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    font-size: 14px;
     color: var(--muted);
   }
+  .feature-category {
+    font-weight: 650;
+    color: var(--accent-text);
+  }
   .feature-title {
-    font: 300 clamp(26px, 2.7vw, 38px) / 1.08 var(--font-display);
-    text-transform: uppercase;
-    letter-spacing: -0.025em;
-    margin: 14px 0 0;
-    text-wrap: balance;
+    margin: 10px 0 0;
+    font-size: clamp(22px, 2.3vw, 28px);
+    line-height: 1.22;
+    letter-spacing: -0.02em;
   }
   .feature-title a {
     color: var(--ink);
   }
   .feature-title a:hover {
-    color: var(--accent);
+    color: var(--accent-text);
   }
   .feature-desc {
-    font-size: 15px;
-    line-height: 1.7;
-    color: var(--text);
-    margin: 16px 0 0;
+    margin: 12px 0 0;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text-2);
   }
   .feature-chapters {
-    list-style: none;
-    counter-reset: chapter;
-    margin: 22px 0 0;
-    padding: 0;
-    border-top: 1px solid var(--border);
+    margin: 18px 0 0;
+    padding: 14px 16px;
+    background: var(--bg-alt);
+    border-radius: var(--radius-sm);
+  }
+  .feature-chapters p {
+    margin: 0 0 6px;
+    font-size: 13.5px;
+    font-weight: 650;
+    color: var(--ink);
+  }
+  .feature-chapters ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 4px;
   }
   .feature-chapters li {
-    counter-increment: chapter;
-    display: flex;
-    gap: 14px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13.5px;
-    line-height: 1.45;
-    color: var(--text-3);
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--text-2);
   }
-  .feature-chapters li::before {
-    content: counter(chapter, decimal-leading-zero);
-    flex: none;
-    width: 22px;
-    color: var(--accent);
-    font-size: 11px;
-    padding-top: 2px;
+  .feature-chapters li::marker {
+    color: var(--accent-text);
   }
   .feature-chapters li.more {
+    list-style: none;
+    margin-left: -18px;
     color: var(--muted);
-  }
-  .feature-chapters li.more::before {
-    content: "";
+    font-style: italic;
   }
   .feature-cta {
-    margin-top: 26px;
-  }
-  @media (min-width: 721px) {
-    .feature-cta {
-      margin-top: auto;
-    }
-    .feature-chapters {
-      margin-bottom: 26px;
-    }
+    align-self: flex-start;
+    margin-top: 22px;
   }
 </style>

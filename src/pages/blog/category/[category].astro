@@ -58,47 +58,44 @@ const jsonLd = [
   current="Articles"
   jsonLd={jsonLd}
 >
-  <div class="listing-page">
-    <section class="frame listing-intro">
-      <nav class="listing-crumbs" aria-label="Breadcrumb">
+  <div class="container">
+    <header class="page-head">
+      <nav class="page-crumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>{" / "}<a href="/blog">Articles</a>{" / "}
         <span aria-current="page">{category.name}</span>
       </nav>
-      <p class="section-index">[ CATEGORY ]</p>
+      <p class="eyebrow">Category</p>
       <h1>{category.name}</h1>
       <p class="lead">{category.intro}</p>
-      <div class="listing-facts">
-        <span>
-          <i class="status-dot"></i>{category.posts.length}
+      <ul class="facts">
+        <li>
+          {category.posts.length}
           {category.posts.length === 1 ? " article" : " articles"}
-        </span>
-        <span><i class="status-dot"></i>Free to read</span>
-      </div>
-    </section>
+        </li>
+        <li>Free to read</li>
+      </ul>
+    </header>
 
-    <section class="frame listing-section journal" aria-labelledby="category-articles">
-      <div class="section-head">
-        <h2 id="category-articles">{category.name} articles</h2>
-        <p>Newest first</p>
-      </div>
+    <section aria-labelledby="category-articles">
+      <h2 id="category-articles" class="visually-hidden">{category.name} articles</h2>
       <CategoryNav posts={posts} current={category.slug} />
       <div class="card-grid">
-        {category.posts.map((post, i) => (
-          <ArticleCard post={post} index={i} headingLevel={3} />
+        {category.posts.map((post) => (
+          <ArticleCard post={post} headingLevel={3} />
         ))}
       </div>
     </section>
 
-    <section class="frame newsletter-section listing-signup">
-      <div class="newsletter-copy">
-        <p class="section-index">[ NEWSLETTER ]</p>
-        <h2 class="display">Get the next {category.name} article.</h2>
-        <p>
-          One email when something new is published — a couple a month at most,
-          and one click to leave.
-        </p>
-      </div>
-      <div class="newsletter-form">
+    <section class="home-section listing-signup">
+      <div class="signup-box">
+        <div>
+          <p class="eyebrow">Newsletter</p>
+          <h2>Get the next {category.name} article.</h2>
+          <p>
+            One email when something new is published — a couple a month at
+            most, and one click to leave.
+          </p>
+        </div>
         <SignupForm source={`category:${category.slug}`} topic={category.slug} />
       </div>
     </section>
