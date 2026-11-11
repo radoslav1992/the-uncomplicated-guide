@@ -3,7 +3,7 @@ title: What a voice agent actually is
 description: Voice agent, speech agent, voice AI, conversational agent — four names for the same thing. Here is what is inside one, why latency decides whether it feels human, and what separates an agent from a talking FAQ.
 pubDate: 2026-09-07
 tags: [Voice agents, Explainer]
-guide: ai-receptionist-voice-assistant-guide
+guide: ai-receptionist-guide
 ---
 
 A voice agent is software that answers the phone, holds a spoken conversation, and does something at the end of it — books the appointment, takes the order, passes the caller to a person.
@@ -80,3 +80,5 @@ Voice agents work best where the calls are repetitive, the request is narrow, an
 They work badly where the conversation is the value — a complaint, a diagnosis, a negotiation — and where being handled by a machine would itself be the insult.
 
 The build is not the hard part. Getting a real number onto it, deciding what happens when it fails, and pricing it so a busy month does not cost you money is the hard part, and that is where most projects stop.
+
+The [AI receptionist guide](/blog/ai-receptionist-guide) walks through all three, step by step — from the first conversation with a business to the monthly invoice.

@@ -3,7 +3,7 @@ title: The part of a voice agent nobody demos
 description: A demo answers a call in a browser tab. A live agent needs a phone number, a rule for what happens when it fails, and someone to pay for the minutes. That gap is where most projects stop.
 pubDate: 2026-08-12
 tags: [Voice agents, Telephony]
-guide: ai-receptionist-voice-assistant-guide
+guide: ai-receptionist-guide
 ---
 
 Every voice agent demo goes the same way. Someone opens a browser tab, clicks a microphone, and has a short conversation with a machine that books an appointment at the end of it. It is genuinely impressive. It also proves less than it looks.
@@ -49,3 +49,5 @@ Six of those seven will surface something. That is the point of the list.
 ## Where this ends up
 
 None of the above is a reason not to build voice agents. They work, and the businesses that need them tend to need them badly. It is a reason to treat the demo as the beginning of the estimate rather than most of the work, and to have answers about numbers, failure and cost before a client asks — because a client who has to ask has already noticed that you have not thought about it.
+
+If you are building one now, the [AI receptionist guide](/blog/ai-receptionist-guide) covers the phone line, the fallbacks, the tests and the pricing step by step.

@@ -1,7 +1,7 @@
 # From shop to blog: deployment and clean-up
 
 On 11 November 2026 the site stopped selling PDF guides and became a free blog. The two paid
-guides are now articles (`/blog/ai-receptionist-voice-assistant-guide` and
+guides are now articles (`/blog/ai-receptionist-guide` and
 `/blog/ai-ugc-video-ads-guide`), and every shop URL redirects permanently (see `redirects` in
 `astro.config.mjs` and `public/_redirects`).
 
@@ -27,7 +27,7 @@ later; that needs the files.
 Merge and let Workers Builds deploy as usual. Then check:
 
 - `curl -sI https://uncomplicatedguide.com/guides/ai-assistants` answers `301` with
-  `location: /blog/ai-receptionist-voice-assistant-guide`; likewise `/guides/ai-video-ads-ugc`,
+  `location: /blog/ai-receptionist-guide`; likewise `/guides/ai-video-ads-ugc`,
   `/account`, `/thank-you`, `/checkout`, `/refunds`, `/download/anything` and `/samples/anything`.
 - `/api/checkout` and `/api/stripe/webhook` answer `404`.
 - The newsletter signup, confirmation link, contact form and `/admin/newsletter` still work.
