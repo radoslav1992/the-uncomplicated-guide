@@ -19,8 +19,6 @@ const freeGuide = {
   subtitle: 'How to build, run and sell AI receptionists and voice assistants',
   pages: 36,
   edition: 'English edition, version 1.1',
-  /** What the PDF cost while it was sold (see `shopClosed`). */
-  formerPrice: '$39',
   parts: [
     {
       title: 'Strategy',
