@@ -1,5 +1,10 @@
 # Adon AI Agency adaptation
 
+> November 2026: the site is now a free blog. The hero, ruled frames, display type, moving text,
+> author and newsletter sections keep the Adon language; the book covers, collection cards, process
+> grid and FAQ were replaced by the "start here" list, guide features and article cards in
+> `src/styles/blog.css`. The notes below describe the original storefront adaptation.
+
 The storefront uses the dark AI Agency demo from the user-supplied Adon archive
 (`dark/ai-agency.html` and `dark/assets/scss/pages/_ai-agency.scss`). The source
 archive is not shipped in the repository.

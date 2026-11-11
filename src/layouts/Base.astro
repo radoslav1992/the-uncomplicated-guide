@@ -3,6 +3,7 @@ import "@fontsource-variable/onest";
 import onestLatin from "@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url";
 import "../styles/global.css";
 import "../styles/adon.css";
+import "../styles/blog.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CookieConsent from "../components/CookieConsent.astro";
@@ -14,16 +15,16 @@ interface Props {
   title: string;
   description?: string;
   /** Which top-nav item is highlighted. */
-  current?: "Home" | "Library" | "Blog" | "About" | "Contact" | "";
+  current?: "Home" | "Guides" | "Articles" | "About" | "Contact" | "";
   /** Absolute or root-relative path to an Open Graph image. */
   image?: ImageMetadata | string;
-  /** Set for pages that should not be indexed (thank-you, download). */
+  /** Set for pages that should not be indexed (status pages, admin). */
   noindex?: boolean;
   /**
    * Set on blog posts. Switches the page to `og:type=article` and adds the
    * published/modified times and tags that social cards and readers use.
    */
-  article?: { publishedTime: Date; modifiedTime?: Date; tags?: string[] };
+  article?: { publishedTime: Date; modifiedTime?: Date; tags?: string[]; section?: string };
   /** Extra JSON-LD to inject. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
@@ -38,7 +39,11 @@ const {
   jsonLd,
 } = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+// Pages are built as `page.html` (build.format "file") but served as `/page`, so the
+// build-time pathname carries a `.html` the public URL does not have.
+const publicPath =
+  Astro.url.pathname.replace(/\.html$/, "").replace(/\/index$/, "/") || "/";
+const canonical = new URL(publicPath, Astro.site ?? Astro.url).href;
 const ogImageSrc =
   typeof image === "string" ? image : (image?.src ?? "/social/default.png");
 const ogImage = new URL(ogImageSrc, Astro.site ?? Astro.url).href;
@@ -48,12 +53,12 @@ const ogImageSize = ogImageSrc.startsWith("/social/")
   : typeof image === "string" || !image
     ? null
     : { width: image.width, height: image.height };
-// Guide covers are portrait and the fallback is a square logo; a wide card would
-// crop either to an unreadable horizontal slice. Only genuinely landscape art
-// earns `summary_large_image`.
+// Only genuinely landscape art earns `summary_large_image`; a wide card would crop
+// a square or portrait image to an unreadable slice. Article hero images are drawn
+// 16:9, so an article with its own image counts as landscape.
 const wideCard = ogImageSize
   ? ogImageSize.width / ogImageSize.height >= 1.5
-  : false;
+  : Boolean(article && typeof image === "string");
 const fullTitle = title.includes(site.name) ? title : `${title} — ${site.name}`;
 const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
 ---
@@ -85,7 +90,7 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
     <link
       rel="alternate"
       type="application/rss+xml"
-      title={`${site.name} — blog`}
+      title={`${site.name} — articles and guides`}
       href="/rss.xml"
     />
     <meta name="theme-color" content="#111111" />
@@ -116,6 +121,9 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
           />
         )}
         <meta property="article:author" content={site.author.name} />
+        {article.section && (
+          <meta property="article:section" content={article.section} />
+        )}
         {article.tags?.map((tag) => (
           <meta property="article:tag" content={tag} />
         ))}
@@ -181,8 +189,6 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
           "https://www.googletagmanager.com/gtag/js?id=" +
           encodeURIComponent(gaId);
         document.head.appendChild(script);
-        const match = location.pathname.match(/^\/guides\/([^/]+)$/);
-        if (match) gtag("event", "view_item", { item_id: match[1] });
       };
       document.addEventListener("cookie-consent:changed", start);
       document.addEventListener("click", (event) => {
@@ -192,7 +198,7 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
             : null;
         if (link && permitted())
           gtag("event", link.getAttribute("data-track"), {
-            item_id: link.getAttribute("data-guide"),
+            item_id: link.getAttribute("data-item") || location.pathname,
           });
       });
       start();

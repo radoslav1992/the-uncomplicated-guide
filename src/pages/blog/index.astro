@@ -1,187 +1,168 @@
 ---
-import Base from '../../layouts/Base.astro';
-import SignupForm from '../../components/SignupForm.astro';
-import { getPosts, readingTime, postUrl } from '../../lib/blog';
-import { formatDate } from '../../lib/http';
+import Base from "../../layouts/Base.astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import SignupForm from "../../components/SignupForm.astro";
+import { site } from "../../data/site";
+import { getPosts, isGuide, postUrl } from "../../lib/blog";
 
 const posts = await getPosts();
+const guideCount = posts.filter(isGuide).length;
+
+// Topics with more than one article become filter chips; the rest stay as tags on the cards.
+const counts = new Map<string, number>();
+for (const post of posts)
+  for (const tag of post.data.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+const topics = [...counts.entries()]
+  .filter(([, n]) => n > 1)
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([tag]) => tag);
+const tagKey = (tag: string) => tag.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: `Articles — ${site.name}`,
+  url: `${site.url}/blog`,
+  description:
+    "Every guide and article on The Uncomplicated Guides: voice agents, AI video ads, vibe coding and side projects.",
+  mainEntity: {
+    "@type": "ItemList",
+    itemListElement: posts.map((post, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${site.url}${postUrl(post)}`,
+      name: post.data.title,
+    })),
+  },
+};
 ---
 
 <Base
-  title="Blog"
-  description="Short pieces on the same procedures the guides cover: what breaks, what it costs, and what to check before you promise it to a client."
-  current="Blog"
+  title="Articles on AI, voice agents and AI video"
+  description="Every guide and article in one place: voice agents, AI video ads, vibe coding and AI side projects — what to build, what it costs and what to check first."
+  current="Articles"
+  jsonLd={jsonLd}
 >
-  <section class="intro">
-    <div class="intro-bg" aria-hidden="true"></div>
-    <div class="container">
-      <p class="eyebrow">Blog</p>
-      <h1 class="display">Notes from the work.</h1>
+  <div class="listing-page">
+    <section class="frame listing-intro">
+      <p class="section-index">[ THE JOURNAL ]</p>
+      <h1>
+        Notes from
+        <br />
+        <em>the work.</em>
+      </h1>
       <p class="lead">
-        Short pieces on the same procedures the guides cover: what breaks, what it costs, and what
-        to check before you promise it to a client. No news, no roundups — the parts that are worth
-        writing down once.
+        Practical pieces on the same work the guides cover: what breaks, what
+        it costs, and what to check before you promise it to a client. No news,
+        no roundups — the parts worth writing down once.
       </p>
-    </div>
-  </section>
+      <div class="listing-facts">
+        <span><i class="status-dot"></i>{posts.length} articles</span>
+        <span><i class="status-dot"></i>{guideCount} long-form guides</span>
+        <span><i class="status-dot"></i>Free to read</span>
+      </div>
+    </section>
 
-  <section class="list-section">
-    <div class="container">
-      {posts.length === 0 && <p class="lead">Nothing published yet. The first pieces are on their way.</p>}
-      <ol class="posts">
-        {
-          posts.map((post, i) => (
-            <li class="post reveal" style={`--i: ${i}`}>
-              <a href={postUrl(post)}>
-                <p class="meta">
-                  <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-                  <span aria-hidden="true">·</span>
-                  <span>{readingTime(post.body)} min read</span>
-                  {post.data.draft && <span class="draft">Draft</span>}
-                </p>
-                <h2 class="display">{post.data.title}</h2>
-                <p class="desc">{post.data.description}</p>
-                {post.data.tags.length > 0 && (
-                  <ul class="tag-list">
-                    {post.data.tags.map((tag) => (
-                      <li>{tag}</li>
-                    ))}
-                  </ul>
-                )}
-                <span class="arrow-link more">Read it →</span>
-              </a>
-            </li>
-          ))
-        }
-      </ol>
-    </div>
-  </section>
-
-  <section class="signup-section">
-    <div class="container">
-      <div class="panel signup-panel">
-        <div>
-          <h2 class="display">One email when there is something worth reading.</h2>
-          <p class="lead-text">
-            New pieces and new guides go out on the same list — a couple of emails a month at most,
-            and one click to leave.
-          </p>
+    <section class="frame listing-section journal" aria-labelledby="all-articles">
+      <div class="section-head">
+        <h2 id="all-articles">All articles</h2>
+        <p data-filter-status aria-live="polite">Newest first</p>
+      </div>
+      {topics.length > 0 && (
+        <div class="topic-bar" role="group" aria-label="Filter by topic" data-topic-bar hidden>
+          <button type="button" aria-pressed="true" data-topic="">All</button>
+          <button type="button" aria-pressed="false" data-topic="guide">Guides</button>
+          {topics.map((tag) => (
+            <button type="button" aria-pressed="false" data-topic={tagKey(tag)}>
+              {tag}
+            </button>
+          ))}
         </div>
+      )}
+      {posts.length === 0 && (
+        <p class="lead">Nothing published yet. The first pieces are on their way.</p>
+      )}
+      <div class="card-grid" data-card-grid>
+        {posts.map((post, i) => (
+          <div
+            data-topics={[
+              ...post.data.tags.map(tagKey),
+              ...(isGuide(post) ? ["guide"] : []),
+            ].join(" ")}
+          >
+            <ArticleCard post={post} index={i} headingLevel={3} />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="frame newsletter-section blog-signup">
+      <div class="newsletter-copy">
+        <p class="section-index">[ NEWSLETTER ]</p>
+        <h2 class="display">One email when there is something worth reading.</h2>
+        <p>
+          New articles and guides go out on the same list — a couple of emails
+          a month at most, and one click to leave.
+        </p>
+      </div>
+      <div class="newsletter-form">
         <SignupForm source="blog" />
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </Base>
 
+<script>
+  // Progressive enhancement: without JavaScript every article stays listed.
+  const bar = document.querySelector<HTMLElement>("[data-topic-bar]");
+  const grid = document.querySelector<HTMLElement>("[data-card-grid]");
+  const status = document.querySelector<HTMLElement>("[data-filter-status]");
+  if (bar && grid) {
+    bar.hidden = false;
+    const items = [...grid.children] as HTMLElement[];
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>("button")];
+    const apply = (topic: string) => {
+      let shown = 0;
+      for (const item of items) {
+        const match = !topic || (item.dataset.topics ?? "").split(" ").includes(topic);
+        item.hidden = !match;
+        if (match) shown++;
+      }
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.topic === topic)));
+      grid.classList.toggle("filtered", Boolean(topic));
+      if (status) status.textContent = topic ? `${shown} of ${items.length} articles` : "Newest first";
+    };
+    bar.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>("button[data-topic]");
+      if (button) apply(button.dataset.topic ?? "");
+    });
+  }
+</script>
+
 <style>
-  .intro {
-    padding: clamp(48px, 7vw, 92px) 0 clamp(24px, 4vw, 40px);
-    position: relative;
-    overflow: hidden;
+  .blog-signup {
+    margin-top: 0;
+    margin-bottom: 70px;
   }
-  .intro-bg {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(52% 60% at 82% 30%, rgba(226, 84, 43, 0.1), transparent 70%);
-    pointer-events: none;
-  }
-  .intro .container {
-    position: relative;
-  }
-  .intro h1 {
-    font-size: clamp(32px, 5.4vw, 62px);
-    line-height: 1;
-    letter-spacing: -0.045em;
-    margin: 14px 0 0;
-  }
-  .intro .lead {
-    margin: 22px 0 0;
-    max-width: 58ch;
-  }
-
-  .list-section {
-    padding: clamp(24px, 4vw, 48px) 0 clamp(56px, 8vw, 96px);
-  }
-  .posts {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border-top: 1px solid var(--border);
-  }
-  .post {
-    border-bottom: 1px solid var(--border);
-  }
-  .post a {
-    display: block;
-    color: inherit;
-    padding: clamp(28px, 4vw, 44px) 0;
-    transition: color 0.18s ease;
-  }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    font-size: 13.5px;
-    color: var(--muted);
-  }
-  .draft {
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+  .blog-signup h2 {
+    font: 300 clamp(26px, 3vw, 40px) / 1.08 var(--font-display);
     text-transform: uppercase;
-    color: #fff;
-    background: var(--accent);
-    border-radius: 999px;
-    padding: 3px 10px;
-  }
-  .post h2 {
-    font-size: clamp(24px, 3.4vw, 38px);
-    line-height: 1.04;
-    letter-spacing: -0.04em;
-    margin: 12px 0 0;
-    max-width: 22ch;
-    transition: color 0.18s ease;
-  }
-  .post a:hover h2 {
-    color: var(--accent);
-  }
-  .desc {
-    font-size: clamp(15.5px, 1.7vw, 17.5px);
-    line-height: 1.6;
-    color: var(--text);
-    margin: 12px 0 0;
-    max-width: 62ch;
-  }
-  .more {
-    margin-top: 20px;
-  }
-
-  .signup-section {
-    padding: 0 0 clamp(72px, 10vw, 120px);
-  }
-  .signup-panel {
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: clamp(32px, 5vw, 72px);
-    align-items: center;
-  }
-  .signup-panel h2 {
-    font-size: clamp(24px, 3.2vw, 34px);
-    letter-spacing: -0.04em;
     margin: 0;
   }
-  .lead-text {
-    font-size: 16.5px;
-    line-height: 1.6;
-    color: var(--text);
-    margin: 16px 0 0;
-    max-width: 46ch;
+  /* A filtered grid loses the 3-column rhythm, so give every card its own rules. */
+  :global(.card-grid.filtered > *:not([hidden])) {
+    border-left: 0;
   }
-  @media (max-width: 860px) {
-    .signup-panel {
-      grid-template-columns: 1fr;
-    }
+  :global(.card-grid.filtered) {
+    gap: 0;
+  }
+  :global(.card-grid > [hidden]) {
+    display: none;
+  }
+  :global(.card-grid > div) {
+    display: flex;
+  }
+  :global(.card-grid > div > .article-card) {
+    flex: 1;
   }
 </style>

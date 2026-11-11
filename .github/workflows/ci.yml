@@ -1,4 +1,4 @@
-name: Validate storefront
+name: Validate site
 on:
   pull_request:
   push:

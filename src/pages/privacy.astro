@@ -8,23 +8,24 @@ import { site } from '../data/site';
   <p>The controller of personal data collected through this site is {site.legalTraderName}, {site.author.city}. Contact: <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
 
   <h2>What is collected and why</h2>
+  <p>Reading the site requires no account and collects no personal data beyond what any web server handles. Data is only collected when you choose to use one of the following:</p>
   <ul>
-    <li><strong>Purchases</strong> — name, email address, country and the amount paid, received from Stripe after checkout. Used to deliver the file, issue the download link, send the receipt and keep the records tax law requires. Stripe processes your card details under its own privacy policy; they never reach this site.</li>
-    <li><strong>Sign-in</strong> — to download a bought guide again, you sign in with a link sent to your email address. After clicking it, a signed cookie (<code>ug_session</code>) keeps you signed in for thirty days. It contains only your email address and an expiry time.</li>
-    <li><strong>Download links and downloads</strong> — the purchase identifier and the time a link was issued and a file was downloaded, so that a link can be reissued, a leaked one revoked, and refund questions answered.</li>
-    <li><strong>Newsletter</strong> — your email address, the date you subscribed and confirmed (double opt-in), and which guide you were interested in, if any. Used only to send the newsletter; every email carries a one-click unsubscribe link, which deletes the address.</li>
-    <li><strong>Reviews</strong> — the rating, the text you write, the display name you choose, and the email address you paid with. The first three are shown publicly; your email address never is, and is stored only to confirm you bought the guide and to let you edit or delete your review. Removing your review deletes the row.</li>
-    <li><strong>Contact form</strong> — name, email and the text of your message. Used only to answer you, kept only in the mailbox.</li>
-    <li><strong>Analytics (Google Analytics 4)</strong> — analytics cookies are set only after you consent in the cookie banner. Without consent only anonymous, cookie-less signals are sent (Google Consent Mode). Details are in the <a href="/cookies">cookie policy</a>.</li>
+    <li><strong>Newsletter</strong> — your email address, the date you subscribed and confirmed (double opt-in), the page you subscribed from, and a topic if the form recorded one. Used only to send the newsletter; every email carries a one-click unsubscribe link, which deletes the address. Legal basis: your consent.</li>
+    <li><strong>Contact form</strong> — name, email, the topics you ticked and the text of your message. Used only to answer you, kept only in the mailbox. Legal basis: your request.</li>
+    <li><strong>Abuse protection</strong> — to stop forms being flooded, a short-lived counter keyed to a one-way hash of your IP address and email address is kept for up to ten minutes. The hash cannot be turned back into either value.</li>
+    <li><strong>Analytics (Google Analytics 4)</strong> — only when it is switched on, and only after you consent in the cookie banner. Details are in the <a href="/cookies">cookie policy</a>.</li>
   </ul>
   <p>Personal data is not sold and is not shared with third parties for marketing.</p>
 
+  <h2>Records of earlier purchases</h2>
+  <p>Until {site.shopClosed} some guides were sold as PDF files. For those purchases we keep the records tax and accounting law requires — name, email address, country, amount and date, received from the payment processor Stripe — together with the download log and any review left at the time. Reviews are no longer published, and none of these records is used for anything else. Purchase records are deleted when the retention period ends (currently ten years in Bulgaria); you can ask for your review and download log to be deleted sooner. Legal basis: legal obligation.</p>
+
   <h2>Where data is processed</h2>
-  <p>The site runs on Cloudflare infrastructure and its data is stored in a Cloudflare database; payments are processed by Stripe; emails are sent through Cloudflare. Each is bound by a data-processing agreement.</p>
+  <p>The site runs on Cloudflare infrastructure, its data is stored in a Cloudflare database, and emails are sent through Cloudflare. Records of earlier purchases are also held by Stripe. Each is bound by a data-processing agreement.</p>
 
   <h2>How long</h2>
-  <p>Purchase records are kept for as long as tax law requires (currently ten years in Bulgaria). Newsletter addresses are kept until you unsubscribe, and unconfirmed addresses are deleted after ninety days. Contact correspondence is kept as long as it is needed to answer you; deletion can be requested at any time.</p>
+  <p>Newsletter addresses are kept until you unsubscribe; unconfirmed addresses are deleted after ninety days. Contact correspondence is kept as long as it is needed to answer you. Purchase records are kept as described above. You can ask for deletion at any time; we delete everything the law does not require us to keep.</p>
 
   <h2>Your rights</h2>
-  <p>Under the GDPR you have the right to access, correct, delete and restrict the processing of your data, to object, and to lodge a complaint with the Bulgarian Commission for Personal Data Protection (CPDP) or your local authority. Requests go to <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+  <p>Under the GDPR you have the right to access, correct, delete and restrict the processing of your data, to object, to withdraw consent, and to lodge a complaint with the Bulgarian Commission for Personal Data Protection (CPDP) or your local authority. Requests go to <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
 </Legal>

@@ -7,11 +7,10 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
 <Legal title="Cookie policy" description="Which cookies this site uses and how to change your choice.">
   <h2>Which cookies this site uses</h2>
   <ul>
-    <li><strong>Technical cookies</strong> — the infrastructure the site runs on (Cloudflare) and the payment provider (Stripe, on its own pages) may set cookies needed for security and performance. They are not used for profiling.</li>
-    <li><strong>Sign-in cookie (<code>ug_session</code>)</strong> — set only when you sign in to your account. Keeps you signed in for thirty days and holds nothing but your email address and an expiry time. Strictly necessary; no consent needed. Signing out removes it.</li>
+    <li><strong>Technical cookies</strong> — the infrastructure the site runs on (Cloudflare) may set cookies needed for security and performance. They are not used for profiling.</li>
     <li><strong>Analytics cookies (Google Analytics 4)</strong> — set <strong>only after consent</strong> in the cookie banner. Used for aggregate statistics on which pages are visited (<code>_ga</code>-type cookies). Data is processed by Google; see <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's privacy policy</a>. The script loads in Consent Mode: before consent, or after refusal, no cookies are set and no identifiers are used.{!gaId && ' Analytics is currently switched off entirely.'}</li>
   </ul>
-  <p>The site uses no marketing cookies and no advertising networks.</p>
+  <p>The site has no accounts and sets no sign-in cookies. It uses no marketing cookies and no advertising networks.</p>
 
   <h2>Changing your choice</h2>
   <p>Your choice is stored on your device. You can change it any time with the button below — the banner will appear again.</p>
@@ -21,7 +20,6 @@ const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || '';
 
   <h2>Questions</h2>
   <p>Questions about cookies and personal data go to <a href={`mailto:${site.email}`}>{site.email}</a>. See also the <a href="/privacy">privacy policy</a>.</p>
-<h2>Purchase access</h2><p>The essential ug_order cookie lasts one hour and allows the browser that started checkout to view that order. It does not sign you into your account.</p>
 </Legal>
 
 <style>

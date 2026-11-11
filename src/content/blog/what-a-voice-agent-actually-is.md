@@ -3,7 +3,7 @@ title: What a voice agent actually is
 description: Voice agent, speech agent, voice AI, conversational agent — four names for the same thing. Here is what is inside one, why latency decides whether it feels human, and what separates an agent from a talking FAQ.
 pubDate: 2026-09-07
 tags: [Voice agents, Explainer]
-guide: ai-assistants
+guide: ai-receptionist-voice-assistant-guide
 ---
 
 A voice agent is software that answers the phone, holds a spoken conversation, and does something at the end of it — books the appointment, takes the order, passes the caller to a person.

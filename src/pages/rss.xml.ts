@@ -7,9 +7,8 @@ import { site } from '../data/site';
 export async function GET(context: APIContext) {
   const posts = await getPosts();
   return rss({
-    title: `${site.name} — blog`,
-    description:
-      'Short pieces on the same procedures the guides cover: what breaks, what it costs, and what to check before you promise it to a client.',
+    title: `${site.name} — articles and guides`,
+    description: site.description,
     site: context.site ?? site.url,
     // The site serves URLs without a trailing slash; matching it keeps feed links
     // from bouncing through a redirect.
