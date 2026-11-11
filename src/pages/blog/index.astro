@@ -1,168 +1,90 @@
 ---
 import Base from "../../layouts/Base.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
+import CategoryNav from "../../components/CategoryNav.astro";
 import SignupForm from "../../components/SignupForm.astro";
 import { site } from "../../data/site";
-import { getPosts, isGuide, postUrl } from "../../lib/blog";
+import { categoriesWithPosts, getPosts, postUrl } from "../../lib/blog";
 
 const posts = await getPosts();
-const guideCount = posts.filter(isGuide).length;
+const categoryCount = categoriesWithPosts(posts).length;
 
-// Topics with more than one article become filter chips; the rest stay as tags on the cards.
-const counts = new Map<string, number>();
-for (const post of posts)
-  for (const tag of post.data.tags) counts.set(tag, (counts.get(tag) ?? 0) + 1);
-const topics = [...counts.entries()]
-  .filter(([, n]) => n > 1)
-  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-  .map(([tag]) => tag);
-const tagKey = (tag: string) => tag.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "CollectionPage",
-  name: `Articles — ${site.name}`,
-  url: `${site.url}/blog`,
-  description:
-    "Every guide and article on The Uncomplicated Guides: voice agents, AI video ads, vibe coding and side projects.",
-  mainEntity: {
-    "@type": "ItemList",
-    itemListElement: posts.map((post, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      url: `${site.url}${postUrl(post)}`,
-      name: post.data.title,
-    })),
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `Articles — ${site.name}`,
+    url: `${site.url}/blog`,
+    description:
+      "Every article on The Uncomplicated Guides: voice AI, AI video, side projects and selling AI services.",
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: posts.map((post, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${site.url}${postUrl(post)}`,
+        name: post.data.title,
+      })),
+    },
   },
-};
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${site.url}/` },
+      { "@type": "ListItem", position: 2, name: "Articles", item: `${site.url}/blog` },
+    ],
+  },
+];
 ---
 
 <Base
-  title="Articles on AI, voice agents and AI video"
-  description="Every guide and article in one place: voice agents, AI video ads, vibe coding and AI side projects — what to build, what it costs and what to check first."
+  title="Articles on AI receptionists, AI video and AI side projects"
+  description="Every article in one place: AI receptionists and voice agents, AI UGC video ads, side projects built with AI, and how to price and sell AI services."
   current="Articles"
   jsonLd={jsonLd}
 >
-  <div class="listing-page">
-    <section class="frame listing-intro">
-      <p class="section-index">[ THE JOURNAL ]</p>
-      <h1>
-        Notes from
-        <br />
-        <em>the work.</em>
-      </h1>
+  <div class="container">
+    <header class="page-head">
+      <p class="eyebrow">Articles</p>
+      <h1>Notes from the work</h1>
       <p class="lead">
-        Practical pieces on the same work the guides cover: what breaks, what
-        it costs, and what to check before you promise it to a client. No news,
-        no roundups — the parts worth writing down once.
+        Practical articles on putting AI to work: what to build, what it costs,
+        and what to check before you promise it to a client. Long step-by-step
+        reads and short field notes, all free.
       </p>
-      <div class="listing-facts">
-        <span><i class="status-dot"></i>{posts.length} articles</span>
-        <span><i class="status-dot"></i>{guideCount} long-form guides</span>
-        <span><i class="status-dot"></i>Free to read</span>
-      </div>
-    </section>
+      <ul class="facts">
+        <li>{posts.length} articles</li>
+        <li>{categoryCount} categories</li>
+        <li>Free to read</li>
+      </ul>
+    </header>
 
-    <section class="frame listing-section journal" aria-labelledby="all-articles">
-      <div class="section-head">
-        <h2 id="all-articles">All articles</h2>
-        <p data-filter-status aria-live="polite">Newest first</p>
-      </div>
-      {topics.length > 0 && (
-        <div class="topic-bar" role="group" aria-label="Filter by topic" data-topic-bar hidden>
-          <button type="button" aria-pressed="true" data-topic="">All</button>
-          <button type="button" aria-pressed="false" data-topic="guide">Guides</button>
-          {topics.map((tag) => (
-            <button type="button" aria-pressed="false" data-topic={tagKey(tag)}>
-              {tag}
-            </button>
-          ))}
-        </div>
-      )}
+    <section aria-labelledby="all-articles">
+      <h2 id="all-articles" class="visually-hidden">All articles</h2>
+      <CategoryNav posts={posts} />
       {posts.length === 0 && (
         <p class="lead">Nothing published yet. The first pieces are on their way.</p>
       )}
-      <div class="card-grid" data-card-grid>
-        {posts.map((post, i) => (
-          <div
-            data-topics={[
-              ...post.data.tags.map(tagKey),
-              ...(isGuide(post) ? ["guide"] : []),
-            ].join(" ")}
-          >
-            <ArticleCard post={post} index={i} headingLevel={3} />
-          </div>
+      <div class="card-grid">
+        {posts.map((post) => (
+          <ArticleCard post={post} headingLevel={3} />
         ))}
       </div>
     </section>
 
-    <section class="frame newsletter-section blog-signup">
-      <div class="newsletter-copy">
-        <p class="section-index">[ NEWSLETTER ]</p>
-        <h2 class="display">One email when there is something worth reading.</h2>
-        <p>
-          New articles and guides go out on the same list — a couple of emails
-          a month at most, and one click to leave.
-        </p>
-      </div>
-      <div class="newsletter-form">
+    <section class="home-section listing-signup">
+      <div class="signup-box">
+        <div>
+          <p class="eyebrow">Newsletter</p>
+          <h2>One email when there is something worth reading.</h2>
+          <p>
+            New articles go out on one list — a couple of emails a month at most,
+            and one click to leave.
+          </p>
+        </div>
         <SignupForm source="blog" />
       </div>
     </section>
   </div>
 </Base>
-
-<script>
-  // Progressive enhancement: without JavaScript every article stays listed.
-  const bar = document.querySelector<HTMLElement>("[data-topic-bar]");
-  const grid = document.querySelector<HTMLElement>("[data-card-grid]");
-  const status = document.querySelector<HTMLElement>("[data-filter-status]");
-  if (bar && grid) {
-    bar.hidden = false;
-    const items = [...grid.children] as HTMLElement[];
-    const buttons = [...bar.querySelectorAll<HTMLButtonElement>("button")];
-    const apply = (topic: string) => {
-      let shown = 0;
-      for (const item of items) {
-        const match = !topic || (item.dataset.topics ?? "").split(" ").includes(topic);
-        item.hidden = !match;
-        if (match) shown++;
-      }
-      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.topic === topic)));
-      grid.classList.toggle("filtered", Boolean(topic));
-      if (status) status.textContent = topic ? `${shown} of ${items.length} articles` : "Newest first";
-    };
-    bar.addEventListener("click", (event) => {
-      const button = (event.target as Element).closest<HTMLButtonElement>("button[data-topic]");
-      if (button) apply(button.dataset.topic ?? "");
-    });
-  }
-</script>
-
-<style>
-  .blog-signup {
-    margin-top: 0;
-    margin-bottom: 70px;
-  }
-  .blog-signup h2 {
-    font: 300 clamp(26px, 3vw, 40px) / 1.08 var(--font-display);
-    text-transform: uppercase;
-    margin: 0;
-  }
-  /* A filtered grid loses the 3-column rhythm, so give every card its own rules. */
-  :global(.card-grid.filtered > *:not([hidden])) {
-    border-left: 0;
-  }
-  :global(.card-grid.filtered) {
-    gap: 0;
-  }
-  :global(.card-grid > [hidden]) {
-    display: none;
-  }
-  :global(.card-grid > div) {
-    display: flex;
-  }
-  :global(.card-grid > div > .article-card) {
-    flex: 1;
-  }
-</style>

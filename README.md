@@ -3,7 +3,7 @@
 > Coming from the PDF shop? Read [docs/LAUNCH.md](docs/LAUNCH.md) — it lists the clean-up steps in
 > R2, Stripe and D1, in the order that is safe.
 
-A free blog of practical guides and articles on putting AI to work. Built with
+A free blog of practical articles on putting AI to work. Built with
 [Astro](https://astro.build) and deployed to [Cloudflare Workers](https://developers.cloudflare.com/workers/):
 every article is a prerendered static page; a few on-demand routes handle the newsletter, the
 contact form and article images. Newsletter subscribers live in a D1 database, article images can
@@ -14,18 +14,20 @@ Until November 2026 the site sold two guides as PDFs. Those are now free article
 URL redirects to its replacement.
 
 **Setting up Cloudflare?** Follow [docs/cloudflare-setup.md](docs/cloudflare-setup.md).
+Design tokens, fonts and colours are documented in [docs/design.md](docs/design.md).
 
 ```
 src/
-  content/blog/         ← every article and guide: one Markdown file each
+  content/blog/         ← every article: one Markdown file each
   content.config.ts     ← the article frontmatter schema
-  data/site.ts          ← site-wide facts (name, author, nav, legal names, upcoming guides)
-  pages/                ← / , /guides, /blog, /blog/[slug], /newsletter, /contact, legal pages,
+  data/site.ts          ← site-wide facts (name, author, nav, legal names, upcoming long reads)
+  data/categories.ts    ← the article categories, with the intro text of each category page
+  pages/                ← / , /blog, /blog/[slug], /blog/category/[category], /newsletter, /contact, legal pages,
                           /admin/newsletter, /media/[...key] (R2 images), /rss.xml
   pages/api/            ← newsletter/{subscribe,confirm,unsubscribe}, contact
-  components/           ← Header, Footer, ArticleCard, GuideFeature, SignupForm, ContactForm…
+  components/           ← Header, Footer, ArticleCard, FeaturedArticle, CategoryNav, SignupForm…
   lib/                  ← blog helpers, newsletter, email, tokens, rate limiting
-  styles/               ← global.css (base), adon.css (brand), blog.css (cards and listings)
+  styles/               ← global.css (tokens, type, prose, forms), blog.css (listings, home)
   worker.ts             ← Worker entry: Astro fetch handler, `email()` for Email Routing,
                           `scheduled()` for newsletter delivery
 public/
@@ -77,37 +79,46 @@ seoTitle: Optional — the <title> in search results, if it should differ from t
 description: One or two sentences. Shown on listings, in the meta description and in the feed.
 pubDate: 2026-08-26
 updatedDate: 2026-12-01      # optional: set for material revisions, not typo fixes
-tags: [Video, Ads]
+category: ai-video           # required: a slug from src/data/categories.ts
+tags: [Video, Ads]           # free-form topics; used for related articles
+featured: false              # optional: true puts it at the top of the home page
 image: /articles/my-article.webp          # optional 16:9 hero, or /media/article-images/<file> from R2
 imageAlt: What the image shows
 socialImage: /social/my-article.png       # optional 1200×630 share card
 takeaways:                                # optional "Key takeaways" box above the body
   - One line a reader can act on.
   - Three to seven of them.
-guide: ai-ugc-video-ads-guide             # optional: the guide this article belongs with
 draft: false                              # optional: true keeps it out of the build
 ---
 
 Body in Markdown. Headings, lists, quotes, code and tables are all styled.
 ```
 
-`guide` names another article with `kind: guide`. The article then ends with a card for that guide,
-and the guide lists the article under "Go deeper".
+### Categories and tags
 
-### Writing a guide
+Every article has exactly one **category** and any number of **tags**. Categories are defined in
+`src/data/categories.ts`; each one with at least one published article gets a page at
+`/blog/category/<slug>`, linked from `/blog`, the home page, the footer, and the breadcrumb and label
+on every article in it. The category's `intro` is the text on that page, so write it as a proper
+introduction to the topic. To add a category, add an entry to that file — the schema picks it up.
 
-A guide is an article with `kind: guide`. It gets a "Free guide" label, a table of contents built
-from its `##` headings (one per chapter), a place on the home page and in `/guides`, and a higher
-sitemap priority. Write each chapter as a `##` heading; the chapter count and the chapter list on
-the guide cards come from them. Code blocks get a copy button, which is useful for prompt templates.
+Tags are finer-grained and free-form. They appear on the article, go into the feed and the
+structured data, and decide which related articles are suggested (after the category).
 
-Guides that are being written are listed in `site.upcoming` (`src/data/site.ts`) and shown on
-`/guides` and the newsletter page.
+### Long reads
+
+Any article with five or more `##` headings gets a table of contents, with the chapter being read
+highlighted. Mark the best long reads `featured: true`: they lead the home page with their chapter
+list, and rank higher in the sitemap. Code blocks get a copy button, which is useful for prompt
+templates.
+
+Long reads being written are listed in `site.upcoming` (`src/data/site.ts`) and shown on the
+newsletter page.
 
 A post marked `draft: true` is visible with `npm run dev` and left out of `npm run build`. Reading
 time is worked out from the word count; the schema is enforced at build time, so a missing or
 misspelled field fails the build rather than shipping broken. `npm test` also checks that every
-`guide:` reference, local image and `/blog/…` link points at something that exists.
+category exists and that local images and `/blog/…` links point at something that exists.
 
 ### Moving or renaming an article
 
@@ -119,11 +130,12 @@ published articles — the content tests check this. Wildcard rules go in `publi
 - **Titles and descriptions** — `seoTitle` (falls back to `title`) and `description` per article.
   Every page gets a canonical URL, Open Graph and Twitter tags from `src/layouts/Base.astro`.
 - **Structured data** — `WebSite` and `Blog` on the home page, `CollectionPage` with an `ItemList`
-  on `/blog` and `/guides`, and `Article` (guides) or `BlogPosting` (articles) plus `BreadcrumbList`
-  on every article, with author, publisher, word count and `isAccessibleForFree`.
+  plus `BreadcrumbList` on `/blog` and each category page, and `BlogPosting` plus `BreadcrumbList`
+  (Home › Articles › category › article) on every article, with author, publisher, category, word
+  count and `isAccessibleForFree`.
 - **Sitemap** — `@astrojs/sitemap` in `astro.config.mjs`. Admin, API and redirected paths are
-  filtered out. Articles carry a real `lastmod` from `updatedDate`/`pubDate`; guides rank above
-  ordinary articles.
+  filtered out. Articles carry a real `lastmod` from `updatedDate`/`pubDate`; featured articles rank
+  above the rest, and category pages sit between `/blog` and the articles.
 - **robots.txt** — `public/robots.txt`. Disallows `/api/` and `/admin/` and points at the sitemap.
 - **Social cards** — `socialImage` (1200×630) when set, otherwise the article's hero image, otherwise
   `public/social/default.png`. Landscape images get `summary_large_image` on Twitter/X.

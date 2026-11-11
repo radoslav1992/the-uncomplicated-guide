@@ -3,7 +3,8 @@ title: "AI Receptionist: How to Build, Price and Sell an AI Phone Answering Serv
 seoTitle: "AI Receptionist: How to Build, Price and Sell One"
 description: "What an AI receptionist is, what it costs, and how to build one that books real appointments. A step-by-step guide for small businesses and agencies."
 pubDate: 2026-11-11
-kind: guide
+category: voice-ai
+featured: true
 tags: [AI receptionist, AI answering service, Voice agents, Pricing]
 image: "/articles/ai-receptionist-guide.webp"
 imageAlt: "AI receptionist illustration: a glowing phone handset over sound waves, representing AI answering a business's calls"

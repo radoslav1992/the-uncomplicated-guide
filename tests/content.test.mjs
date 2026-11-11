@@ -14,8 +14,8 @@ const posts = readdirSync(dir)
     return {
       id: file.replace(/\.md$/, ''),
       body: text.split('---').slice(2).join('---'),
-      kind: field('kind') ?? 'article',
-      guide: field('guide'),
+      category: field('category'),
+      featured: field('featured') === 'true',
       image: field('image'),
       socialImage: field('socialImage'),
       draft: field('draft') === 'true',
@@ -24,10 +24,13 @@ const posts = readdirSync(dir)
 const published = posts.filter((post) => !post.draft);
 const ids = new Set(published.map((post) => post.id));
 
-test('every `guide:` reference points to a published guide article', () => {
-  const guides = new Set(published.filter((post) => post.kind === 'guide').map((post) => post.id));
-  for (const post of published.filter((p) => p.guide)) {
-    assert.ok(guides.has(post.guide), `${post.id} links to missing guide "${post.guide}"`);
+test('every article has a category defined in src/data/categories.ts', () => {
+  const source = readFileSync(new URL('../src/data/categories.ts', import.meta.url), 'utf8');
+  const known = new Set([...source.matchAll(/slug: '([a-z0-9-]+)'/g)].map((m) => m[1]));
+  assert.ok(known.size > 0, 'no categories found');
+  for (const post of posts) {
+    assert.ok(post.category, `${post.id} has no category`);
+    assert.ok(known.has(post.category), `${post.id} uses unknown category "${post.category}"`);
   }
 });
 
@@ -48,9 +51,9 @@ test('internal /blog links in articles point to published articles', () => {
   }
 });
 
-test('guides have chapters, and redirects for the old guide URLs land on them', () => {
+test('featured articles have chapters, and redirects land on published articles', () => {
   const config = readFileSync(new URL('../astro.config.mjs', import.meta.url), 'utf8');
-  for (const post of published.filter((p) => p.kind === 'guide')) {
+  for (const post of published.filter((p) => p.featured)) {
     const chapters = post.body.split('\n').filter((line) => line.startsWith('## ')).length;
     assert.ok(chapters >= 5, `${post.id} has only ${chapters} chapters`);
   }

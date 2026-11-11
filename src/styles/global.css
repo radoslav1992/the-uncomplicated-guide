@@ -1,47 +1,92 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   The Uncomplicated Guides — base styles.
+
+   A reading-first design: warm paper background, dark ink, one orange accent.
+   Onest for headings and interface text, Literata for long-form reading.
+   Dark mode follows the reader's system setting. Every text colour below meets
+   WCAG AA (4.5:1) against the backgrounds it is used on, in both themes.
+   ───────────────────────────────────────────────────────────────────────────── */
+
 /* ───────────────────────────── Tokens ───────────────────────────── */
 :root {
-  --bg: #fcfaf5;
-  --bg-alt: #f3eee4;
-  --bg-author: #eee4d4;
-  --bg-input: #fffefa;
-  --bg-chip: #f0eadd;
+  /* Surfaces */
+  --bg: #faf8f4;
+  --bg-alt: #f3efe8;
   --card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-chip: #efe9e1;
+  --tint: #fdeee3;
 
-  --ink: #192c37;
-  --text: #536068;
-  --text-2: #5f6b70;
-  --text-3: #394b56;
-  --muted: #69726f;
-  --faint: #b3ab9c;
+  /* Text */
+  --ink: #1c1917;
+  --text: #2e2a26;
+  --text-2: #57534e;
+  --text-3: #2e2a26;
+  --muted: #6b655e;
+  --faint: #a8a097;
 
-  --border: #e4dfd3;
-  --border-2: #d2c9b9;
-  --border-input: #ddd5c9;
-  --border-dark: #3a4a54;
+  /* Lines */
+  --border: #e7e1d8;
+  --border-2: #d8d0c4;
+  --border-input: #cfc6b9;
 
-  --accent: #a44727;
-  --accent-decorative: #e9b56c;
-  --accent-hover: #81361e;
-  --accent-link-hover: #81361e;
-  --accent-tint: #f6e5d6;
-  --accent-ring: rgba(226, 84, 43, 0.14);
+  /* Accent. `--accent` is the brand orange for fills (with dark text on top);
+     `--accent-text` is the shade that is legible as text on the background. */
+  --accent: #fb7515;
+  --accent-fill-hover: #e8650a;
+  --on-accent: #1c1917;
+  --accent-text: #b5440d;
+  --accent-hover: #8f350a;
+  --accent-link-hover: var(--accent-hover);
+  --accent-ring: rgba(251, 117, 21, 0.28);
 
-  --dark-text: #f6f3ee;
-  --dark-muted: #b1bfc2;
-  --dark-body: #d2dadd;
+  /* Type */
+  --font-body: "Onest Variable", "Onest", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-body);
+  --font-reading: "Literata Variable", "Literata", Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, monospace;
 
-  --font-body: "Onest Variable", "Onest", system-ui, sans-serif;
-  --font-display: "Onest Variable", "Onest", system-ui, sans-serif;
-  --font-editorial: Georgia, "Times New Roman", serif;
-
+  /* Layout */
   --container: 1200px;
-  --gutter: clamp(20px, 4vw, 40px);
-  --radius-card: 18px;
-  --radius-panel: 18px;
-  --shadow-card: 0 10px 28px rgba(22, 19, 15, 0.08);
-  --shadow-cover: 0 26px 44px rgba(22, 19, 15, 0.3);
+  --gutter: clamp(16px, 4vw, 40px);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-card: 14px;
+  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.04), 0 10px 30px rgba(28, 25, 23, 0.06);
+  --header-h: 72px;
 
   color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151517;
+    --bg-alt: #1c1c1f;
+    --card: #1e1e22;
+    --bg-input: #1a1a1d;
+    --bg-chip: #2a2a2f;
+    --tint: #2a1d14;
+
+    --ink: #f4f2ee;
+    --text: #dcd8d2;
+    --text-2: #b9b4ad;
+    --text-3: #dcd8d2;
+    --muted: #a39e97;
+    --faint: #6f6a64;
+
+    --border: #2c2c31;
+    --border-2: #3a3a40;
+    --border-input: #47474e;
+
+    --accent-fill-hover: #ff8a3d;
+    --accent-text: #ff8a3d;
+    --accent-hover: #ffa66b;
+    --accent-ring: rgba(255, 138, 61, 0.3);
+
+    --shadow-card: none;
+
+    color-scheme: dark;
+  }
 }
 
 /* ───────────────────────────── Base ───────────────────────────── */
@@ -53,6 +98,8 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  -webkit-text-size-adjust: 100%;
 }
 
 html,
@@ -64,14 +111,16 @@ body {
 
 body {
   font-family: var(--font-body);
-  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
-  line-height: 1.5;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow-x: clip;
 }
 
 main {
@@ -79,23 +128,25 @@ main {
 }
 
 a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: none;
 }
 a:hover {
-  color: var(--accent-link-hover);
-}
-
-::selection {
-  background: var(--accent);
-  color: #fff;
+  color: var(--accent-hover);
 }
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   text-wrap: balance;
 }
+
 p {
   text-wrap: pretty;
 }
@@ -107,13 +158,19 @@ img {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
   color: inherit;
 }
 
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--accent-text);
   outline-offset: 3px;
   border-radius: 4px;
 }
@@ -126,94 +183,69 @@ textarea {
 }
 
 .section {
-  padding: clamp(72px, 10vw, 128px) 0;
+  padding: clamp(56px, 8vw, 96px) 0;
 }
 
 .section-alt {
   background: var(--bg-alt);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border-block: 1px solid var(--border);
 }
 
-.section-dark {
-  background: var(--ink);
-  color: var(--dark-text);
-}
-
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(32px, 5vw, 72px);
-  align-items: start;
-}
-
-@media (max-width: 860px) {
-  .grid-2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ───────────────────────────── Type ───────────────────────────── */
+/* ───────────────────────────── Type helpers ───────────────────────────── */
 .display {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .eyebrow {
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-weight: 650;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--accent-text);
   margin: 0;
 }
 
-.section-dark .eyebrow {
-  color: var(--dark-muted);
-}
-
 .lead {
-  font-size: clamp(16.5px, 1.7vw, 19px);
-  line-height: 1.6;
-  color: var(--text);
+  font-size: clamp(17px, 1.6vw, 19px);
+  line-height: 1.65;
+  color: var(--text-2);
 }
 
 .small {
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--muted);
 }
 
-/* ───────────────────────────── Buttons ───────────────────────────── */
+/* ───────────────────────────── Buttons & links ───────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 16px 23px;
   min-height: 46px;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.2;
   cursor: pointer;
   text-decoration: none;
   transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.18s ease;
-  white-space: nowrap;
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
 }
 
 .btn-accent {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .btn-accent:hover {
-  background: var(--accent-hover);
-  color: #fff;
+  background: var(--accent-fill-hover);
+  color: var(--on-accent);
 }
 
 .btn-dark {
@@ -221,14 +253,14 @@ textarea {
   color: var(--bg);
 }
 .btn-dark:hover {
-  background: #000;
-  color: #fff;
+  background: var(--text-2);
+  color: var(--bg);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--ink);
   border-color: var(--border-2);
+  color: var(--ink);
 }
 .btn-outline:hover {
   border-color: var(--ink);
@@ -241,153 +273,129 @@ textarea {
 
 .btn[disabled],
 .btn[aria-busy="true"] {
-  opacity: 0.7;
-  cursor: progress;
-}
-
-.text-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 15px 4px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--ink);
-  border-bottom: 1px solid var(--border-2);
-  transition:
-    color 0.18s ease,
-    border-color 0.18s ease;
-}
-.text-link:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .arrow-link {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accent);
+  gap: 6px;
+  font-weight: 650;
+  color: var(--accent-text);
 }
 .arrow-link:hover {
-  color: var(--accent-link-hover);
+  color: var(--accent-hover);
 }
 
-/* ───────────────────────────── Badges & chips ───────────────────────────── */
+.text-link {
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
+/* ───────────────────────────── Chips ───────────────────────────── */
 .tag-list {
   list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 20px 0 0;
-  padding: 0;
 }
 .tag-list li {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 13.5px;
+  font-weight: 550;
   color: var(--text-2);
   background: var(--bg-chip);
   border-radius: 999px;
-  padding: 6px 12px;
+  padding: 5px 12px;
 }
 
 /* ───────────────────────────── Cards & forms ───────────────────────────── */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
-  padding: 28px;
-}
-
+.card,
 .panel {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-panel);
-  padding: clamp(30px, 4.5vw, 56px);
+  border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
+}
+.card {
+  padding: 24px;
+}
+.panel {
+  padding: clamp(24px, 4vw, 40px);
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  font-size: 14px;
-  font-weight: 600;
+  display: grid;
+  gap: 6px;
+  font-size: 14.5px;
+  font-weight: 650;
+  color: var(--ink);
 }
-
 .field .hint {
   font-size: 13.5px;
   font-weight: 400;
-  line-height: 1.55;
   color: var(--muted);
 }
 
 .input {
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 400;
-  padding: 13px 15px;
-  border: 1px solid var(--border-input);
-  border-radius: 12px;
-  background: var(--bg-input);
-  outline: none;
-  color: var(--ink);
   width: 100%;
+  font-size: 16px;
+  padding: 12px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-sm);
+  color: var(--text);
   transition:
     border-color 0.16s ease,
     box-shadow 0.16s ease;
 }
+.input::placeholder {
+  color: var(--faint);
+}
 .input:focus {
-  border-color: var(--accent);
+  outline: none;
+  border-color: var(--accent-text);
   box-shadow: 0 0 0 3px var(--accent-ring);
 }
 textarea.input {
   resize: vertical;
   min-height: 120px;
-}
-
-.notice {
-  margin: 0;
-  font-size: 15.5px;
   line-height: 1.55;
-  color: var(--ink);
-  background: var(--bg-chip);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 12px 12px 0;
-  padding: 14px 16px;
 }
 
-.notice-ok {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.5;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(52, 168, 83, 0.12);
-  color: #1f6b34;
-}
-
+.notice,
+.notice-ok,
 .notice-error {
   margin: 0;
   font-size: 15px;
   line-height: 1.5;
   padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(226, 84, 43, 0.12);
-  color: #a3331a;
+  border-radius: var(--radius-sm);
+}
+.notice,
+.notice-ok {
+  background: var(--tint);
+  color: var(--text);
+}
+.notice-error {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--text);
+  border-left: 3px solid #dc2626;
 }
 
-/* ───────────────────────────── Blog prose ─────────────────────────────
-   Styles for rendered Markdown. Applied to the wrapper, so post bodies need
-   no classes of their own. */
+/* ───────────────────────────── Article prose ─────────────────────────────
+   Rendered Markdown. Literata at a comfortable size and measure; headings,
+   tables and code switch back to Onest/monospace for scanning. */
 .prose {
-  font-size: clamp(16.5px, 1.25vw, 18px);
-  line-height: 1.72;
-  color: var(--text-3);
+  font-family: var(--font-reading);
+  font-size: clamp(17.5px, 0.6vw + 15px, 19.5px);
+  line-height: 1.75;
+  color: var(--text);
+  font-optical-sizing: auto;
+  hanging-punctuation: first;
 }
 
 .prose p,
@@ -397,7 +405,7 @@ textarea.input {
 .prose pre,
 .prose figure,
 .prose table {
-  margin: 0 0 1.15em;
+  margin: 0 0 1.25em;
 }
 
 .prose > :last-child {
@@ -405,23 +413,24 @@ textarea.input {
 }
 
 .prose h2,
-.prose h3 {
+.prose h3,
+.prose h4 {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.03em;
   color: var(--ink);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .prose h2 {
-  font-size: clamp(22px, 2.6vw, 29px);
-  line-height: 1.14;
-  margin: 1.9em 0 0.55em;
+  font-size: clamp(24px, 2.3vw, 30px);
+  line-height: 1.25;
+  margin: 2.1em 0 0.6em;
 }
 
 .prose h3 {
-  font-size: clamp(18px, 2vw, 21px);
-  line-height: 1.25;
-  margin: 1.6em 0 0.45em;
+  font-size: clamp(19.5px, 1.6vw, 22px);
+  line-height: 1.3;
+  margin: 1.8em 0 0.5em;
 }
 
 .prose h2:first-child,
@@ -430,35 +439,40 @@ textarea.input {
 }
 
 .prose a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+}
+.prose a:hover {
+  color: var(--accent-hover);
+  text-decoration-thickness: 2px;
 }
 
 .prose strong {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .prose ul,
 .prose ol {
-  padding-left: 22px;
+  padding-left: 1.4em;
 }
 
 .prose li {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.45em;
+  padding-left: 0.2em;
 }
 
 .prose li::marker {
-  color: var(--faint);
+  color: var(--accent-text);
 }
 
 .prose blockquote {
   border-left: 3px solid var(--accent);
-  padding: 2px 0 2px 20px;
+  padding: 0.3em 0 0.3em 1.1em;
   color: var(--ink);
-  font-size: 1.05em;
-  line-height: 1.6;
+  font-style: italic;
 }
 
 .prose blockquote p {
@@ -466,16 +480,17 @@ textarea.input {
 }
 
 .prose code {
-  font-size: 0.88em;
+  font-family: var(--font-mono);
+  font-size: 0.82em;
   background: var(--bg-chip);
-  padding: 2px 6px;
+  padding: 0.15em 0.4em;
   border-radius: 6px;
 }
 
-/* Shiki sets the background inline; the border and padding are ours. */
 .prose pre {
+  font-family: var(--font-mono);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 18px 20px;
   overflow-x: auto;
   font-size: 14.5px;
@@ -496,7 +511,7 @@ textarea.input {
 }
 
 .prose img {
-  border-radius: 16px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   display: block;
 }
@@ -504,7 +519,9 @@ textarea.input {
 .prose table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.94em;
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.5;
   display: block;
   overflow-x: auto;
 }
@@ -512,27 +529,40 @@ textarea.input {
 .prose th,
 .prose td {
   text-align: left;
-  padding: 10px 12px;
+  vertical-align: top;
+  padding: 11px 14px;
   border-bottom: 1px solid var(--border);
 }
 
 .prose th {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 650;
+  background: var(--bg-alt);
+  white-space: nowrap;
 }
 
-/* ───────────────────────────── Legal prose ───────────────────────────── */
+.prose td code {
+  white-space: nowrap;
+}
+
+/* Code highlighting: Shiki renders both themes; show the dark one in dark mode. */
+@media (prefers-color-scheme: dark) {
+  .astro-code,
+  .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}
+
+/* ───────────────────────────── Legal pages ───────────────────────────── */
 .legal {
   max-width: 760px;
   margin: 0 auto;
-  padding: 76px var(--gutter) 96px;
+  padding: clamp(40px, 7vw, 72px) var(--gutter) 96px;
 }
 .legal h1 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(32px, 5.5vw, 44px);
-  letter-spacing: -0.035em;
-  margin: 12px 0 6px;
+  font-size: clamp(32px, 5vw, 44px);
+  margin: 10px 0 6px;
 }
 .legal .updated {
   font-size: 14px;
@@ -540,16 +570,13 @@ textarea.input {
   margin: 0 0 36px;
 }
 .legal h2 {
-  font-family: var(--font-display);
-  font-weight: 600;
   font-size: 21px;
-  letter-spacing: -0.02em;
-  margin: 34px 0 10px;
+  margin: 36px 0 10px;
 }
 .legal p,
 .legal li {
-  font-size: 16px;
-  line-height: 1.65;
+  font-size: 16.5px;
+  line-height: 1.7;
   color: var(--text);
 }
 .legal p {
@@ -562,51 +589,19 @@ textarea.input {
   gap: 8px;
 }
 .legal a {
-  color: var(--accent);
+  color: var(--accent-text);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 .legal code {
-  font-size: 0.9em;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
   background: var(--bg-chip);
   padding: 2px 6px;
   border-radius: 6px;
 }
 .legal strong {
   color: var(--ink);
-}
-
-/* ───────────────────────────── Scroll-driven motion ─────────────────────────────
-   All movement is CSS: `animation-timeline` runs an animation from the scroll
-   position instead of the clock. No JavaScript, off the main thread, stops when
-   the finger stops. Everything sits behind @supports and prefers-reduced-motion,
-   and the base state is always the FINAL state, so browsers without support
-   (and readers who prefer no motion) see the finished page, never a blank one. */
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.reveal {
-  --i: 0;
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: rise linear both;
-      animation-timeline: view();
-      /* Each sibling with a higher --i starts a little later. */
-      animation-range: entry calc(4% + var(--i) * 3%) cover
-        calc(30% + var(--i) * 3%);
-    }
-  }
 }
 
 /* ───────────────────────────── Utilities ───────────────────────────── */
@@ -630,65 +625,30 @@ textarea.input {
   overflow: hidden;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-  html {
-    scroll-behavior: auto;
-  }
-}
-
 .skip-link {
   position: fixed;
   top: 8px;
   left: 16px;
   z-index: 1000;
   background: var(--ink);
-  color: white;
+  color: var(--bg);
   padding: 12px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   transform: translateY(-150%);
 }
 .skip-link:focus {
   transform: none;
-  color: white;
-}
-button:disabled {
-  cursor: wait;
-  opacity: 0.75;
-}
-#main-content {
-  scroll-margin-top: 85px;
+  color: var(--bg);
 }
 
-/* Small interaction cues; reduced-motion rules above also cover these transitions. */
-.btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-.btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-.btn svg,
-.arrow-link svg {
-  flex: none;
-  transition: transform 0.25s;
-}
-.btn:hover svg,
-.arrow-link:hover svg {
-  transform: translateX(3px);
-}
-section[id] {
-  scroll-margin-top: 95px;
-}
-@media (max-width: 480px) {
-  .btn {
-    white-space: normal;
-    text-align: center;
-    line-height: 1.3;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }

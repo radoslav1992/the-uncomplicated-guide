@@ -2,6 +2,7 @@
 title: "Building Roblox Games With Claude Code: Is Roblox the Perfect AI Side Hustle?"
 description: "A practical look at using Claude Code, Rojo and Roblox Studio to build Roblox games as a side hustle — including workflow, monetization, costs and the economics behind it."
 pubDate: 2026-10-06
+category: side-projects
 tags: [Roblox, Claude Code, AI, Game Development, Side Hustle]
 image: "/media/article-images/Game%20Dev%20Desk_%20Ideas%20to%20Income.png"
 imageAlt: "Building Roblox games with Claude Code as a side hustle"

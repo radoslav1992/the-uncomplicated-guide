@@ -106,8 +106,9 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 ## 8. Go-live test, in order
 
-1. Open the site; the home page, `/guides`, `/blog` and both guide articles render.
-2. Old URLs redirect permanently: `/guides/ai-assistants`, `/guides/ai-video-ads-ugc`, `/account`,
+1. Open the site; the home page, `/blog`, a category page such as `/blog/category/voice-ai`, and both
+   featured articles render.
+2. Old URLs redirect permanently: `/guides`, `/guides/ai-assistants`, `/guides/ai-video-ads-ugc`, `/account`,
    `/refunds` and `/samples/ai-assistants.pdf` each answer `301` with the new location
    (`curl -sI https://uncomplicatedguide.com/guides/ai-assistants`).
 3. Send yourself a message through the contact form and reply to it — the reply reaches the visitor.

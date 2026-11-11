@@ -37,19 +37,18 @@ export const site = {
   url: 'https://uncomplicatedguide.com',
   nav: [
     { label: 'Home', href: '/' },
-    { label: 'Guides', href: '/guides' },
     { label: 'Articles', href: '/blog' },
     { label: 'About', href: '/#author' },
     { label: 'Contact', href: '/contact' },
   ],
-  newsletterBlurb: 'One email when a new guide or article is published. Nothing else.',
+  newsletterBlurb: 'One email when a new article is published. Nothing else.',
   legalNav: [
     { label: 'Terms of use', href: '/terms' },
     { label: 'Privacy policy', href: '/privacy' },
     { label: 'Cookie policy', href: '/cookies' },
     { label: 'Imprint', href: '/imprint' },
   ],
-  /** Guides being written. Shown on /guides and the newsletter page. */
+  /** Long reads being written. Shown on the newsletter page. */
   upcoming: [
     {
       title: 'Vibe coding for non-developers',

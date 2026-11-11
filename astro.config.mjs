@@ -31,25 +31,26 @@ function blogLastmod() {
 }
 
 const postDates = blogLastmod();
-const guidePaths = guideArticles();
+const featuredPaths = featuredArticles();
 const LEGAL = ['/terms', '/privacy', '/cookies', '/imprint'];
 
-/** Paths of the long-form guides (`kind: guide`), which rank above ordinary articles. */
-function guideArticles() {
+/** Paths of `featured: true` articles — the long reads — which rank above the rest. */
+function featuredArticles() {
   const dir = new URL('./src/content/blog/', import.meta.url);
   const paths = new Set();
   for (const file of readdirSync(dir)) {
     if (!file.endsWith('.md')) continue;
     const frontmatter = readFileSync(new URL(file, dir), 'utf-8').split('---')[1] ?? '';
-    if (/^kind:\s*guide\s*$/m.test(frontmatter)) paths.add(`/blog/${file.replace(/\.md$/, '')}`);
+    if (/^featured:\s*true\s*$/m.test(frontmatter)) paths.add(`/blog/${file.replace(/\.md$/, '')}`);
   }
   return paths;
 }
 
 /**
- * Retired URLs from the PDF shop, and where they now point. Served as permanent (301)
- * redirects: the Cloudflare adapter appends them to `public/_redirects`, which holds
- * the wildcard ones (`/download/*`, `/samples/*`) Astro cannot express.
+ * Retired URLs, and where they now point. Served as permanent (301) redirects: the
+ * Cloudflare adapter appends them to `public/_redirects`, which holds the wildcard ones
+ * (`/download/*`, `/samples/*`) Astro cannot express. Every target is a live page, so
+ * nothing redirects twice.
  */
 const AI_RECEPTIONIST_GUIDE = '/blog/ai-receptionist-guide';
 const AI_VIDEO_GUIDE = '/blog/ai-ugc-video-ads-guide';
@@ -58,14 +59,16 @@ const redirects = {
   // The two paid guides are now free articles.
   '/guides/ai-assistants': moved(AI_RECEPTIONIST_GUIDE),
   '/guides/ai-video-ads-ugc': moved(AI_VIDEO_GUIDE),
+  // The separate guides listing; guides are now ordinary (featured) articles.
+  '/guides': moved('/blog'),
   // "Coming soon" product pages.
-  '/guides/vibe-coding-for-non-developers': moved('/guides'),
-  '/guides/working-with-ai-coding-agents': moved('/guides'),
-  '/guides/30-tiktok-hacks-for-success': moved('/guides'),
+  '/guides/vibe-coding-for-non-developers': moved('/blog'),
+  '/guides/working-with-ai-coding-agents': moved('/blog'),
+  '/guides/30-tiktok-hacks-for-success': moved('/blog'),
   // Shop pages.
-  '/account': moved('/guides'),
-  '/checkout': moved('/guides'),
-  '/thank-you': moved('/guides'),
+  '/account': moved('/blog'),
+  '/checkout': moved('/blog'),
+  '/thank-you': moved('/blog'),
   '/refunds': moved('/terms'),
   // Renamed for search: the guide's first slug, live for a few hours.
   '/blog/ai-receptionist-voice-assistant-guide': moved(AI_RECEPTIONIST_GUIDE),
@@ -76,13 +79,13 @@ const redirects = {
 /** How often each kind of page changes, and how it ranks against the rest of the site. */
 function sitemapEntry(path) {
   if (path === '/') return { changefreq: 'weekly', priority: 1.0 };
-  if (path === '/guides') return { changefreq: 'weekly', priority: 0.9 };
-  if (path === '/blog') return { changefreq: 'weekly', priority: 0.8 };
+  if (path === '/blog') return { changefreq: 'weekly', priority: 0.9 };
+  if (path.startsWith('/blog/category/')) return { changefreq: 'weekly', priority: 0.8 };
   if (path.startsWith('/blog/')) {
-    const guide = guidePaths.has(path);
+    const featured = featuredPaths.has(path);
     return {
-      changefreq: guide ? 'monthly' : 'yearly',
-      priority: guide ? 0.9 : 0.7,
+      changefreq: featured ? 'monthly' : 'yearly',
+      priority: featured ? 0.9 : 0.7,
       lastmod: postDates.get(path),
     };
   }
@@ -116,9 +119,10 @@ export default defineConfig({
       },
     }),
   ],
-  // Blog code blocks: a light theme so they sit on the site's paper, not a dark slab.
+  // Code blocks follow the reader's colour scheme: both themes are rendered and
+  // global.css switches to the dark one under prefers-color-scheme: dark.
   markdown: {
-    shikiConfig: { theme: 'github-light', wrap: true },
+    shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, wrap: true },
   },
   // Sessions are not used; keep the adapter from provisioning a KV namespace for them.
   session: false,

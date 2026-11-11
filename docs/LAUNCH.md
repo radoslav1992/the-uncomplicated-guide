@@ -85,7 +85,7 @@ log to be deleted. If you later drop the tables, do it in a new migration, not b
 
 ## 6. Earlier buyers
 
-People who paid for a PDF can no longer sign in at `/account` (it redirects to `/guides`); the same
+People who paid for a PDF can no longer sign in at `/account` (it redirects to `/blog`); the same
 content is now free on the site. Questions about past purchases go to hello@uncomplicatedguide.com,
 and the contact form has a topic for them. Whether to email buyers about the change, or to refund
 recent purchases, is a business decision — the addresses are in `purchases`.

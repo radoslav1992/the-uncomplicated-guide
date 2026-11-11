@@ -2,8 +2,8 @@
 title: What to charge when the work costs you per minute
 description: Flat monthly fees and variable costs do not mix. Here is the arithmetic that stops your busiest client from quietly becoming your worst margin.
 pubDate: 2026-09-02
+category: selling-ai-services
 tags: [Pricing]
-guide: ai-receptionist-guide
 ---
 
 Most services people sell have costs that sit still. You do the work once, you send the invoice, the cost of delivering it next month is roughly the cost of delivering it this month.

@@ -1,12 +1,11 @@
 ---
 import { site } from "../data/site";
-import { getGuides, postUrl } from "../lib/blog";
+import { categoriesWithPosts, getPosts } from "../lib/blog";
 import SignupForm from "./SignupForm.astro";
 
 const year = new Date().getFullYear();
-const guides = await getGuides();
+const categories = categoriesWithPosts(await getPosts());
 const nav = [
-  { label: "All articles", href: "/blog" },
   { label: "Newsletter", href: "/newsletter" },
   { label: "About", href: "/#author" },
   { label: "Contact", href: "/contact" },
@@ -15,34 +14,25 @@ const nav = [
 ---
 
 <footer class="site-footer">
-  <div class="container footer-top">
-    <p>
-      Your next chapter
-      <br />
-      <em>starts here.</em>
-    </p>
-    <a href="/guides">Start with a free guide ↗</a>
-  </div>
   <div class="container cols">
-    <div class="col">
+    <div class="col about">
       <p class="brand">
-        <img src="/brand/next-chapter.webp" alt="" width="28" height="28" />
+        <img src="/brand/next-chapter.webp" alt="" width="32" height="32" />
         <span>{site.name}</span>
       </p>
       <p class="muted">{site.tagline}.</p>
-      <p class="muted">{site.legalName} · {site.author.city}</p>
       <div class="newsletter">
         <p class="heading">Newsletter</p>
         <p class="muted">{site.newsletterBlurb}</p>
         <SignupForm compact source="footer" />
       </div>
     </div>
-    <nav class="col" aria-label="Free guides">
-      <p class="heading">Free guides</p>
-      {guides.map((g) => (
-        <a href={postUrl(g)}>{g.data.title}</a>
+    <nav class="col" aria-label="Categories">
+      <p class="heading">Categories</p>
+      {categories.map((category) => (
+        <a href={category.url}>{category.name}</a>
       ))}
-      <a href="/guides">All guides</a>
+      <a href="/blog">All articles</a>
     </nav>
     <nav class="col" aria-label="Footer navigation">
       <p class="heading">Read more</p>
@@ -61,160 +51,87 @@ const nav = [
   </div>
   <div class="container bottom">
     <p class="muted">
-      © {year} {site.name}. All rights reserved.
+      © {year} {site.legalName} · {site.author.city}
     </p>
   </div>
 </footer>
 
 <style>
-  .footer-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 28px;
-    padding-top: 50px;
-    padding-bottom: 30px;
-    border-bottom: 1px solid #ffffff24;
-  }
-  .footer-top p {
-    font-family: var(--font-display);
-    text-transform: uppercase;
-    font-size: clamp(38px, 5vw, 70px);
-    line-height: 1.25;
-    letter-spacing: -0.03em;
-    margin: 0;
-  }
-  .footer-top em {
-    font-family: var(--font-editorial);
-    font-weight: 300;
-    font-style: normal;
-    color: #fb7515;
-  }
-  .footer-top a {
-    font-size: 13px;
-    color: #fb7515;
-  }
-  .site-footer :global(.btn-accent) {
-    background: #fb7515;
-    color: #111111;
-  }
-  .site-footer :global(.btn-accent:hover) {
-    background: #ff974c;
-    color: #111111;
-  }
-  .site-footer :global(.notice) {
-    color: #91dda0;
-  }
-  .site-footer :global(.notice-error) {
-    color: #ffd4ca;
-  }
-  .site-footer :global(.fields) {
-    grid-template-columns: 1fr;
-  }
-  .site-footer :global(.input) {
-    min-width: 0;
-  }
-  .col {
-    min-width: 0;
-    overflow-wrap: anywhere;
-  }
-  @media (max-width: 640px) {
-    .footer-top {
-      align-items: start;
-      flex-direction: column;
-    }
-    .footer-top p {
-      font-size: 27px;
-    }
-  }
-
   .site-footer {
-    border-top: 1px solid var(--border);
-    background: #111111;
-    --ink: #f5f5f1;
-    --text: #d0d9dc;
-    --text-2: #d0d9dc;
-    --text-3: #d0d9dc;
-    --muted: #b1bfc2;
-    --border: #ffffff24;
-    --border-input: #64747c;
-    --bg-input: #1b1b1b;
-    --accent: #fb7515;
-    --accent-link-hover: #ffffff;
-    color: #f5f5f1;
     margin-top: auto;
+    background: var(--bg-alt);
+    border-top: 1px solid var(--border);
   }
   .cols {
-    padding-top: 48px;
-    padding-bottom: 28px;
     display: grid;
-    grid-template-columns: 1.6fr 1.2fr 0.85fr 1fr;
+    grid-template-columns: 1.6fr 1fr 1fr 1.1fr;
     gap: 32px;
+    padding-top: 48px;
+    padding-bottom: 32px;
   }
   .col {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 9px;
-    font-size: 14px;
+    gap: 10px;
+    min-width: 0;
+    font-size: 15px;
+    overflow-wrap: anywhere;
   }
   .col a {
     color: var(--text-2);
-    transition: color 0.16s ease;
   }
   .col a:hover {
-    color: var(--ink);
+    color: var(--accent-text);
   }
   .brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0 0 4px;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 15px;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
   }
   .brand img {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     flex: none;
-    display: block;
-  }
-  .legal-heading {
-    margin-top: 18px !important;
   }
   .heading {
-    font-size: 13px;
+    margin: 0 0 2px;
+    font-size: 14px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     color: var(--ink);
-    margin: 0 0 4px;
+  }
+  .legal-heading {
+    margin-top: 14px;
   }
   .muted {
-    font-size: 13.5px;
-    line-height: 1.55;
-    color: var(--muted);
     margin: 0;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--muted);
   }
   .newsletter {
-    margin-top: 14px;
     width: 100%;
-    max-width: 340px;
+    max-width: 380px;
     display: grid;
     gap: 8px;
-  }
-  .newsletter .heading {
-    margin-top: 6px;
+    margin-top: 14px;
   }
   .bottom {
     padding-top: 18px;
-    padding-bottom: 18px;
+    padding-bottom: 24px;
     border-top: 1px solid var(--border);
   }
-  @media (max-width: 860px) {
+  @media (max-width: 900px) {
     .cols {
       grid-template-columns: 1fr 1fr;
+    }
+    .about {
+      grid-column: 1 / -1;
     }
   }
   @media (max-width: 520px) {

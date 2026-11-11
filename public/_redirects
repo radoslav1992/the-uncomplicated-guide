@@ -3,5 +3,5 @@
 # Only wildcard rules, which Astro cannot express, belong here.
 
 # Download links and sample pages from the old PDF shop.
-/download/* /guides 301
-/samples/* /guides 301
+/download/* /blog 301
+/samples/* /blog 301

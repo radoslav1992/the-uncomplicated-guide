@@ -2,6 +2,7 @@
 title: "Building Websites With ChatGPT Sites and Adsterra: The Side Hustle That Doesn't Need a Backend"
 description: "Build useful websites with AI, monetize them with ads, and discover why getting traffic is harder than writing code."
 pubDate: 2026-10-08
+category: side-projects
 tags: [Side Hustle, Web Development, Artificial Intelligence, Passive Income, Online Business]
 image: "/media/article-images/Build%20Small%2C%20Earn%20Slow.png"
 imageAlt: "Build Small, Earn Slow — client-side websites, AI-built tools, and ad monetization"

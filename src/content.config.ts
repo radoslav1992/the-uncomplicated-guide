@@ -1,14 +1,14 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
+import { categorySlugs } from './data/categories';
 
 /**
  * Every article on the site. One Markdown file per article in `src/content/blog/`;
  * the file name becomes the URL (`my-post.md` → `/blog/my-post`).
  *
- * Long-form guides are ordinary articles with `kind: guide`: they get the same URL
- * scheme, a "Guide" label, a table of contents, and a place on the home page and in
- * /guides.
+ * Articles are organised by one `category` (src/data/categories.ts) and any number of
+ * free-form `tags`. Long reads can be marked `featured` to lead the home page.
  */
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.md' }),
@@ -25,9 +25,12 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     /** Set when an article is materially revised, not for typo fixes. */
     updatedDate: z.coerce.date().optional(),
+    /** One of the slugs in src/data/categories.ts. Decides the article's category page. */
+    category: z.enum(categorySlugs),
+    /** Free-form topics, shown on the article and used to suggest related reading. */
     tags: z.array(z.string()).default([]),
-    /** `guide` for long-form, chaptered guides; everything else is an `article`. */
-    kind: z.enum(['article', 'guide']).default('article'),
+    /** Featured articles lead the home page ("start here" and the featured section). */
+    featured: z.boolean().default(false),
     /** Hero/social image, ideally 16:9. Root-relative paths and absolute URLs are supported. */
     image: z.string().optional(),
     imageAlt: z.string().optional(),
@@ -41,11 +44,6 @@ const blog = defineCollection({
      * the article body. Write them so a reader who stops there still learns something.
      */
     takeaways: z.array(z.string()).optional(),
-    /**
-     * Slug of a guide (another article with `kind: guide`) this piece belongs with.
-     * Shows a "read the full guide" card at the end of the article.
-     */
-    guide: z.string().optional(),
     /** Drafts are visible with `astro dev` and left out of the build. */
     draft: z.boolean().default(false),
   }),

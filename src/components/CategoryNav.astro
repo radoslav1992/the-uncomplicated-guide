@@ -1,0 +1,72 @@
+---
+/**
+ * Links to every category with articles, plus "All articles". Real links rather than
+ * a client-side filter, so each category page is crawlable and shareable.
+ */
+import type { Post } from "../lib/blog";
+import { categoriesWithPosts } from "../lib/blog";
+
+interface Props {
+  posts: Post[];
+  /** Slug of the category being shown; empty for the full list. */
+  current?: string;
+}
+
+const { posts, current = "" } = Astro.props;
+const list = categoriesWithPosts(posts);
+---
+
+<nav class="category-nav" aria-label="Categories">
+  <a href="/blog" aria-current={current ? undefined : "page"}>
+    All <span>{posts.length}</span>
+  </a>
+  {list.map((category) => (
+    <a href={category.url} aria-current={current === category.slug ? "page" : undefined}>
+      {category.name} <span>{category.posts.length}</span>
+    </a>
+  ))}
+</nav>
+
+<style>
+  .category-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 28px;
+  }
+  .category-nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 16px;
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    background: var(--card);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-2);
+    transition:
+      background-color 0.16s ease,
+      color 0.16s ease,
+      border-color 0.16s ease;
+  }
+  .category-nav a span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .category-nav a:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .category-nav a[aria-current="page"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+  .category-nav a[aria-current="page"] span {
+    color: var(--bg);
+    opacity: 0.75;
+  }
+</style>

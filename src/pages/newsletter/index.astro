@@ -17,11 +17,11 @@ const messages: Record<string, { title: string; text: string }> = {
   },
   confirmed: {
     title: 'You are on the list.',
-    text: 'Thank you. You will hear from me when a new guide or article is published, and now and then with a short note. Every email has an unsubscribe link.',
+    text: 'Thank you. You will hear from me when a new article is published, and now and then with a short note. Every email has an unsubscribe link.',
   },
   unsubscribed: {
     title: 'Unsubscribed.',
-    text: 'Your address has been removed. Nothing more will be sent. The guides stay free to read whenever you need them.',
+    text: 'Your address has been removed. Nothing more will be sent. The articles stay free to read whenever you need them.',
   },
   invalid: {
     title: 'That link is not valid.',
@@ -31,7 +31,7 @@ const messages: Record<string, { title: string; text: string }> = {
 const msg = messages[status];
 ---
 
-<Base title="Newsletter" description="One email when a new free guide or article is published, and now and then a short note. Nothing else." noindex={Boolean(msg)}>
+<Base title="Newsletter" description="One email when a new free article is published, and now and then a short note. Nothing else." noindex={Boolean(msg)}>
   <div class="container wrap">
     <p class="eyebrow">Newsletter</p>
     {
@@ -45,15 +45,15 @@ const msg = messages[status];
             </div>
           )}
           <p class="small links">
-            <a href="/guides">Read the free guides →</a>
+            <a href="/blog">Read the articles →</a>
           </p>
         </Fragment>
       ) : (
         <Fragment>
           <h1 class="display">Hear when the next one is out.</h1>
           <p class="lead">
-            {site.upcoming.length} more guides are on the writing desk. Subscribe and you get one email on the day a
-            guide or article is published, plus the occasional short note about something learned building
+            {site.upcoming.length} more long reads are on the writing desk. Subscribe and you get one email on the day
+            an article is published, plus the occasional short note about something learned building
             with AI. Never more than a couple a month, and everything stays free to read.
           </p>
           <ul class="upcoming">
@@ -74,8 +74,8 @@ const msg = messages[status];
 </Base>
 
 <style>
-  .wrap { padding-top: 96px; padding-bottom: 120px; max-width: 720px; }
-  h1 { font-size: clamp(32px, 5.5vw, 52px); letter-spacing: -0.04em; margin: 12px 0 16px; }
+  .wrap { padding-top: clamp(40px, 7vw, 80px); padding-bottom: clamp(56px, 8vw, 104px); max-width: 760px; }
+  h1 { font-size: clamp(34px, 5vw, 50px); line-height: 1.1; margin: 10px 0 16px; }
   .lead { margin: 0 0 28px; }
   .form-panel { padding: 28px; }
   .links { margin-top: 20px; }

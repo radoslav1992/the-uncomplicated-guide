@@ -45,88 +45,70 @@ import { site } from '../data/site';
 
 <style>
   .wrap {
-    padding-top: 76px;
-    padding-bottom: 96px;
+    padding-top: clamp(40px, 7vw, 72px);
+    padding-bottom: clamp(56px, 8vw, 96px);
     display: grid;
-    grid-template-columns: 1fr 0.85fr;
-    gap: 56px;
+    grid-template-columns: 1fr 0.8fr;
+    gap: clamp(32px, 5vw, 56px);
     align-items: start;
   }
   h1 {
-    font-size: clamp(32px, 5.5vw, 48px);
-    line-height: 1.08;
-    letter-spacing: -0.035em;
-    margin: 12px 0 14px;
+    font-size: clamp(34px, 5vw, 50px);
+    line-height: 1.1;
+    margin: 10px 0 14px;
   }
   .intro {
     font-size: 18px;
+    line-height: 1.65;
     color: var(--text-2);
-    margin: 0 0 34px;
-    max-width: 520px;
+    margin: 0 0 32px;
+    max-width: 560px;
   }
   aside {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding-top: 24px;
+    padding-top: 8px;
   }
   .card p {
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: 15.5px;
+    line-height: 1.65;
     color: var(--text-2);
-    margin: 0 0 16px;
+    margin: 0 0 14px;
   }
   .card p:last-child {
     margin-bottom: 0;
   }
-  .t {
+  .card .t {
     font-size: 18px;
     color: var(--ink);
-    margin: 0 0 10px !important;
+    margin: 0 0 10px;
   }
   .dark {
-    background: #242424;
-    border-color: var(--border);
-    color: #fff;
-  }
-  .dark .t {
-    color: #fff;
-    margin-bottom: 16px !important;
+    background: var(--tint);
   }
   .label {
-    font-size: 12.5px !important;
+    font-size: 14px !important;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgba(255, 255, 255, 0.6) !important;
+    color: var(--ink) !important;
     margin: 0 0 4px !important;
   }
   .mail {
     display: block;
-    font-size: 16px;
-    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
     word-break: break-word;
   }
-  .mail:hover {
-    color: var(--accent);
-    text-decoration: underline;
-  }
   .fine {
-    font-size: 13px !important;
-    line-height: 1.5;
-    color: rgba(255, 255, 255, 0.55) !important;
-    margin: 8px 0 0 !important;
+    font-size: 14px !important;
+    margin: 10px 0 0 !important;
   }
   .legal-note {
-    font-size: 14px !important;
-    line-height: 1.7 !important;
+    font-size: 14.5px !important;
   }
   @media (max-width: 860px) {
     .wrap {
       grid-template-columns: 1fr;
-      gap: 32px;
-      padding-top: 48px;
-      padding-bottom: 64px;
     }
     aside {
       padding-top: 0;

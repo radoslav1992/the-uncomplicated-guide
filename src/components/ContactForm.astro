@@ -55,7 +55,7 @@ const sent = Astro.url.searchParams.get('sent') === '1';
   {
     turnstileKey && (
       <Fragment>
-        <div class="cf-turnstile" data-sitekey={turnstileKey} data-theme="light" />
+        <div class="cf-turnstile" data-sitekey={turnstileKey} data-theme="auto" />
         <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
       </Fragment>
     )
@@ -117,7 +117,7 @@ const sent = Astro.url.searchParams.get('sent') === '1';
   }
   .chip span {
     display: inline-block;
-    font-size: 14px;
+    font-size: 14.5px;
     padding: 8px 14px;
     border-radius: 999px;
     border: 1px solid var(--border-input);
@@ -134,7 +134,7 @@ const sent = Astro.url.searchParams.get('sent') === '1';
   .chip input:checked + span {
     background: var(--accent);
     border-color: var(--accent);
-    color: #111;
+    color: var(--on-accent);
   }
   .chip input:focus-visible + span {
     outline: 2px solid var(--accent);

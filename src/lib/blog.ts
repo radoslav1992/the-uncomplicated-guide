@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { categories, categoryUrl, getCategory } from '../data/categories';
 
 export type Post = CollectionEntry<'blog'>;
 
@@ -11,31 +12,48 @@ export async function getPosts(): Promise<Post[]> {
   return posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 }
 
-/** Long-form guides (`kind: guide`), newest first. */
-export async function getGuides(): Promise<Post[]> {
-  return (await getPosts()).filter((post) => post.data.kind === 'guide');
-}
-
-export const isGuide = (post: Post) => post.data.kind === 'guide';
-
 /** Rounded minutes at 200 words per minute; never zero. */
 export function readingTime(body: string | undefined): number {
   const words = (body ?? '').trim().split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(words / 200));
 }
 
+/** The article's `## ` headings, read from the Markdown source. */
+export function chapters(post: Post): string[] {
+  return (post.body ?? '')
+    .split('\n')
+    .filter((line) => line.startsWith('## '))
+    .map((line) => line.slice(3).replace(/[*_`]/g, '').trim());
+}
+
 export const postUrl = (post: Post) => `/blog/${post.id}`;
 
+/** The category record for an article (the schema guarantees it exists). */
+export const postCategory = (post: Post) => getCategory(post.data.category)!;
+
 /**
- * Articles to suggest after `post`: the ones sharing the most tags or the same
- * guide first, then the newest. Never the post itself.
+ * Categories that have at least one published article, in the order of
+ * src/data/categories.ts, each with its articles. Empty categories get no page.
+ */
+export function categoriesWithPosts(posts: Post[]) {
+  return categories
+    .map((category) => ({
+      ...category,
+      url: categoryUrl(category.slug),
+      posts: posts.filter((post) => post.data.category === category.slug),
+    }))
+    .filter((category) => category.posts.length > 0);
+}
+
+/**
+ * Articles to suggest after `post`: the same category first, then shared tags,
+ * then the newest. Never the post itself.
  */
 export function relatedPosts(post: Post, all: Post[], count = 3): Post[] {
   const tags = new Set(post.data.tags.map((t) => t.toLowerCase()));
   const score = (other: Post) =>
-    other.data.tags.filter((t) => tags.has(t.toLowerCase())).length +
-    (post.data.guide && (other.data.guide === post.data.guide || other.id === post.data.guide) ? 2 : 0) +
-    (other.data.guide === post.id ? 2 : 0);
+    (other.data.category === post.data.category ? 3 : 0) +
+    other.data.tags.filter((t) => tags.has(t.toLowerCase())).length;
   return all
     .filter((other) => other.id !== post.id)
     .map((other, index) => ({ other, index, score: score(other) }))

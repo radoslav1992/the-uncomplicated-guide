@@ -1,290 +1,265 @@
-/* Blog layout pieces shared by the home page, /blog and /guides.
-   Built on the Adon tokens in adon.css: ruled frames, display type, orange accent. */
+/* Layout pieces shared by the home page, /blog and the category pages.
+   Built on the tokens in global.css. */
 
-/* ── Home hero: "start here" list in place of the old book covers ── */
-.hero-start {
-  padding: 18px 22px 22px;
-  min-height: 330px;
-  display: flex;
-  flex-direction: column;
-  background: radial-gradient(ellipse at 50% 80%, #57301b40, transparent 68%);
+/* ── Page header on listings ── */
+.page-head {
+  padding: clamp(40px, 6vw, 72px) 0 clamp(28px, 4vw, 40px);
 }
-.start-list {
-  list-style: none;
-  margin: auto 0 0;
-  padding: 18px 0 0;
-  display: grid;
-  gap: 12px;
+.page-head h1 {
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 1.1;
+  margin: 12px 0 0;
+  max-width: 18ch;
 }
-.start-list a {
-  display: grid;
-  grid-template-columns: 148px 1fr;
-  gap: 18px;
-  align-items: center;
-  padding: 10px;
-  border: 1px solid var(--border);
-  background: #ffffff04;
-  color: var(--ink);
-  transition:
-    background 0.25s,
-    border-color 0.25s;
+.page-head .lead {
+  max-width: 62ch;
+  margin: 18px 0 0;
 }
-.start-list a:hover {
-  background: #ffffff0a;
-  border-color: var(--accent);
+.page-crumbs {
+  margin: 0 0 18px;
+  font-size: 14px;
+  color: var(--muted);
 }
-.start-list img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
+.page-crumbs a {
+  color: var(--text-2);
 }
-.start-kind {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
+.page-crumbs a:hover {
+  color: var(--accent-text);
 }
-.start-title {
-  display: block;
-  margin-top: 6px;
-  font: 300 clamp(17px, 1.6vw, 22px) / 1.15 var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-}
-
-/* ── Article grid (home, /blog, related articles) ── */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--border);
-}
-.card-grid > * {
-  border-bottom: 1px solid var(--border);
-}
-.card-grid > *:not(:nth-child(3n + 1)) {
-  border-left: 1px solid var(--border);
-}
-.journal .card-grid > *:nth-last-child(-n + 3):nth-child(3n + 1),
-.journal .card-grid > *:nth-last-child(-n + 3):nth-child(3n + 1) ~ * {
-  border-bottom: 0;
-}
-
-/* ── Listing pages (/blog, /guides) ── */
-.listing-page .frame {
-  width: calc(100% - var(--gutter) * 2);
-  max-width: 1320px;
-  margin-inline: auto;
-  border-inline: 1px solid var(--border);
-  position: relative;
-}
-.listing-intro {
-  padding: 56px 22px 48px;
-  border-bottom: 1px solid var(--border);
-}
-.listing-intro h1 {
-  font: 300 clamp(40px, 6.4vw, 92px) / 1 var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: -0.03em;
-  margin: 0;
-}
-.listing-intro h1 em {
-  font-style: normal;
-  color: var(--accent);
-}
-.listing-intro .lead {
-  max-width: 640px;
-  margin: 26px 0 0;
-  font-size: 16px;
-  line-height: 1.8;
-}
-.listing-facts {
+.facts {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 26px;
-  margin-top: 28px;
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text);
+  gap: 8px 22px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  color: var(--muted);
 }
-.listing-facts span {
+.facts li {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
 }
-.listing-section {
-  padding: 46px 0 0;
-  border-bottom: 1px solid var(--border);
+.facts li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
 }
-.listing-section > .section-head {
+
+/* ── Section header: title on the left, link on the right ── */
+.section-head {
   display: flex;
   justify-content: space-between;
   align-items: end;
-  gap: 20px;
-  padding: 0 22px 26px;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin: 0 0 24px;
 }
-.listing-section > .section-head h2 {
-  font: 300 clamp(26px, 3vw, 40px) / 1.05 var(--font-display);
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  margin: 0;
+.section-head h2 {
+  font-size: clamp(24px, 2.6vw, 32px);
+  margin: 6px 0 0;
 }
-.listing-section > .section-head p {
-  margin: 0;
-  font-size: 13px;
-  color: var(--muted);
+.section-head p {
+  margin: 8px 0 0;
+  color: var(--text-2);
+  max-width: 60ch;
 }
-.guide-grid {
+
+/* ── Grids ── */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.featured-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
-  padding: 0 22px 46px;
 }
 
-/* ── Topic chips on /blog ── */
-.topic-bar {
+
+/* ── Newsletter box ── */
+.signup-box {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+  padding: clamp(28px, 4vw, 48px);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--tint);
+  border: 1px solid var(--border);
+}
+.signup-box h2 {
+  font-size: clamp(24px, 2.8vw, 34px);
+  margin: 8px 0 0;
+}
+.signup-box p {
+  margin: 12px 0 0;
+  color: var(--text-2);
+  font-size: 16.5px;
+  line-height: 1.6;
+  max-width: 48ch;
+}
+.signup-box .small {
+  margin-top: 10px;
+}
+
+/* ── Home: hero ── */
+.home-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+  padding: clamp(40px, 7vw, 88px) 0 clamp(40px, 6vw, 72px);
+}
+.home-hero h1 {
+  font-size: clamp(38px, 5.6vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin: 14px 0 0;
+}
+.home-hero h1 em {
+  font-style: normal;
+  color: var(--accent-text);
+}
+.home-hero .lead {
+  margin: 20px 0 0;
+  max-width: 52ch;
+}
+.hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 22px 26px;
+  gap: 12px;
+  margin-top: 28px;
 }
-.topic-bar button {
-  font: inherit;
-  font-size: 11px;
+.topics-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  padding: 20px 20px 12px;
+  box-shadow: var(--shadow-card);
+}
+.topics-box > p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 9px 13px;
-  min-height: 36px;
-  border: 1px solid var(--border-2);
-  background: transparent;
-  color: var(--text-3);
-  cursor: pointer;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+  color: var(--muted);
 }
-.topic-bar button:hover {
-  border-color: var(--accent);
-  color: var(--ink);
-}
-.topic-bar button[aria-pressed="true"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #111;
-}
-
-/* ── "On the writing desk" list ── */
-.upcoming-list {
+.topics-box ul {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+.topics-box li + li {
   border-top: 1px solid var(--border);
 }
-.upcoming-list li {
+.topics-box a {
   display: grid;
-  grid-template-columns: 60px 1fr auto;
-  gap: 22px;
-  align-items: center;
-  padding: 26px 22px;
-  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  padding: 14px 8px;
+  margin: 0 -8px;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  transition: background-color 0.16s ease;
 }
-.upcoming-list li:last-child {
-  border-bottom: 0;
-}
-.upcoming-number {
-  font: 300 34px/1 var(--font-display);
-  color: var(--accent);
-}
-.upcoming-list h3 {
-  font: 300 22px/1.2 var(--font-display);
-  text-transform: uppercase;
-  margin: 0 0 8px;
-}
-.upcoming-list p {
-  margin: 0;
-  max-width: 720px;
-  font-size: 14px;
-  line-height: 1.75;
+.topics-box a:hover {
+  background: var(--bg-alt);
   color: var(--text);
 }
-.upcoming-list .arrow-link {
-  font-size: 12px;
-  white-space: nowrap;
+.topic-name {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.topic-count {
+  flex: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.topic-desc {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-2);
 }
 
-@media (max-width: 1050px) {
+/* ── Home: author ── */
+.author-block {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+}
+.author-block img {
+  width: 220px;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.author-block h2 {
+  font-size: clamp(24px, 2.6vw, 32px);
+  margin: 8px 0 0;
+}
+.author-block p {
+  margin: 14px 0 0;
+  color: var(--text-2);
+  font-size: 16.5px;
+  line-height: 1.7;
+  max-width: 62ch;
+}
+.author-block .arrow-link {
+  margin-top: 18px;
+}
+
+/* ── Home section spacing ── */
+.home-section {
+  padding: clamp(40px, 6vw, 72px) 0;
+}
+.home-section + .home-section {
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 1000px) {
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .card-grid > *:not(:nth-child(3n + 1)) {
-    border-left: 0;
-  }
-  .card-grid > *:nth-child(2n) {
-    border-left: 1px solid var(--border);
-  }
-  .journal .card-grid > *:nth-last-child(-n + 3):nth-child(3n + 1),
-  .journal .card-grid > *:nth-last-child(-n + 3):nth-child(3n + 1) ~ * {
-    border-bottom: 1px solid var(--border);
-  }
-  .start-list a {
-    grid-template-columns: 112px 1fr;
-    gap: 14px;
-  }
-}
-@media (max-width: 720px) {
-  .hero-start {
-    min-height: 0;
-    padding: 18px 15px;
-  }
-  .start-list a {
-    grid-template-columns: 96px 1fr;
-    padding: 8px;
-  }
-  .start-title {
-    font-size: 15px;
-  }
-  .card-grid {
+  .home-hero {
     grid-template-columns: 1fr;
-  }
-  .card-grid > *:nth-child(2n) {
-    border-left: 0;
-  }
-  .listing-intro {
-    padding: 38px 15px 32px;
-  }
-  .listing-section > .section-head,
-  .topic-bar {
-    padding-inline: 15px;
-  }
-  .guide-grid {
-    grid-template-columns: 1fr;
-    padding: 0 15px 32px;
-  }
-  .upcoming-list li {
-    grid-template-columns: 34px 1fr;
-    gap: 14px;
-    padding: 22px 15px;
-  }
-  .upcoming-list .arrow-link {
-    grid-column: 2;
-  }
-  .upcoming-number {
-    font-size: 24px;
   }
 }
 
-/* The home hero stacks on phones: start list, then the description. */
 @media (max-width: 720px) {
-  .hero-17-content {
-    grid-template-columns: 1fr !important;
+  .featured-grid,
+  .signup-box {
+    grid-template-columns: 1fr;
   }
-  .hero-17-content > .hero-stat {
-    display: none;
+  .author-block {
+    grid-template-columns: 1fr;
   }
-  .hero-17-content > div + div {
-    border-left: 0;
+  .author-block img {
+    width: 140px;
+    height: 140px;
   }
+}
+
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Space above the newsletter box at the end of listings. */
+.listing-signup {
+  padding-top: clamp(48px, 7vw, 80px);
+  padding-bottom: clamp(48px, 7vw, 80px);
 }

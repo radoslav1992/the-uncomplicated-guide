@@ -2,16 +2,21 @@
 import { Image } from "astro:assets";
 import Base from "../layouts/Base.astro";
 import ArticleCard from "../components/ArticleCard.astro";
-import GuideFeature from "../components/GuideFeature.astro";
+import FeaturedArticle from "../components/FeaturedArticle.astro";
 import SignupForm from "../components/SignupForm.astro";
 import portrait from "../assets/portrait.webp";
 import { site } from "../data/site";
-import { getPosts, isGuide, postUrl, readingTime } from "../lib/blog";
+import {
+  categoriesWithPosts,
+  getPosts,
+  postUrl,
+} from "../lib/blog";
 
 const posts = await getPosts();
-const guides = posts.filter(isGuide);
-const articles = posts.filter((post) => !isGuide(post));
-const latest = articles.slice(0, 6);
+const featured = posts.filter((post) => post.data.featured);
+// Featured articles already lead the page; the latest list shows the rest.
+const latest = posts.filter((post) => !post.data.featured).slice(0, 6);
+const categories = categoriesWithPosts(posts);
 
 const origin = site.url;
 const jsonLd = [
@@ -41,222 +46,127 @@ const jsonLd = [
 ---
 
 <Base
-  title="Free practical guides to AI, voice agents and AI video"
+  title="Practical articles on AI receptionists, AI video and AI side projects"
   description={site.description}
   current="Home"
   jsonLd={jsonLd}
 >
-  <div class="agency-home">
-    <section class="hero-area-17 frame">
-      <div class="hero-kicker">
-        <span>
-          <i class="status-dot"></i> Free to read. No paywall, no sign-up.
-        </span>
-        <span>THE UNCOMPLICATED GUIDES — JOURNAL</span>
-      </div>
-      <div class="hero-17-header">
-        <h1
-          class="hero-17-title"
-          aria-label="Practical AI guides, free to read."
-        >
-          <span class="title-line" aria-hidden="true">
-            <span>Practical AI guides.</span>
-          </span>
-          <span class="title-line" aria-hidden="true">
-            <span>
-              Free <em>to read.</em>
-            </span>
-          </span>
+  <div class="container">
+    <section class="home-hero">
+      <div>
+        <p class="eyebrow">Free to read · No paywall · No sign-up</p>
+        <h1>
+          Practical AI guides, <em>without the noise.</em>
         </h1>
-        <span class="hero-cross" aria-hidden="true">
-          ✳
-        </span>
+        <p class="lead">
+          Step-by-step articles and field notes on AI receptionists, AI video
+          ads and side projects built with AI: what to build, what it costs, and
+          what breaks before a client finds out.
+        </p>
+        <div class="hero-actions">
+          <a href="#featured" class="btn btn-accent">Start reading</a>
+          <a href="/blog" class="btn btn-outline">Browse all articles</a>
+        </div>
       </div>
-      <div class="hero-17-content">
-        <div class="hero-start">
-          <span class="technical-label">[ START HERE ]</span>
-          <ul class="start-list">
-            {guides.slice(0, 3).map((guide) => (
+      {categories.length > 0 && (
+        <nav class="topics-box" aria-label="Browse by topic">
+          <p>Browse by topic</p>
+          <ul>
+            {categories.map((category) => (
               <li>
-                <a href={postUrl(guide)}>
-                  {guide.data.image && (
-                    <img
-                      src={guide.data.image}
-                      alt=""
-                      width="160"
-                      height="90"
-                      loading="eager"
-                      decoding="async"
-                    />
-                  )}
-                  <span>
-                    <span class="start-kind">
-                      Free guide · {readingTime(guide.body)} min
+                <a href={category.url}>
+                  <span class="topic-name">
+                    {category.name}
+                    <span class="topic-count">
+                      {category.posts.length}
+                      {category.posts.length === 1 ? " article" : " articles"}
                     </span>
-                    <span class="start-title">{guide.data.title}</span>
                   </span>
+                  <span class="topic-desc">{category.description}</span>
                 </a>
               </li>
             ))}
           </ul>
-        </div>
-        <div class="hero-stat">
-          <span class="technical-label">GUIDES & ARTICLES</span>
-          <span class="stat-number">
-            {String(posts.length).padStart(2, "0")}
-          </span>
-          <span class="technical-label">ALL FREE. ALL FROM REAL WORK.</span>
-        </div>
-        <div class="hero-description">
-          <p>
-            Put AI to work.
-            <br />
-            Build something useful.
-          </p>
-          <p class="muted-copy">
-            Step-by-step guides and field notes on voice agents, AI video ads,
-            vibe coding and side projects: what to build, what it costs and
-            what breaks before a client finds out.
-          </p>
-          <a href="#guides" class="rr-btn-classic">
-            Start reading{" "}
-            <span class="button-arrow" aria-hidden="true">
-              ↗
-            </span>
-          </a>
-        </div>
-      </div>
-      <div class="hero-foot">
-        <span>BY {site.author.name.toUpperCase()}</span>
-        <a href="#guides">
-          SCROLL TO EXPLORE <span aria-hidden="true">↓</span>
-        </a>
-        <span>SOFIA, BULGARIA / READ WORLDWIDE</span>
-      </div>
+        </nav>
+      )}
     </section>
 
-    {guides.length > 0 && (
-      <section id="guides" class="frame agency-section">
-        <div class="agency-heading" data-reveal>
-          <p class="section-index">[ 01 / FREE GUIDES ]</p>
-          <h2>
-            Long reads.
-            <br />
-            <em>No paywall.</em>
-          </h2>
-          <a href="/guides" class="arrow-link">
-            All guides ↗
-          </a>
+    {featured.length > 0 && (
+      <section id="featured" class="home-section" aria-labelledby="featured-heading">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Featured</p>
+            <h2 id="featured-heading">Long reads, start to finish</h2>
+          </div>
+          <a href="/blog" class="arrow-link">All articles →</a>
         </div>
-        <div class="collection-grid">
-          {guides.slice(0, 2).map((guide) => (
-            <GuideFeature post={guide} />
+        <div class="featured-grid">
+          {featured.slice(0, 2).map((post) => (
+            <FeaturedArticle post={post} />
           ))}
-        </div>
-        <div class="collection-notes">
-          <span>
-            <i class="status-dot"></i> Every chapter on one page
-          </span>
-          <span>
-            <i class="status-dot"></i> Prompts, tables and checklists inline
-          </span>
-          <span>
-            <i class="status-dot"></i> Updated when the tools change
-          </span>
         </div>
       </section>
     )}
-
-    <div class="moving-text" aria-hidden="true">
-      <div class="wrapper-text">
-        LESS NOISE. <span>MORE KNOW-HOW.</span> LESS NOISE.{" "}
-        <span>MORE KNOW-HOW.</span>
-      </div>
-    </div>
 
     {latest.length > 0 && (
-      <section id="latest" class="frame agency-section journal">
-        <div class="agency-heading" data-reveal>
-          <p class="section-index">[ 02 / LATEST ARTICLES ]</p>
-          <h2>
-            Ideas from
-            <br />
-            <em>the work.</em>
-          </h2>
-          <a href="/blog" class="arrow-link">
-            All articles ↗
-          </a>
+      <section id="latest" class="home-section" aria-labelledby="latest-heading">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Latest</p>
+            <h2 id="latest-heading">Recent articles</h2>
+          </div>
+          <a href="/blog" class="arrow-link">All articles →</a>
         </div>
         <div class="card-grid">
-          {latest.map((post, i) => (
-            <ArticleCard post={post} index={i} />
+          {latest.map((post) => (
+            <ArticleCard post={post} />
           ))}
         </div>
       </section>
     )}
 
-    <section id="author" class="frame agency-section author-section">
-      <div class="author-visual" data-reveal>
-        <div class="parallax-view">
-          <Image
-            src={portrait}
-            alt={site.author.name}
-            widths={[400, 800]}
-            sizes="(max-width: 720px) 90vw, 40vw"
-            loading="lazy"
-            data-parallax
-          />
+    <section id="author" class="home-section" aria-labelledby="author-heading">
+      <div class="author-block">
+        <Image
+          src={portrait}
+          alt={site.author.name}
+          widths={[220, 440]}
+          sizes="220px"
+          loading="lazy"
+        />
+        <div>
+          <p class="eyebrow">About the author</p>
+          <h2 id="author-heading">Hello, I’m {site.author.name}.</h2>
+          <p>
+            I teach generative AI and natural language processing at university
+            and am a PhD candidate in computer science. I run a software studio
+            in Sofia, building voice agents, automations and internal systems.
+          </p>
+          <p>
+            The articles here collect the decisions, checks and commercial
+            considerations behind that work — the parts that rarely make it into
+            a tutorial. They are free to read and free to use in your own
+            projects.
+          </p>
+          <a href="/contact" class="arrow-link">Ask a question or suggest a topic →</a>
         </div>
-        <div class="photo-caption">
-          <span>THE PERSON BEHIND THE PAGES</span>
-          <span>↗</span>
-        </div>
-      </div>
-      <div class="author-copy" data-reveal>
-        <p class="section-index">[ 03 / ABOUT THE AUTHOR ]</p>
-        <h2>
-          Built from work.
-          <br />
-          <em>Written to help.</em>
-        </h2>
-        <p class="author-name">Hello, I’m {site.author.name}.</p>
-        <p>
-          I teach generative AI and natural language processing at university
-          and am a PhD candidate in computer science. I run a software studio in
-          Sofia, building voice agents, automations, and internal systems.
-        </p>
-        <p>
-          The guides here collect the decisions, checks and commercial
-          considerations behind that work — the parts that rarely make it into
-          a tutorial. They are free to read and free to use in your own
-          projects.
-        </p>
-        <a href="/contact" class="rr-btn-classic">
-          Ask a question or suggest a topic{" "}
-          <span class="button-arrow" aria-hidden="true">
-            ↗
-          </span>
-        </a>
       </div>
     </section>
 
-    <section id="signup" class="frame newsletter-section">
-      <div class="newsletter-copy" data-reveal>
-        <p class="section-index">[ STAY CURIOUS ]</p>
-        <h2>
-          The next useful guide.
-          <br />
-          <em>In your inbox.</em>
-        </h2>
-        <p>
-          One email when a new guide or article is published.
-          <br />
-          No sequences, no sales. Unsubscribe anytime.
-        </p>
-      </div>
-      <div class="newsletter-form" data-reveal>
-        <SignupForm source="home" buttonLabel="Keep me in the loop ↗" />
-        <p class="small">A confirmation email keeps the choice yours.</p>
+    <section id="signup" class="home-section">
+      <div class="signup-box">
+        <div>
+          <p class="eyebrow">Newsletter</p>
+          <h2>The next useful article, in your inbox.</h2>
+          <p>
+            One email when a new article is published. No sequences, no sales,
+            and one click to leave.
+          </p>
+        </div>
+        <div>
+          <SignupForm source="home" buttonLabel="Subscribe" />
+          <p class="small">A confirmation email keeps the choice yours.</p>
+        </div>
       </div>
     </section>
   </div>
