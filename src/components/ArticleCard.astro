@@ -1,0 +1,142 @@
+---
+/**
+ * One article in a grid. Shows the hero image when the article has one, otherwise
+ * a large index number in the display face, so text-only articles still read as cards.
+ */
+import { formatDate } from "../lib/http";
+import { isGuide, postUrl, readingTime, type Post } from "../lib/blog";
+
+interface Props {
+  post: Post;
+  /** Position in the list, used for the number on cards without an image. */
+  index?: number;
+  /** Heading level for the title, so cards sit correctly in each page's outline. */
+  headingLevel?: 2 | 3;
+}
+
+const { post, index = 0, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as "h2" | "h3";
+const url = postUrl(post);
+const label = isGuide(post) ? "Free guide" : (post.data.tags[0] ?? "Article");
+---
+
+<article class="article-card" data-reveal>
+  {post.data.image ? (
+    <a href={url} class="card-media" tabindex="-1" aria-hidden="true">
+      <img
+        src={post.data.image}
+        alt=""
+        width="1200"
+        height="675"
+        loading="lazy"
+        decoding="async"
+      />
+    </a>
+  ) : (
+    <span class="card-number" aria-hidden="true">
+      {String(index + 1).padStart(2, "0")}
+    </span>
+  )}
+  <div class="card-meta">
+    <span class:list={{ "is-guide": isGuide(post) }}>{label}</span>
+    <span>{readingTime(post.body)} min read</span>
+  </div>
+  <Heading class="card-title">
+    <a href={url}>{post.data.title}</a>
+  </Heading>
+  <p class="card-desc">{post.data.description}</p>
+  <div class="card-foot">
+    <time datetime={post.data.pubDate.toISOString()}>
+      {formatDate(post.data.pubDate)}
+    </time>
+    <a href={url} aria-label={`Read ${post.data.title}`}>
+      Read <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+</article>
+
+<style>
+  .article-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 22px 22px 26px;
+    transition: background 0.3s;
+  }
+  .article-card:hover {
+    background: #ffffff05;
+  }
+  .card-media {
+    display: block;
+    overflow: hidden;
+    margin: -2px 0 22px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+  }
+  .card-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .article-card:hover .card-media img {
+    transform: scale(1.03);
+  }
+  .card-number {
+    font: 300 72px/1 var(--font-display);
+    color: #ffffff20;
+    margin: 4px 0 26px;
+  }
+  .card-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card-meta .is-guide {
+    color: var(--accent);
+  }
+  .card-title {
+    font: 300 clamp(22px, 2vw, 27px) / 1.14 var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    margin: 14px 0 14px;
+    text-wrap: balance;
+  }
+  .card-title a {
+    color: var(--ink);
+  }
+  .card-title a:hover {
+    color: var(--accent);
+  }
+  .card-desc {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text);
+    margin: 0 0 24px;
+  }
+  .card-foot {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .card-foot a {
+    color: var(--ink);
+  }
+  .card-foot a span {
+    color: var(--accent);
+    font-size: 18px;
+    margin-left: 6px;
+  }
+</style>

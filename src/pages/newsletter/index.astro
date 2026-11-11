@@ -5,7 +5,6 @@
 import Base from '../../layouts/Base.astro';
 import SignupForm from '../../components/SignupForm.astro';
 import { site } from '../../data/site';
-import { upcomingGuides } from '../../data/guides';
 
 export const prerender = false;
 Astro.response.headers.set('cache-control', 'private, no-store');
@@ -18,11 +17,11 @@ const messages: Record<string, { title: string; text: string }> = {
   },
   confirmed: {
     title: 'You are on the list.',
-    text: 'Thank you. You will hear from me when a guide ships or a revised edition replaces the old file, and now and then with a short note. Every email has an unsubscribe link.',
+    text: 'Thank you. You will hear from me when a new guide or article is published, and now and then with a short note. Every email has an unsubscribe link.',
   },
   unsubscribed: {
     title: 'Unsubscribed.',
-    text: 'Your address has been removed. Nothing more will be sent. The library stays open whenever you need it.',
+    text: 'Your address has been removed. Nothing more will be sent. The guides stay free to read whenever you need them.',
   },
   invalid: {
     title: 'That link is not valid.',
@@ -32,7 +31,7 @@ const messages: Record<string, { title: string; text: string }> = {
 const msg = messages[status];
 ---
 
-<Base title="Newsletter" description="One email when a guide ships, and now and then a short note. Nothing else." noindex={Boolean(msg)}>
+<Base title="Newsletter" description="One email when a new free guide or article is published, and now and then a short note. Nothing else." noindex={Boolean(msg)}>
   <div class="container wrap">
     <p class="eyebrow">Newsletter</p>
     {
@@ -46,22 +45,27 @@ const msg = messages[status];
             </div>
           )}
           <p class="small links">
-            <a href="/guides">Browse the library →</a>
+            <a href="/guides">Read the free guides →</a>
           </p>
         </Fragment>
       ) : (
         <Fragment>
-          <h1 class="display">Hear when the next one ships.</h1>
+          <h1 class="display">Hear when the next one is out.</h1>
           <p class="lead">
-            {upcomingGuides.length} guides are in progress. Subscribe and you get one email on the day a guide comes out or a
-            revised edition replaces the old file, plus the occasional short note about something learned
-            building or selling one of these. Never more than a couple a month.
+            {site.upcoming.length} more guides are on the writing desk. Subscribe and you get one email on the day a
+            guide or article is published, plus the occasional short note about something learned building
+            with AI. Never more than a couple a month, and everything stays free to read.
           </p>
+          <ul class="upcoming">
+            {site.upcoming.map((item) => (
+              <li><strong>{item.title}</strong> — {item.text}</li>
+            ))}
+          </ul>
           <div class="panel form-panel">
             <SignupForm redirect="/newsletter?status=check" source="newsletter-page" />
           </div>
           <p class="small links">
-            No sequences, no “last chance”. Questions: <a href={`mailto:${site.email}`}>{site.email}</a>.
+            No sequences, no sales. Questions: <a href={`mailto:${site.email}`}>{site.email}</a>.
           </p>
         </Fragment>
       )
@@ -75,4 +79,6 @@ const msg = messages[status];
   .lead { margin: 0 0 28px; }
   .form-panel { padding: 28px; }
   .links { margin-top: 20px; }
+  .upcoming { margin: 0 0 32px; padding-left: 20px; color: var(--text); line-height: 1.65; display: grid; gap: 10px; }
+  .upcoming strong { color: var(--ink); font-weight: 600; }
 </style>

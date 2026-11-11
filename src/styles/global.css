@@ -275,35 +275,6 @@ textarea {
 }
 
 /* ───────────────────────────── Badges & chips ───────────────────────────── */
-.price-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #fff;
-  background: var(--accent);
-  border-radius: 999px;
-  padding: 6px 14px;
-}
-
-.price-badge.sm {
-  font-size: 13px;
-  padding: 5px 12px;
-}
-
-.soon-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fff;
-  background: var(--accent);
-  border-radius: 999px;
-  padding: 5px 12px;
-}
 
 .tag-list {
   list-style: none;
@@ -408,79 +379,6 @@ textarea.input {
   border-radius: 12px;
   background: rgba(226, 84, 43, 0.12);
   color: #a3331a;
-}
-
-/* ───────────────────────────── Dash lists (who it's for) ───────────────────────────── */
-.dash-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 14px;
-}
-.dash-list li {
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--text);
-  padding-left: 20px;
-  position: relative;
-}
-.dash-list li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.66em;
-  width: 8px;
-  height: 1px;
-  background: var(--border-2);
-}
-.dash-list.accent li::before {
-  background: var(--accent);
-}
-
-/* ───────────────────────────── Numbered parts ───────────────────────────── */
-.parts {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.parts li {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: clamp(18px, 3vw, 36px);
-}
-.parts li + li {
-  margin-top: clamp(40px, 6vw, 72px);
-  padding-top: clamp(40px, 6vw, 72px);
-  border-top: 1px solid var(--border-2);
-}
-.parts .num {
-  font-family: var(--font-display);
-  font-size: clamp(26px, 4vw, 46px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.05em;
-  color: var(--faint);
-  min-width: 2ch;
-}
-.parts li:first-child .num {
-  color: var(--accent);
-}
-.parts h3 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: clamp(21px, 2.8vw, 30px);
-  line-height: 1.06;
-  letter-spacing: -0.03em;
-  margin: 0;
-  text-transform: uppercase;
-}
-.parts p {
-  font-size: 16px;
-  line-height: 1.65;
-  color: var(--text);
-  margin: 12px 0 0;
-  max-width: 48ch;
 }
 
 /* ───────────────────────────── Blog prose ─────────────────────────────

@@ -53,9 +53,7 @@ h1.display {
   border-radius: 0;
   min-height: 48px;
 }
-.btn-accent,
-.price-badge,
-.soon-badge {
+.btn-accent {
   color: #111;
 }
 .btn-accent:hover {
@@ -208,65 +206,6 @@ h1.display {
   color: var(--muted);
   text-transform: uppercase;
 }
-.hero-art {
-  position: relative;
-  padding: 18px 22px;
-  min-height: 360px;
-  overflow: hidden;
-  background: radial-gradient(ellipse at 50% 70%, #57301b55, transparent 68%);
-}
-.book-pair {
-  position: relative;
-  height: 290px;
-  max-width: 500px;
-  margin: auto;
-  perspective: 1000px;
-}
-.hero-book {
-  position: absolute;
-  display: block;
-  width: 38%;
-  max-width: 200px;
-  top: 18px;
-  box-shadow: 16px 20px 26px #0009;
-  transition: filter 0.3s;
-}
-.hero-book img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.hero-book:hover {
-  filter: brightness(1.13);
-}
-.hero-book::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    #0008,
-    transparent 4%,
-    #ffffff22 6%,
-    transparent 10%
-  );
-  pointer-events: none;
-}
-.book-0 {
-  left: 13%;
-  transform: rotate(-10deg) rotateY(12deg);
-  z-index: 2;
-}
-.book-1 {
-  right: 13%;
-  top: 40px;
-  transform: rotate(10deg) rotateY(-12deg);
-}
-.art-bottom {
-  position: absolute;
-  bottom: 16px;
-  left: 22px;
-}
 .hero-stat {
   display: flex;
   flex-direction: column;
@@ -404,45 +343,6 @@ h1.display {
   -webkit-text-stroke: 1px #111;
   color: transparent;
 }
-.process-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid var(--border);
-}
-.process-card {
-  padding: 30px 24px 36px;
-  position: relative;
-}
-.process-card + .process-card {
-  border-left: 1px solid var(--border);
-}
-.process-number {
-  font: 300 75px/1 var(--font-display);
-  color: var(--accent);
-}
-.process-card > img {
-  position: absolute;
-  right: 25px;
-  top: 42px;
-}
-.process-card h3 {
-  font: 300 29px/1.1 var(--font-display);
-  text-transform: uppercase;
-  margin: 40px 0 18px;
-}
-.process-card p {
-  font-size: 14px;
-  line-height: 1.8;
-  color: var(--text);
-  max-width: 320px;
-  min-height: 90px;
-}
-.process-card .technical-label {
-  display: block;
-  border-top: 1px solid var(--border);
-  padding-top: 20px;
-  margin-top: 26px;
-}
 .author-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -490,78 +390,6 @@ h1.display {
 .author-copy .rr-btn-classic {
   margin-top: 25px;
   max-width: 370px;
-}
-.journal-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--border);
-}
-.journal-card {
-  padding: 25px 22px 28px;
-  display: flex;
-  flex-direction: column;
-  transition: background 0.3s;
-}
-.journal-card + .journal-card {
-  border-left: 1px solid var(--border);
-}
-.journal-card:hover {
-  background: #ffffff05;
-}
-.journal-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 9px;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.journal-number {
-  font: 300 80px/1 var(--font-display);
-  color: #ffffff20;
-  margin: 28px 0;
-}
-.journal-card h3 {
-  font: 300 29px/1.12 var(--font-display);
-  text-transform: uppercase;
-  margin: 0 0 18px;
-}
-.journal-card h3 a {
-  color: var(--ink);
-}
-.journal-card p {
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.8;
-  margin: 0 0 25px;
-}
-.journal-link {
-  margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  padding-top: 20px;
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  color: var(--ink);
-}
-.journal-link > span {
-  color: var(--accent);
-  font-size: 22px;
-}
-.faq-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8%;
-  padding: 80px 22px;
-}
-.faq-section p:not(.section-index) {
-  font-size: 13px;
-  color: var(--text);
-  line-height: 1.8;
-  margin-top: 30px;
-}
-.faq-section .faq-item {
-  background: transparent;
 }
 .newsletter-section {
   display: grid;
@@ -627,15 +455,6 @@ h1.display {
   .hero-17-content {
     grid-template-columns: 1.5fr 0.75fr 1fr;
   }
-  .hero-book {
-    top: 35px;
-  }
-  .book-1 {
-    top: 70px;
-  }
-  .hero-art {
-    min-height: 335px;
-  }
   .agency-heading {
     grid-template-columns: 1fr 2fr;
   }
@@ -652,9 +471,6 @@ h1.display {
   }
   .hero-foot > span:last-child {
     display: none;
-  }
-  .process-card {
-    padding-inline: 18px;
   }
 }
 @media (max-width: 720px) {
@@ -674,24 +490,6 @@ h1.display {
   }
   .hero-17-content {
     grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-  }
-  .hero-art {
-    min-height: 240px;
-    padding-inline: 15px;
-  }
-  .book-pair {
-    height: 190px;
-  }
-  .hero-book {
-    width: 45%;
-    top: 25px;
-  }
-  .book-0 {
-    left: 5%;
-  }
-  .book-1 {
-    right: 4%;
-    top: 50px;
   }
   .hero-stat {
     padding: 18px 12px;
@@ -756,20 +554,6 @@ h1.display {
     gap: 15px 22px;
     font-size: 10px;
   }
-  .process-grid {
-    grid-template-columns: 1fr;
-  }
-  .process-card + .process-card {
-    border-left: 0;
-    border-top: 1px solid var(--border);
-  }
-  .process-card p {
-    min-height: 0;
-    max-width: 100%;
-  }
-  .process-card h3 {
-    margin-top: 25px;
-  }
   .author-section {
     grid-template-columns: 1fr;
     padding: 45px 15px;
@@ -777,22 +561,6 @@ h1.display {
   }
   .parallax-view {
     height: 390px;
-  }
-  .journal-grid {
-    grid-template-columns: 1fr;
-  }
-  .journal-card + .journal-card {
-    border-left: 0;
-    border-top: 1px solid var(--border);
-  }
-  .journal-number {
-    margin: 20px 0;
-    font-size: 60px;
-  }
-  .faq-section {
-    grid-template-columns: 1fr;
-    padding: 45px 15px;
-    gap: 20px;
   }
   .newsletter-section {
     grid-template-columns: 1fr;
@@ -802,14 +570,8 @@ h1.display {
   .technical-label {
     font-size: 8px;
   }
-  .art-bottom {
-    left: 15px;
-  }
   .heading-note {
     max-width: 400px;
-  }
-  .hero-art .technical-label {
-    font-size: 7px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -817,18 +579,15 @@ h1.display {
     scroll-behavior: auto;
   }
   .title-line > span,
-  [data-reveal],
-  .hero-book,
-  [data-parallax],
-  .wrapper-text {
+[data-reveal],
+[data-parallax],
+.wrapper-text {
     will-change: auto;
   }
 }
 
 /* Shared transactional controls retain a consistent contrast on orange. */
-body .btn-accent,
-body .price-badge,
-body .soon-badge {
+body .btn-accent {
   color: #111;
 }
 body .newsletter-section .btn-accent {

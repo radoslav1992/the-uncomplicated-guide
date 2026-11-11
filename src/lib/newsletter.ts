@@ -80,7 +80,7 @@ export async function subscribe(env: Env, origin: string, email: string, interes
     text: `One click and you are on the list:
 ${await confirmUrl(env, origin, email)}
 
-What you get: one email when a guide ships or a revised edition replaces the old file, and now and then a short note about something I learned building or selling one of these. Never more than a couple a month; every email has an unsubscribe link.
+What you get: one email when a new guide or article is published, and now and then a short note about something I learned building with AI. Never more than a couple a month; every email has an unsubscribe link.
 
 If you did not ask for this, ignore it — nothing is sent without the click.
 

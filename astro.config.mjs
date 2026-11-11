@@ -31,16 +31,58 @@ function blogLastmod() {
 }
 
 const postDates = blogLastmod();
-const LEGAL = ['/terms', '/refunds', '/privacy', '/cookies', '/imprint'];
+const guidePaths = guideArticles();
+const LEGAL = ['/terms', '/privacy', '/cookies', '/imprint'];
+
+/** Paths of the long-form guides (`kind: guide`), which rank above ordinary articles. */
+function guideArticles() {
+  const dir = new URL('./src/content/blog/', import.meta.url);
+  const paths = new Set();
+  for (const file of readdirSync(dir)) {
+    if (!file.endsWith('.md')) continue;
+    const frontmatter = readFileSync(new URL(file, dir), 'utf-8').split('---')[1] ?? '';
+    if (/^kind:\s*guide\s*$/m.test(frontmatter)) paths.add(`/blog/${file.replace(/\.md$/, '')}`);
+  }
+  return paths;
+}
+
+/**
+ * Retired URLs from the PDF shop, and where they now point. Served as permanent (301)
+ * redirects: the Cloudflare adapter appends them to `public/_redirects`, which holds
+ * the wildcard ones (`/download/*`, `/samples/*`) Astro cannot express.
+ */
+const AI_RECEPTIONIST_GUIDE = '/blog/ai-receptionist-voice-assistant-guide';
+const AI_VIDEO_GUIDE = '/blog/ai-ugc-video-ads-guide';
+const moved = (destination) => ({ status: 301, destination });
+const redirects = {
+  // The two paid guides are now free articles.
+  '/guides/ai-assistants': moved(AI_RECEPTIONIST_GUIDE),
+  '/guides/ai-video-ads-ugc': moved(AI_VIDEO_GUIDE),
+  // "Coming soon" product pages.
+  '/guides/vibe-coding-for-non-developers': moved('/guides'),
+  '/guides/working-with-ai-coding-agents': moved('/guides'),
+  '/guides/30-tiktok-hacks-for-success': moved('/guides'),
+  // Shop pages.
+  '/account': moved('/guides'),
+  '/checkout': moved('/guides'),
+  '/thank-you': moved('/guides'),
+  '/refunds': moved('/terms'),
+  // An article about the shop's sales pages, retired with them.
+  '/blog/who-its-not-for': moved('/blog'),
+};
 
 /** How often each kind of page changes, and how it ranks against the rest of the site. */
 function sitemapEntry(path) {
   if (path === '/') return { changefreq: 'weekly', priority: 1.0 };
   if (path === '/guides') return { changefreq: 'weekly', priority: 0.9 };
-  if (path.startsWith('/guides/')) return { changefreq: 'monthly', priority: 0.8 };
-  if (path === '/blog') return { changefreq: 'weekly', priority: 0.7 };
+  if (path === '/blog') return { changefreq: 'weekly', priority: 0.8 };
   if (path.startsWith('/blog/')) {
-    return { changefreq: 'yearly', priority: 0.6, lastmod: postDates.get(path) };
+    const guide = guidePaths.has(path);
+    return {
+      changefreq: guide ? 'monthly' : 'yearly',
+      priority: guide ? 0.9 : 0.7,
+      lastmod: postDates.get(path),
+    };
   }
   if (path === '/contact' || path === '/newsletter') return { changefreq: 'yearly', priority: 0.4 };
   if (LEGAL.includes(path)) return { changefreq: 'yearly', priority: 0.2 };
@@ -53,20 +95,18 @@ export default defineConfig({
   trailingSlash: 'never',
   adapter: cloudflare({
     // Optimise images with sharp at build time for prerendered pages.
-    // On-demand pages (thank-you, download) do not use <Image>.
+    // On-demand pages (newsletter status, admin, media) do not use <Image>.
     imageService: 'compile',
   }),
+  redirects,
   integrations: [
     sitemap({
-      // Private and transactional pages stay out of the index. These also carry
-      // `noindex` in the page itself and are disallowed in robots.txt.
-      filter: (page) =>
-        !page.includes('/thank-you') &&
-        !page.includes('/download/') &&
-        !page.includes('/account') &&
-        !page.includes('/checkout') &&
-        !page.includes('/admin/') &&
-        !page.includes('/api/'),
+      // Private pages and redirect stubs stay out of the index. Admin and API routes
+      // also carry `noindex` and are disallowed in robots.txt.
+      filter: (page) => {
+        const path = new URL(page).pathname.replace(/\/$/, '') || '/';
+        return !path.startsWith('/admin') && !path.startsWith('/api/') && !(path in redirects);
+      },
       serialize(item) {
         const path = new URL(item.url).pathname.replace(/\/$/, '') || '/';
         const { lastmod, ...rest } = sitemapEntry(path);

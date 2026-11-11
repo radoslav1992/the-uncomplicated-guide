@@ -1,48 +1,48 @@
 ---
 import { Image } from "astro:assets";
 import Base from "../layouts/Base.astro";
-import GuideCard from "../components/GuideCard.astro";
-import Faq from "../components/Faq.astro";
-import Icon from "../components/Icon.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import GuideFeature from "../components/GuideFeature.astro";
 import SignupForm from "../components/SignupForm.astro";
 import portrait from "../assets/portrait.webp";
 import { site } from "../data/site";
-import { availableGuides } from "../data/guides";
-import { getPosts, postUrl, readingTime } from "../lib/blog";
-const featured = availableGuides.slice(0, 2);
-const posts = (await getPosts()).filter((post) => !post.data.draft).slice(0, 3);
-const FAQ = [
+import { getPosts, isGuide, postUrl, readingTime } from "../lib/blog";
+
+const posts = await getPosts();
+const guides = posts.filter(isGuide);
+const articles = posts.filter((post) => !isGuide(post));
+const latest = articles.slice(0, 6);
+
+const origin = site.url;
+const jsonLd = [
   {
-    q: "What do I get?",
-    a: "An English PDF with planning frameworks, prompts, checklists and business examples. AI Assistants is 36 pages; AI Video Ads & UGC is 35. Read three real sample pages before choosing. Software subscriptions, runnable integrations and video project files are not included.",
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: site.name,
+    url: `${origin}/`,
+    description: site.description,
+    inLanguage: "en",
   },
   {
-    q: "How do I get my download?",
-    a: "Pay once through Stripe, then download your PDF. We also email the link. If a link expires, sign in to My guides with your purchase email to get another.",
-  },
-  {
-    q: "Can I use the material with clients?",
-    a: "Yes. Use the prompts, checklists and templates in your own work and with your clients. Your licence does not allow sharing or reselling the PDF itself.",
-  },
-  {
-    q: "What about refunds?",
-    a: "Checkout asks for your express consent to immediate digital delivery. Statutory rights for faulty or misdescribed content remain. Our additional 14-day not-as-described promise and full refund terms are on the Refund policy page.",
-  },
-  {
-    q: "Are the tools kept current?",
-    a: "These editions are dated 1 September 2026. Tool prices, features and platform rules can change, so follow the official source links before committing a client budget. Future revisions within the same 1.x edition are included when published.",
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: site.name,
+    url: `${origin}/blog`,
+    description: site.description,
+    author: { "@type": "Person", name: site.author.name, url: `${origin}/#author` },
+    blogPost: posts.slice(0, 10).map((post) => ({
+      "@type": "BlogPosting",
+      headline: post.data.title,
+      url: `${origin}${postUrl(post)}`,
+      datePublished: post.data.pubDate.toISOString(),
+    })),
   },
 ];
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: site.name,
-  url: site.url,
-};
 ---
 
 <Base
-  title="Practical playbooks for AI services"
+  title="Free practical guides to AI, voice agents and AI video"
+  description={site.description}
   current="Home"
   jsonLd={jsonLd}
 >
@@ -50,21 +50,21 @@ const jsonLd = {
     <section class="hero-area-17 frame">
       <div class="hero-kicker">
         <span>
-          <i class="status-dot"></i> Independent thinking. Practical AI.
+          <i class="status-dot"></i> Free to read. No paywall, no sign-up.
         </span>
-        <span>THE UNCOMPLICATED GUIDES — VOL. 01</span>
+        <span>THE UNCOMPLICATED GUIDES — JOURNAL</span>
       </div>
       <div class="hero-17-header">
         <h1
           class="hero-17-title"
-          aria-label="Less complicated. More possibility."
+          aria-label="Practical AI guides, free to read."
         >
           <span class="title-line" aria-hidden="true">
-            <span>Less complicated.</span>
+            <span>Practical AI guides.</span>
           </span>
           <span class="title-line" aria-hidden="true">
             <span>
-              More <em>possibility.</em>
+              Free <em>to read.</em>
             </span>
           </span>
         </h1>
@@ -73,38 +73,39 @@ const jsonLd = {
         </span>
       </div>
       <div class="hero-17-content">
-        <div class="hero-art">
-          <span class="technical-label">[ IDEAS INTO ACTION ]</span>
-          <div class="book-pair">
-            {featured.map((guide, i) => (
-              <a
-                href={`/guides/${guide.slug}`}
-                class:list={["hero-book", `book-${i}`]}
-                aria-label={`Explore ${guide.title}`}
-              >
-                {guide.cover && (
-                  <Image
-                    src={guide.cover}
-                    alt={`${guide.title} cover`}
-                    widths={[300, 600]}
-                    sizes="(max-width: 600px) 38vw, 220px"
-                    loading="eager"
-                    fetchpriority={i === 0 ? "high" : "auto"}
-                  />
-                )}
-              </a>
+        <div class="hero-start">
+          <span class="technical-label">[ START HERE ]</span>
+          <ul class="start-list">
+            {guides.slice(0, 3).map((guide) => (
+              <li>
+                <a href={postUrl(guide)}>
+                  {guide.data.image && (
+                    <img
+                      src={guide.data.image}
+                      alt=""
+                      width="160"
+                      height="90"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  )}
+                  <span>
+                    <span class="start-kind">
+                      Free guide · {readingTime(guide.body)} min
+                    </span>
+                    <span class="start-title">{guide.data.title}</span>
+                  </span>
+                </a>
+              </li>
             ))}
-          </div>
-          <span class="technical-label art-bottom">
-            PDF PLAYBOOKS / YOUR NEXT CHAPTER
-          </span>
+          </ul>
         </div>
         <div class="hero-stat">
-          <span class="technical-label">GUIDES TO GET YOU GOING</span>
+          <span class="technical-label">GUIDES & ARTICLES</span>
           <span class="stat-number">
-            {String(availableGuides.length).padStart(2, "0")}
+            {String(posts.length).padStart(2, "0")}
           </span>
-          <span class="technical-label">CLEAR STEPS. REAL APPLICATIONS.</span>
+          <span class="technical-label">ALL FREE. ALL FROM REAL WORK.</span>
         </div>
         <div class="hero-description">
           <p>
@@ -113,12 +114,12 @@ const jsonLd = {
             Build something useful.
           </p>
           <p class="muted-copy">
-            Practical playbooks for voice assistants and AI video ads.
-            Understand the workflow, plan the costs, and take your next idea
-            further.
+            Step-by-step guides and field notes on voice agents, AI video ads,
+            vibe coding and side projects: what to build, what it costs and
+            what breaks before a client finds out.
           </p>
           <a href="#guides" class="rr-btn-classic">
-            Explore the guides{" "}
+            Start reading{" "}
             <span class="button-arrow" aria-hidden="true">
               ↗
             </span>
@@ -134,37 +135,37 @@ const jsonLd = {
       </div>
     </section>
 
-    <section id="guides" class="frame agency-section">
-      <div class="agency-heading" data-reveal>
-        <p class="section-index">[ 01 / THE COLLECTION ]</p>
-        <h2>
-          Small guides.
-          <br />
-          <em>Big next steps.</em>
-        </h2>
-        <a href="/guides" class="arrow-link">
-          View the library ↗
-        </a>
-      </div>
-      <div class="collection-grid">
-        {availableGuides.map((guide) => (
-          <div data-reveal>
-            <GuideCard guide={guide} />
-          </div>
-        ))}
-      </div>
-      <div class="collection-notes">
-        <span>
-          <Icon name="book" size={17} /> Free sample pages
-        </span>
-        <span>
-          <Icon name="download" size={17} /> Instant PDF download
-        </span>
-        <span>
-          <Icon name="check" size={17} /> Pay once. Keep it.
-        </span>
-      </div>
-    </section>
+    {guides.length > 0 && (
+      <section id="guides" class="frame agency-section">
+        <div class="agency-heading" data-reveal>
+          <p class="section-index">[ 01 / FREE GUIDES ]</p>
+          <h2>
+            Long reads.
+            <br />
+            <em>No paywall.</em>
+          </h2>
+          <a href="/guides" class="arrow-link">
+            All guides ↗
+          </a>
+        </div>
+        <div class="collection-grid">
+          {guides.slice(0, 2).map((guide) => (
+            <GuideFeature post={guide} />
+          ))}
+        </div>
+        <div class="collection-notes">
+          <span>
+            <i class="status-dot"></i> Every chapter on one page
+          </span>
+          <span>
+            <i class="status-dot"></i> Prompts, tables and checklists inline
+          </span>
+          <span>
+            <i class="status-dot"></i> Updated when the tools change
+          </span>
+        </div>
+      </section>
+    )}
 
     <div class="moving-text" aria-hidden="true">
       <div class="wrapper-text">
@@ -173,56 +174,26 @@ const jsonLd = {
       </div>
     </div>
 
-    <section id="approach" class="frame agency-section">
-      <div class="agency-heading" data-reveal>
-        <p class="section-index">[ 02 / THE APPROACH ]</p>
-        <h2>
-          From “what if”
-          <br />
-          <em>to what’s next.</em>
-        </h2>
-        <p class="heading-note">
-          The tools are only part of the story. Build a plan around the work
-          that actually matters.
-        </p>
-      </div>
-      <div class="process-grid">
-        {[
-          {
-            n: "01",
-            title: "Find your project.",
-            copy: "Work out who it helps, what it needs, and whether the numbers make sense.",
-            tag: "CLARITY BEFORE COMPLEXITY",
-          },
-          {
-            n: "02",
-            title: "Make it practical.",
-            copy: "Follow the workflow. Adapt the prompts, planning tables, and checklists to your own work.",
-            tag: "FRAMEWORKS YOU CAN USE",
-          },
-          {
-            n: "03",
-            title: "Go beyond the demo.",
-            copy: "Plan how you’ll test, price, and support the work when a real client starts using it.",
-            tag: "THINK THROUGH THE DETAILS",
-          },
-        ].map((step) => (
-          <article class="process-card" data-reveal>
-            <span class="process-number">{step.n}</span>
-            <img
-              src="/adon/images/shape-s-5.webp"
-              alt=""
-              width="42"
-              height="42"
-              loading="lazy"
-            />
-            <h3>{step.title}</h3>
-            <p>{step.copy}</p>
-            <span class="technical-label">{step.tag}</span>
-          </article>
-        ))}
-      </div>
-    </section>
+    {latest.length > 0 && (
+      <section id="latest" class="frame agency-section journal">
+        <div class="agency-heading" data-reveal>
+          <p class="section-index">[ 02 / LATEST ARTICLES ]</p>
+          <h2>
+            Ideas from
+            <br />
+            <em>the work.</em>
+          </h2>
+          <a href="/blog" class="arrow-link">
+            All articles ↗
+          </a>
+        </div>
+        <div class="card-grid">
+          {latest.map((post, i) => (
+            <ArticleCard post={post} index={i} />
+          ))}
+        </div>
+      </section>
+    )}
 
     <section id="author" class="frame agency-section author-section">
       <div class="author-visual" data-reveal>
@@ -242,7 +213,7 @@ const jsonLd = {
         </div>
       </div>
       <div class="author-copy" data-reveal>
-        <p class="section-index">[ 03 / MEET THE AUTHOR ]</p>
+        <p class="section-index">[ 03 / ABOUT THE AUTHOR ]</p>
         <h2>
           Built from work.
           <br />
@@ -255,12 +226,13 @@ const jsonLd = {
           Sofia, building voice agents, automations, and internal systems.
         </p>
         <p>
-          These guides collect the decisions, checks, and commercial
-          considerations behind that work. A useful companion for your next
-          project, with room for your own judgement.
+          The guides here collect the decisions, checks and commercial
+          considerations behind that work — the parts that rarely make it into
+          a tutorial. They are free to read and free to use in your own
+          projects.
         </p>
         <a href="/contact" class="rr-btn-classic">
-          Let’s talk about your next step{" "}
+          Ask a question or suggest a topic{" "}
           <span class="button-arrow" aria-hidden="true">
             ↗
           </span>
@@ -268,77 +240,18 @@ const jsonLd = {
       </div>
     </section>
 
-    {posts.length > 0 && (
-      <section class="frame agency-section journal">
-        <div class="agency-heading" data-reveal>
-          <p class="section-index">[ 04 / FIELD NOTES ]</p>
-          <h2>
-            Ideas from
-            <br />
-            <em>the work.</em>
-          </h2>
-          <a href="/blog" class="arrow-link">
-            All articles ↗
-          </a>
-        </div>
-        <div class="journal-grid">
-          {posts.map((post, i) => (
-            <article class="journal-card" data-reveal>
-              <div class="journal-meta">
-                <span>{post.data.tags[0] || "Field notes"}</span>
-                <span>{readingTime(post.body)} MIN READ</span>
-              </div>
-              <span class="journal-number" aria-hidden="true">
-                0{i + 1}
-              </span>
-              <h3>
-                <a href={postUrl(post)}>{post.data.title}</a>
-              </h3>
-              <p>{post.data.description}</p>
-              <a
-                class="journal-link"
-                href={postUrl(post)}
-                aria-label={`Read ${post.data.title}`}
-              >
-                Read the note <span aria-hidden="true">↗</span>
-              </a>
-            </article>
-          ))}
-        </div>
-      </section>
-    )}
-
-    <section class="frame agency-section faq-section">
-      <div data-reveal>
-        <p class="section-index">[ 05 / GOOD QUESTIONS ]</p>
-        <h2>
-          Before your
-          <br />
-          <em>next chapter.</em>
-        </h2>
-        <p>
-          Already have a guide?
-          <br />
-          <a href="/account">Find it in My guides ↗</a>
-        </p>
-      </div>
-      <div data-reveal>
-        <Faq items={FAQ} />
-      </div>
-    </section>
-
     <section id="signup" class="frame newsletter-section">
       <div class="newsletter-copy" data-reveal>
         <p class="section-index">[ STAY CURIOUS ]</p>
         <h2>
-          The next useful idea.
+          The next useful guide.
           <br />
           <em>In your inbox.</em>
         </h2>
         <p>
-          New guides and occasional notes from the work.
+          One email when a new guide or article is published.
           <br />
-          No sequences or last-chance offers. Unsubscribe anytime.
+          No sequences, no sales. Unsubscribe anytime.
         </p>
       </div>
       <div class="newsletter-form" data-reveal>

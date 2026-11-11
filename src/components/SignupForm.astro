@@ -3,8 +3,8 @@
  * Newsletter signup (double opt-in). Posts to /api/newsletter/subscribe; works without JS via redirect.
  */
 interface Props {
-  /** Optional guide slug to record what the person is interested in. */
-  guide?: string;
+  /** Optional topic or article slug, recorded with the address as the reader's interest. */
+  topic?: string;
   redirect?: string;
   buttonLabel?: string;
   source?: string;
@@ -12,7 +12,7 @@ interface Props {
   compact?: boolean;
 }
 const {
-  guide,
+  topic,
   redirect = '/newsletter?status=check',
   buttonLabel = 'Subscribe',
   source = Astro.url.pathname,
@@ -23,7 +23,7 @@ const {
 <form method="post" action="/api/newsletter/subscribe" class:list={['signup', { compact }]} data-signup-form>
   <input type="hidden" name="redirect" value={redirect} />
   <input type="hidden" name="source" value={source} />
-  {guide && <input type="hidden" name="guide" value={guide} />}
+  {topic && <input type="hidden" name="topic" value={topic} />}
   <label class="honeypot" aria-hidden="true">
     Leave this empty <input type="text" name="website" tabindex="-1" autocomplete="off" />
   </label>

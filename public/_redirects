@@ -1,0 +1,7 @@
+# Permanent redirects for retired URLs, applied by Cloudflare before the Worker runs.
+# Fixed paths live in `redirects` in astro.config.mjs; the build appends them below.
+# Only wildcard rules, which Astro cannot express, belong here.
+
+# Download links and sample pages from the old PDF shop.
+/download/* /guides 301
+/samples/* /guides 301

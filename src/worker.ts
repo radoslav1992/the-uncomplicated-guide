@@ -5,9 +5,9 @@
  * - `email`: Cloudflare Email Routing. In the dashboard (Email → Email Routing →
  *   Routing rules) send mail for hello@yourdomain to this Worker. Messages are
  *   forwarded to CONTACT_TO, which must be a verified destination address.
- * - `scheduled`: the cron trigger in wrangler.jsonc; delivers queued newsletter batches.
+ * - `scheduled`: the cron trigger in wrangler.jsonc; delivers queued newsletter batches
+ *   and clears expired rate-limit rows.
  */
-import { deliverPurchases } from './lib/delivery';
 import { handle } from '@astrojs/cloudflare/handler';
 import { deliverPending, oneClickUnsubscribe, purgeUnconfirmed } from './lib/newsletter';
 
@@ -26,7 +26,7 @@ export default {
     headers.set('X-Frame-Options', 'DENY');
     headers.set('Referrer-Policy', 'no-referrer');
     const path = new URL(request.url).pathname;
-    if (/^\/(api|admin|account|thank-you|download|checkout)(\/|$)/.test(path)) {
+    if (/^\/(api|admin)(\/|$)/.test(path)) {
       headers.set('Cache-Control', 'private, no-store');
       headers.set('X-Robots-Tag', 'noindex, nofollow');
     }
@@ -55,11 +55,7 @@ export default {
 
   async scheduled(_event, env, ctx) {
     const origin = (env.SITE_URL || '').replace(/\/$/, '');
-    ctx.waitUntil(deliverPurchases(env, origin));
-    ctx.waitUntil(env.DB.batch([
-      env.DB.prepare('DELETE FROM login_tokens WHERE expires_at < ?1').bind(Date.now()),
-      env.DB.prepare('DELETE FROM rate_limits WHERE expires_at < ?1').bind(Date.now()),
-    ]));
+    ctx.waitUntil(env.DB.prepare('DELETE FROM rate_limits WHERE expires_at < ?1').bind(Date.now()).run());
     ctx.waitUntil(
       deliverPending(env, origin).then((n) => {
         if (n) console.info('[newsletter] cron delivered', n);

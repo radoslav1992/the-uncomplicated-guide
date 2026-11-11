@@ -2,11 +2,11 @@
 import { site } from '../data/site';
 
 const TOPICS = [
-  'A guide I bought',
-  'Download problem',
-  'Receipt or invoice',
-  'Team licence',
-  'Question before buying',
+  'A question about a guide',
+  'A topic to cover',
+  'A correction',
+  'Working together',
+  'An earlier PDF purchase',
   'Something else',
 ];
 const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
@@ -47,8 +47,7 @@ const sent = Astro.url.searchParams.get('sent') === '1';
   <label class="field">
     Tell me briefly
     <span class="hint">
-      If it is about a purchase, the email you paid with and the approximate date are enough — I
-      can find the rest.
+      If it is about a specific article, the link or title is enough — I can find the rest.
     </span>
     <textarea class="input" name="message" rows="5" required></textarea>
   </label>

@@ -24,7 +24,7 @@ export async function sendEmail(env: Env, mail: OutgoingEmail): Promise<{ ok: bo
       to: mail.to,
       subject: mail.subject,
     });
-    // Never log message bodies: they contain bearer download and login tokens.
+    // Never log message bodies: they contain signed confirmation and unsubscribe links.
     return { ok: false, error: 'SEND_EMAIL binding missing' };
   }
   try {

@@ -14,7 +14,7 @@
 
   // ─── Plain configuration (not secret) ────────────────────────────────────
   "vars": {
-    // Public URL of the deployed site (used for absolute links in emails and Stripe redirects).
+    // Public URL of the deployed site (used for absolute links in emails).
     "SITE_URL": "https://uncomplicatedguide.com",
     // Sender for all outgoing mail. The domain must be verified in Cloudflare Email Service.
     "EMAIL_FROM": "hello@uncomplicatedguide.com",
@@ -25,16 +25,12 @@
     // Optional: Google Analytics 4 id. Leave empty to ship without analytics and without the cookie banner.
     "PUBLIC_GA_MEASUREMENT_ID": "",
     // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
-    "PUBLIC_TURNSTILE_SITE_KEY": "",
-    // Set to "true" once Stripe Tax is enabled on your Stripe account.
-    "STRIPE_AUTOMATIC_TAX": "false"
+    "PUBLIC_TURNSTILE_SITE_KEY": ""
   },
 
   // ─── Secrets (set with `wrangler secret put NAME`, locally in `.dev.vars`) ──
-  // STRIPE_SECRET_KEY        sk_live_... / sk_test_...
-  // STRIPE_WEBHOOK_SECRET    whsec_... (from the webhook endpoint pointing at /api/stripe/webhook)
-  // AUTH_SECRET              required; a long random string. Signs sign-in sessions, magic links
-  //                          and unsubscribe links. Generate with: openssl rand -base64 48
+  // AUTH_SECRET              required; a long random string. Signs newsletter confirmation and
+  //                          unsubscribe links. Generate with: openssl rand -base64 48
   // ADMIN_TOKEN              required to use /admin/newsletter; any long random string.
   // TURNSTILE_SECRET_KEY     optional, pairs with PUBLIC_TURNSTILE_SITE_KEY
 
@@ -46,8 +42,9 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "guides-db", "database_id": "1257ef33-c0c0-4d12-b568-8629bc7fc0c8", "migrations_dir": "migrations" }
   ],
-  // R2: the private bucket shared with kova.bg. Files are uploaded as they are —
-  // the object key is the exact file name, and it must equal `fileKey` in src/data/guides.ts.
+  // R2: the private bucket shared with kova.bg. Only objects under `article-images/` are
+  // served (by src/pages/media/[...key].astro, as /media/article-images/<file>). The old
+  // guide PDFs in this bucket are no longer read by anything — see docs/LAUNCH.md.
   "r2_buckets": [
     { "binding": "GUIDE_FILES", "bucket_name": "kova-guides" }
   ],

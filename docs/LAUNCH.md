@@ -1,40 +1,102 @@
-# Launch changes and deployment
+# From shop to blog: deployment and clean-up
 
-This branch changes the purchase schema and authentication behavior. Apply migration `0004_launch_hardening.sql` before deploying the Worker. Do not publish the complete paid PDFs in this repository; `public/samples/` intentionally contains only three selected pages per guide.
+On 11 November 2026 the site stopped selling PDF guides and became a free blog. The two paid
+guides are now articles (`/blog/ai-receptionist-voice-assistant-guide` and
+`/blog/ai-ugc-video-ads-guide`), and every shop URL redirects permanently (see `redirects` in
+`astro.config.mjs` and `public/_redirects`).
 
-## Required production setup
+The code change is self-contained: deploying it needs no new secrets and no database migration.
+What follows are the steps outside the repository, in the order that is safe.
 
-1. Confirm that **Digital Craft EOOD** is the contractual seller (this is the name observed in Stripe Checkout). Supply its verified full registered postal address and registration number as `SELLER_REGISTERED_ADDRESS` and `SELLER_REGISTRATION_NUMBER` in the build environment or `.env`. Supply `SELLER_VAT_NUMBER` when applicable. The repository cannot establish these facts. `npm run deploy` checks the two mandatory fields. Direct dashboard deployments must use the same build values and release check.
-2. Confirm the tax treatment with the business's accountant. `STRIPE_AUTOMATIC_TAX` is still false until the appropriate registrations and Stripe Tax configuration are established. Stripe payment processing does not itself satisfy filing/remittance obligations. Inline checkout prices use inclusive tax treatment. If switching to fixed Stripe Price IDs, verify their amount, currency and tax behavior.
-3. Set a newly generated, private `AUTH_SECRET` of at least 32 characters in Cloudflare. The example has no usable default. Rotating the secret invalidates old account and newsletter links; tell existing subscribers if rotation is needed. Set a separate long `ADMIN_TOKEN`, the correct live Stripe API and webhook secrets, and verify the SEND_EMAIL domain/binding and CONTACT_TO destination. Rate limiting protects public forms even without Turnstile. Enable Turnstile with matching public/secret keys if wanted.
-4. Back up D1, then run `npm run db:migrate` against the intended production database. Migration 0004 adds single-use login tokens, rate limits, purchase verification/consent, a delivery queue, newsletter leases and refund tombstones. It does not delete purchases or reviews. Deploy the new Worker only after migration succeeds. An old Worker ignores the additive columns, but do not roll back to its unsafe access behavior.
-5. Privately upload the full PDFs to R2 bucket `kova-guides` with the existing exact keys:
-   - `247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf` ← uploaded `24-7-AI-Assistants-EN-v1.1.pdf` (36 pages).
-   - `AI_Video_Ads_UGC_Guide_EN_v1.0.pdf` ← uploaded video PDF (35 pages).
-   Confirm the R2 content type, object size and checksum against each source. The files have not been uploaded to production by this change.
-6. Enable Stripe webhook events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `charge.refunded`. Keep the scheduled trigger running every five minutes. Delivery jobs persist before acknowledgement and retry failed email sends with backoff. Inspect `delivery_jobs` for growing attempts or old pending records. A provider timeout can cause a duplicate email; links remain order-scoped.
-7. At `/admin/reviews`, verify legacy purchases against Stripe in batches of 25. Test/seed and unverified purchases cannot contribute public reviews or averages. Critical reviews are treated identically to positive ones. Unresolved Stripe sessions remain unverified for support investigation. Previously issued test receipts are not proof of live purchases.
-8. Deactivate or update externally shared legacy Stripe Payment Links. New site purchases go through the express-consent page. Legacy links do not create the order browser cookie or record the new consent; buyers recover through email/account and retain any applicable withdrawal rights.
-9. Address the PDFs' page-2 claim that copies are personalised. Current fulfilment delivers the original PDF; it does not stamp buyer identification. Remove the claim in the source editions before shipping, or implement and verify actual personalisation. This branch does not alter the paid source files.
+## 1. Before deleting anything: keep a copy of the PDFs
 
-## Acceptance checks before public launch
+The full PDFs exist only in the R2 bucket `kova-guides` — they were never committed, and there is
+no other copy in this project. Download both first and keep them somewhere you control:
 
-- `npm ci`, `npm run check`, `npm test`, `npm run build`, `npm run check:release` on the deployment runner. CI runs type checking, Node/SQLite regression tests and the Cloudflare build without production secrets.
-- In Stripe **test mode**, complete each guide's checkout from the consent page. Verify the checkbox is mandatory, metadata records consent, and R2 returns the correct PDF. A pasted session id in a different browser must reveal no email or download and must not sign in to the buyer account.
-- Delay and replay a payment webhook; trigger a failed email send then a successful retry. Check that there is one purchase and one current token, and that the queue drains. Async payment methods must not deliver while unpaid.
-- Request a login email; it must work only once and expire after 20 minutes. Renew an expired download from My guides. Repeat in two tabs and check both receive the same renewed token.
-- Test full refunds, duplicate refund events and refunds before completion events. Downloads/reissues/resends must stop. Partial refunds intentionally preserve access.
-- Unsubscribe after a newsletter is queued; future sends must skip that address. Test overlapping cron calls and retry failed deliveries in the admin page. An already in-flight provider send cannot be recalled.
-- Check desktop and real mobile browsers at 320, 390 and 768 CSS pixels, including keyboard navigation, Escape-to-close menu, sample PDF links, form errors, the cookie banner, sticky purchase bar and 200% text zoom. Screen-reader testing remains necessary for a full accessibility assessment.
-- Verify both sample PDFs (3 pages), social cards (1200×630), canonical URLs and noindex on private routes. Confirm sensitive URLs and query strings never enter analytics. Analytics is absent on private pages and loads only after consent on public pages. Events: page_view, view_item, view_sample, begin_checkout. Use Stripe for confirmed sales; no unverified client-side purchase event is emitted.
+```bash
+npx wrangler r2 object get "kova-guides/247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" --file "247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" --remote
+npx wrangler r2 object get "kova-guides/AI_Video_Ads_UGC_Guide_EN_v1.0.pdf" --file "AI_Video_Ads_UGC_Guide_EN_v1.0.pdf" --remote
+```
 
-## Validation limits in the review workspace
+The free articles were written from the sample pages, the chapter outlines and the related blog
+posts, not from the full PDFs. Chapters that exist only in the PDFs can be folded into the articles
+later; that needs the files.
 
-Local regression tests exercise actual library logic against SQLite with mocked email, image metadata and platform bindings. They are not an end-to-end Cloudflare or Stripe certification. The Cloudflare build reached Worker bundling but the local runtime failed at `os.networkInterfaces` (`uv_interface_addresses`, system error 1) during prerendering. The review browser also blocked localhost. CI and a staging deployment must complete the build and rendered desktop/mobile checks before merge/release. No production payment, email, refund, migration, R2 upload or deployment was performed.
+## 2. Deploy
 
-## References for changed disclosures
+Merge and let Workers Builds deploy as usual. Then check:
 
-- EU digital content withdrawal and consumer remedies: https://europa.eu/youreurope/citizens/consumers/shopping/returns/index_en.htm
-- Statutory guarantees: https://europa.eu/youreurope/citizens/consumers/shopping/guarantees/index_en.htm
-- ODR closure: https://consumer-redress.ec.europa.eu/site-relocation_en
-- Stripe tax filing: https://docs.stripe.com/tax/filing
+- `curl -sI https://uncomplicatedguide.com/guides/ai-assistants` answers `301` with
+  `location: /blog/ai-receptionist-voice-assistant-guide`; likewise `/guides/ai-video-ads-ugc`,
+  `/account`, `/thank-you`, `/checkout`, `/refunds`, `/download/anything` and `/samples/anything`.
+- `/api/checkout` and `/api/stripe/webhook` answer `404`.
+- The newsletter signup, confirmation link, contact form and `/admin/newsletter` still work.
+
+## 3. Delete the PDFs from R2
+
+Only after step 1 and a successful deploy. Delete just the two guide objects — the `article-images/`
+prefix in the same bucket serves the blog's images and must stay. The bucket is shared with kova.bg,
+so do not delete anything else.
+
+```bash
+npx wrangler r2 object delete "kova-guides/247_AI_Assistants_ElevenAgents_EN_v1.1_Kova.pdf" --remote
+npx wrangler r2 object delete "kova-guides/AI_Video_Ads_UGC_Guide_EN_v1.0.pdf" --remote
+```
+
+## 4. Stripe
+
+The Stripe account is shared with kova.bg, so change only what belonged to this site:
+
+- **Payment Links**: deactivate the two links for the guides (products `prod_VDCE0pSfyMOATJ` —
+  24/7 AI Assistants — and `prod_VDCwauiErlkqed` — AI Video Ads & UGC). A link shared somewhere
+  would otherwise keep taking money for a file that is no longer delivered.
+- **Products**: archive the same two products.
+- **Webhooks**: delete the endpoint `https://uncomplicatedguide.com/api/stripe/webhook`. The route is
+  gone, so Stripe would retry every event against a 404 and eventually email you about it. Leave
+  kova.bg's endpoint alone.
+- **Worker secrets**: delete `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` from the Worker
+  (Settings → Variables and Secrets). Nothing reads them any more.
+
+## 5. Database (D1 `guides-db`)
+
+Nothing is dropped by this change. The shop tables stay in place and are no longer read or written:
+
+| Table | What it holds | Recommendation |
+| --- | --- | --- |
+| `purchases` | One row per paid order | **Keep.** Accounting records; Bulgarian law currently requires ten years. |
+| `refunded_payments` | Refund tombstones | Keep with `purchases`. |
+| `downloads` | Download log | Not required by law; export if wanted, then delete. |
+| `reviews` | Buyers' ratings and text | No longer published; export if wanted, then delete. |
+| `delivery_jobs`, `login_tokens` | Operational queues | Safe to empty. |
+
+Back up first (`npx wrangler d1 export guides-db --remote --output guides-db-backup.sql`), then, if
+you agree with the table above:
+
+```sql
+DELETE FROM delivery_jobs;
+DELETE FROM login_tokens;
+DELETE FROM downloads;
+DELETE FROM reviews;
+```
+
+Run it with `npx wrangler d1 execute guides-db --remote --command "<statement>"`. The privacy policy
+already says reviews are no longer published and that buyers can ask for their review and download
+log to be deleted. If you later drop the tables, do it in a new migration, not by editing the old ones.
+
+## 6. Earlier buyers
+
+People who paid for a PDF can no longer sign in at `/account` (it redirects to `/guides`); the same
+content is now free on the site. Questions about past purchases go to hello@uncomplicatedguide.com,
+and the contact form has a topic for them. Whether to email buyers about the change, or to refund
+recent purchases, is a business decision — the addresses are in `purchases`.
+
+## 7. Search engines
+
+- In Google Search Console, submit `https://uncomplicatedguide.com/sitemap-index.xml` again and use
+  **URL inspection → Request indexing** on the two guide articles.
+- The old `/guides/<slug>` product pages redirect with `301`, so their signals pass to the articles;
+  leave the redirects in place for at least a year.
+- The next step is the keyword-driven pass on the two guide articles. Titles for search results go in
+  `seoTitle` (the on-page headline stays `title`), and `description` is the meta description. If a
+  slug changes, add the old URL to `redirects` in `astro.config.mjs` and update the two existing
+  entries so nothing redirects twice.

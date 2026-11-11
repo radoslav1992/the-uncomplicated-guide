@@ -1,19 +1,16 @@
 ---
 import { site } from "../data/site";
-import { availableGuides } from "../data/guides";
+import { getGuides, postUrl } from "../lib/blog";
 import SignupForm from "./SignupForm.astro";
 
 const year = new Date().getFullYear();
+const guides = await getGuides();
 const nav = [
-  { label: "Library", href: "/guides" },
-  ...availableGuides.map((g) => ({
-    label: g.title,
-    href: `/guides/${g.slug}`,
-  })),
-  { label: "Blog", href: "/blog" },
-  { label: "Your guides", href: "/account" },
+  { label: "All articles", href: "/blog" },
+  { label: "Newsletter", href: "/newsletter" },
   { label: "About", href: "/#author" },
   { label: "Contact", href: "/contact" },
+  { label: "RSS feed", href: "/rss.xml" },
 ];
 ---
 
@@ -24,7 +21,7 @@ const nav = [
       <br />
       <em>starts here.</em>
     </p>
-    <a href="/guides">Find yours in the library ↗</a>
+    <a href="/guides">Start with a free guide ↗</a>
   </div>
   <div class="container cols">
     <div class="col">
@@ -32,30 +29,34 @@ const nav = [
         <img src="/brand/next-chapter.webp" alt="" width="28" height="28" />
         <span>{site.name}</span>
       </p>
-      <p class="muted">{site.legalName}</p>
-      <p class="muted">{site.reach}</p>
+      <p class="muted">{site.tagline}.</p>
+      <p class="muted">{site.legalName} · {site.author.city}</p>
       <div class="newsletter">
         <p class="heading">Newsletter</p>
         <p class="muted">{site.newsletterBlurb}</p>
         <SignupForm compact source="footer" />
       </div>
     </div>
-    <div class="col">
-      <p class="heading">Contact</p>
-      <a href={`mailto:${site.email}`}>{site.email}</a>
-    </div>
+    <nav class="col" aria-label="Free guides">
+      <p class="heading">Free guides</p>
+      {guides.map((g) => (
+        <a href={postUrl(g)}>{g.data.title}</a>
+      ))}
+      <a href="/guides">All guides</a>
+    </nav>
     <nav class="col" aria-label="Footer navigation">
-      <p class="heading">Navigation</p>
+      <p class="heading">Read more</p>
       {nav.map((it) => (
         <a href={it.href}>{it.label}</a>
       ))}
     </nav>
     <div class="col">
-      <p class="heading">Terms</p>
+      <p class="heading">Contact</p>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+      <p class="heading legal-heading">Legal</p>
       {site.legalNav.map((it) => (
         <a href={it.href}>{it.label}</a>
       ))}
-      <p class="muted">{site.footerPromise}</p>
     </div>
   </div>
   <div class="container bottom">
@@ -178,6 +179,9 @@ const nav = [
     height: 28px;
     flex: none;
     display: block;
+  }
+  .legal-heading {
+    margin-top: 18px !important;
   }
   .heading {
     font-size: 13px;

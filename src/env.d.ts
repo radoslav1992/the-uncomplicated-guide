@@ -7,6 +7,7 @@
 interface Env {
   // Storage
   DB: D1Database;
+  /** R2 bucket; only `article-images/` is served, through /media/. */
   GUIDE_FILES: R2Bucket;
   // Cloudflare Email Service
   SEND_EMAIL?: SendEmail;
@@ -20,11 +21,8 @@ interface Env {
   CONTACT_TO: string;
   PUBLIC_GA_MEASUREMENT_ID?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
-  STRIPE_AUTOMATIC_TAX?: string;
 
   // Secrets
-  STRIPE_SECRET_KEY?: string;
-  STRIPE_WEBHOOK_SECRET?: string;
   TURNSTILE_SECRET_KEY?: string;
   AUTH_SECRET?: string;
   ADMIN_TOKEN?: string;

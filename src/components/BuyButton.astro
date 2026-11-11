@@ -1,7 +1,0 @@
----
-import type { Guide } from '../data/guides';
-import { formatPrice } from '../data/site';
-interface Props { guide: Guide; label?: string; class?: string; }
-const { guide, label, class: className = 'btn btn-accent' } = Astro.props;
----
-<a href={`/checkout?guide=${guide.slug}`} class={className} data-track="begin_checkout" data-guide={guide.slug}>{label ?? `Buy for ${formatPrice(guide.price, guide.currency)} →`}</a>
