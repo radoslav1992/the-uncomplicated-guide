@@ -47,3 +47,5 @@ Given those three, a failing video tells you which link of the chain broke. With
 Platforms want AI-generated content marked, and advertising rules increasingly want it too. The label is not what loses the viewer — the second sentence is. And the alternative, a testimonial from a customer who does not exist, is not a risk worth taking: in most markets that is not merely against a platform policy, it is against the law.
 
 Disclose it, write something worth watching, and put the effort where the decision is actually made: in the first three seconds.
+
+The full [AI UGC guide](/blog/ai-ugc-video-ads-guide) walks through the whole pipeline — brief, hooks, voiceover, avatar, edit and testing — step by step.

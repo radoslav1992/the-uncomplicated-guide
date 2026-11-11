@@ -1,55 +1,66 @@
 ---
-title: "How to Make AI UGC Video Ads — and Sell Them as a Service"
-seoTitle: "How to Make AI UGC Video Ads: Script, Voice, Avatar and Edit"
-description: "A step-by-step guide to UGC-style AI video ads with ChatGPT or Claude, ElevenLabs, HeyGen and Captions: the brief, five hooks per script, natural voices, believable avatars, testing, disclosure, and how to price it as a monthly service."
+title: "AI UGC Ads: How to Script, Voice, Animate and Edit AI Video Ads — and Sell Them"
+seoTitle: "AI UGC: How to Make AI UGC Video Ads (and Sell Them)"
+description: "How to make AI UGC ads with ChatGPT, ElevenLabs, HeyGen and Captions AI — script, voiceover, avatar, edit and testing — plus how to price and sell them."
 pubDate: 2026-11-11
 kind: guide
-tags: [AI video, UGC ads, ElevenLabs, HeyGen]
+tags: [AI UGC, AI video ads, HeyGen, ElevenLabs, Captions AI]
 image: "/articles/ai-ugc-video-ads-guide.webp"
-imageAlt: "A phone showing an AI presenter between audio waveforms, representing AI-generated UGC video ads"
+imageAlt: "AI UGC video ad illustration: a phone showing an AI avatar presenter between audio waveforms"
 socialImage: "/social/ai-ugc-video-ads-guide.png"
 takeaways:
+  - "AI UGC works when you treat it as a production line: brief, script, voiceover, avatar, edit, test."
   - "Start from a one-page brief with approved claims and one number that defines success."
-  - "Write one body and five hooks. Test the first three seconds, not whole videos."
-  - "Most robotic voices are writing problems. Fix the text before touching the settings."
-  - "Check every avatar render on a phone at full size: lips, hands, background."
-  - "Name and version every file, or your test results stop meaning anything."
+  - "Write one body and five UGC hooks. Test the first three seconds, not whole videos."
+  - "Most robotic voiceovers are writing problems. Fix the text before touching the ElevenLabs settings."
+  - "Check every HeyGen avatar render on a phone at full size: lips, hands, background."
   - "Label AI content, get consent for real faces and voices, and never fake a testimonial."
-  - "Price from real costs — re-renders included — and sell outcomes, not seconds of video."
+  - "Price AI UGC from real costs — re-renders included — and sell outcomes, not seconds of video."
 ---
 
-*The avatar is the part that feels like magic. It is also the part that matters least.*
+*In AI UGC, the avatar is the part that feels like magic. It is also the part that matters least.*
 
 UGC-style ads are everywhere for a reason. A person talking to camera, shot on a phone, captions on — it is the format short-form feeds reward.
 
 It is also slow and expensive to make with real people. Casting. Filming days. A reshoot every time you want to try a new opening line.
 
-AI changes the economics. A script model writes the hooks, a voice model reads them, an avatar presents them, and an editor turns the clip into something that looks native to the feed. Done properly, you don't end up with one video. You end up with ten comparable ones — and a clear answer about which one works.
+AI UGC ads keep the style and replace the filming. A language model writes the hooks, a voice model records the voiceover, an AI avatar presents it, and an editor turns the clip into something that looks native to the feed. Done properly, you don't end up with one video. You end up with ten comparable ones — and a clear answer about which one works.
 
 Done badly, you end up with an uncanny presenter reading the About page to an audience that has already scrolled away.
 
 I run a software studio, and this is the pipeline we use for real client creatives: the same folders, the same checklists, the same way of pricing it. This guide walks through it step by step, from the business goal to the monthly report.
 
-It uses four tools — **ChatGPT or Claude** for the script, **ElevenLabs** for the voice, **HeyGen** for the avatar and **Captions** for the edit. But the process is what matters, and it survives swapping any of them.
+It uses four tools — **ChatGPT or Claude** for the script, **ElevenLabs** for the voiceover, **HeyGen** for the avatar and **Captions AI** for the edit. But the process is what matters, and it survives swapping any of them.
 
-It is for you if you are a small business or marketer who wants a steady stream of UGC-style ads without filming days, a freelancer or agency who wants to sell video creatives as a monthly service, or someone who made one impressive avatar demo and then got stuck turning it into a process.
+It is for you if you are a small business or marketer who wants a steady stream of UGC-style ads without filming days, a freelancer or agency who wants to sell AI video ads as a monthly service, or someone who made one impressive avatar demo and then got stuck turning it into a process.
 
 Two things it won't do. It can't make AI video look like a cinematic brand film — the tools aren't there yet, and pretending otherwise wastes a week. And it won't help you fake testimonials. A review implying a customer experience that never happened is illegal in many markets, not just risky.
 
-## What AI UGC actually is
+## What is AI UGC?
 
-"UGC" stands for user-generated content: videos that look like a real person filmed them, not a studio. In advertising it has come to mean a particular style — a presenter talking straight to camera, handheld framing, captions, a quick hook and a clear call to action.
+AI UGC is user-generated-style video made with AI instead of a camera: an AI avatar presents a script written with a language model, in a synthetic voice, edited to look like a creator filmed it on a phone. In advertising, AI UGC ads — sometimes called AI avatar ads — are used to produce and test many versions of an ad quickly and cheaply.
 
-An AI UGC ad keeps that style but replaces the filming. The presenter is an AI avatar. The voice is synthetic. The script comes from a language model, guided by a brief.
+"UGC" stands for user-generated content: videos that look like a real person made them, not a studio. In ads it has come to mean a particular style — a presenter talking straight to camera, handheld framing, captions, a quick hook and a clear call to action. An AI UGC video — or AI-generated UGC — keeps that style and replaces the filming.
 
-The trick is that none of these pieces is impressive on its own. What makes the approach worth doing is the *production line*: once the brief and the body of the script are right, producing five more versions with different openings costs almost nothing. That is where the value is — far more than in the saving on a film crew.
+The trick is that none of the pieces is impressive on its own. What makes it worth doing is the *production line*: once the brief and the body of the script are right, producing five more versions with different openings costs almost nothing. That is where the value is — far more than in the saving on a film crew.
 
-## What you'll need
+## AI UGC pipeline vs AI video ad generators
 
-- **ChatGPT or Claude** for the scripts.
-- **ElevenLabs on a paid plan** for the voice. Free tiers don't carry the commercial licence you need for client ads.
-- **HeyGen** for the avatar.
-- **Captions** (or a similar editor) for cutting, captions, B-roll and export.
+There are two ways to make AI video ads, and it is worth choosing deliberately.
+
+| Approach | How it works | Good for | Watch out for |
+| --- | --- | --- | --- |
+| All-in-one AI video ad generator | Paste a product link or a prompt, pick an AI actor, get a finished ad from one tool | Trying ideas fast, high volume, no editing skills | Less control over claims, voice and brand consistency; you are limited to one vendor's avatars and styles |
+| A four-tool AI UGC pipeline | Script, voiceover, avatar and edit in separate specialist tools, with checks between them | Client work, regulated claims, consistent brands, repeatable testing | More steps, and you need a process to keep versions straight |
+
+This guide covers the pipeline, because it is what holds up when a client's claims, brand and budget are on the line. But the parts that decide whether an ad works are the same either way: the brief, the hooks, the claims and the testing. If you use an AI video ad maker instead, Steps 1–3 and 8–11 still apply.
+
+## How to make UGC ads with AI: what you'll need
+
+- **ChatGPT or Claude** for the UGC ad scripts.
+- **ElevenLabs on a paid plan** for the voiceover. Free tiers don't carry the commercial licence you need for client ads.
+- **HeyGen** for the AI avatar.
+- **Captions AI** (or a similar editor) for cutting, captions, B-roll and export.
 - **A real phone** for checking every render. Laptops lie about how video looks in a feed.
 - **One person on the client's side** who can sign off claims within a day.
 - **Access to the ad account**, or at least a reporting export, so you can measure results.
@@ -60,13 +71,13 @@ Here is how the pieces fit together. Every arrow is a hand-off, and every hand-o
 | --- | --- | --- | --- | --- |
 | Brief | — | The client's goal | A one-page brief and approved claims | Signed off by someone who knows the product |
 | Script | ChatGPT or Claude | The brief | Five hooks and one body | Every claim is approved; length fits |
-| Voice | ElevenLabs | The approved script | One audio file per hook, plus the body | Names and numbers right by ear |
+| Voiceover | ElevenLabs | The approved script | One audio file per hook, plus the body | Names and numbers right by ear |
 | Avatar | HeyGen | The approved audio | Presenter clips | Lips, hands and background clean on a phone |
-| Edit | Captions | The clips | Finished 9:16 variants | Captions safe, CTA right, music licensed |
+| Edit | Captions AI | The clips | Finished 9:16 variants | Captions safe, CTA right, music licensed |
 
 ## Step 1: Write a one-page brief before opening any tool
 
-Most failed AI video projects start with the avatar, because that is the fun part. Then they discover that nobody agreed what the ad was for.
+Most failed AI UGC projects start with the avatar, because that is the fun part. Then they discover that nobody agreed what the ad was for.
 
 So start with one sheet of paper. The brief is the contract between the business and the production line. It doesn't need to be long, but every field has to be filled in by someone who knows the product.
 
@@ -116,7 +127,7 @@ And keep text and faces away from the bottom and right-hand edges. That is where
 
 Why so much fuss about three seconds? Because no ranking system can promote a video people swipe past in the first second. I wrote more about that in [Your ad gets three seconds](/blog/your-ad-gets-three-seconds).
 
-## Step 3: Script five hooks and one body
+## Step 3: Write the UGC ad script — five hooks and one body
 
 Ask a model for "an ad for a dental clinic" and you get something that sounds like the clinic's About page set to music.
 
@@ -167,9 +178,17 @@ Get the body right once. Then produce hooks against it — same voice, same avat
 
 Publish them all. Within a couple of days it is usually obvious which hook holds attention, and it is often not the one you liked best in the edit.
 
-### Hooks that work — and hooks that get rejected
+### UGC hooks that work — and hooks that get rejected
 
-Hooks that hold attention tend to open in the middle of something: a question the viewer would answer "yes" to, a specific number, a mistake they are probably making, a before/after you can show and back up, or a flat contradiction of what they assume.
+Good UGC hooks — and good TikTok ad hooks in general — open in the middle of something: a question the viewer would answer "yes" to, a specific number, a mistake they are probably making, a before/after you can show and back up, or a flat contradiction of what they assume.
+
+For the dental brief above, five hooks against the same body might be:
+
+- **Contradiction:** "Whitening doesn't have to take weeks."
+- **Question:** "What does one whitening session actually change?"
+- **Mistake:** "The whitening mistake most people make at home."
+- **Before/after:** "Same smile. One session apart." (with a released photo on screen)
+- **Number:** "One session. Here's what most patients see."
 
 Hooks that get scrolled past, or rejected by ad review:
 
@@ -178,9 +197,23 @@ Hooks that get scrolled past, or rejected by ad review:
 - Lines that say or imply something about the viewer's personal characteristics — health, body, money, beliefs. Ad platforms restrict these, and "Struggling with your weight?" is the classic way to get an ad rejected.
 - Fake urgency the offer doesn't actually have, and anything that makes the presenter sound like a real customer.
 
-## Step 4: Make the voice sound human
+### A UGC ad script example
 
-Here is the thing nobody tells you about synthetic voices: they perform punctuation, not meaning.
+Here is a complete script for the same brief: about 65 words, or roughly 26 seconds at 2.5 words per second — inside the brief's 25–35 second format once the on-screen moments are added. Square brackets are details the client fills in.
+
+| Beat | Voiceover | On screen |
+| --- | --- | --- |
+| Hook (0–3 s) | "Whitening doesn't have to take weeks." | Whitening in one session? |
+| Problem (3–8 s) | "Most people put it off because they picture trays, strips and months of waiting." | B-roll: whitening strips |
+| Solution (8–18 s) | "At [clinic], whitening is one session, and most patients see a visible result after it." | Presenter, then the treatment room |
+| Proof (18–25 s) | "We've done [number] whitening sessions. Here's one patient's before and after." | Released before/after photo |
+| Offer (25–30 s) | "This month the consultation is free, and your first session is twenty percent off. Book through the link." | Free consultation · 20% off · AI presenter |
+
+Every line maps to the brief: the result is the approved claim word for word, the proof is from the "proof available" field, and the offer is exactly the offer. Nothing implies the presenter is a patient.
+
+## Step 4: Make the ElevenLabs voiceover sound human
+
+Here is the thing nobody tells you about AI voiceovers: they perform punctuation, not meaning.
 
 Give a voice model a wall of text with no commas or sentence breaks and it will read it at an even canter, like a train announcement. Fix the writing and you have fixed most of the voice.
 
@@ -193,7 +226,7 @@ Give a voice model a wall of text with no commas or sentence breaks and it will 
 
 ### Pick a model and lock the settings
 
-ElevenLabs has several speech models that trade expressiveness against speed and cost, and the line-up changes often — so check the current list rather than an old tutorial. For ads, the most expressive model is usually worth it. A flat read wastes a good hook.
+ElevenLabs has several speech models that trade expressiveness against speed and cost, and the line-up changes often — so check the current list rather than an old tutorial. For an AI voiceover for ads, the most expressive model is usually worth it. A flat read wastes a good hook.
 
 If the model supports inline delivery tags, use them sparingly, and listen out for tags being read aloud.
 
@@ -209,15 +242,15 @@ Cloning a real person's voice — the business owner, a regular presenter — ne
 
 Generate anything a client will publish on a paid plan. Export at full quality, put the version in every file name, and listen to every file from start to finish before it moves on: names, numbers, dates and the brand, checked by ear rather than by looking at a waveform.
 
-## Step 5: Put a face on it with HeyGen
+## Step 5: Choose your HeyGen avatar — stock, photo or Digital Twin
 
-HeyGen gives you three broad options:
+HeyGen gives you three broad kinds of avatar:
 
 - **Stock avatars** — ready-made presenters. The fastest start, and fine for demos and many ads.
 - **Photo avatars** — a still image brought to life. Good for a consistent brand character, but they need the most scrutiny.
-- **Digital Twin** — trained on footage of a real person. The most natural-looking, and the one that needs the most care with consent.
+- **HeyGen Digital Twin** — trained on footage of a real person. The most natural-looking, and the one that needs the most care with consent.
 
-Whichever you use, drive it with the approved ElevenLabs audio rather than the avatar tool's built-in voice. You get one consistent voice across every variant, and the audio you checked by ear is exactly what the viewer hears.
+Whichever HeyGen avatar you use, drive it with the approved ElevenLabs voiceover rather than the avatar tool's built-in voice. You get one consistent voice across every variant, and the audio you checked by ear is exactly what the viewer hears.
 
 ### Check every render on a phone
 
@@ -233,12 +266,12 @@ A Digital Twin of a real person — owner, employee or hired presenter — needs
 
 Keep both on file for each client, with a renewal date and a plan for taking the videos down. And use stock or photo avatars for demos. Never put a real person's likeness in a demo without consent.
 
-## Step 6: Edit it into something that belongs in the feed
+## Step 6: Edit in Captions AI so it looks native to the feed
 
-A raw avatar clip isn't an ad yet. The edit is what makes it look like it belongs in someone's feed. In Captions (or your editor of choice):
+A raw avatar clip isn't an ad yet. The edit is what makes it look like it belongs in someone's feed. In Captions AI (or your editor of choice):
 
 - **Cut the dead air.** Trim the first half-second and every pause that isn't selling something.
-- **Add captions inside the safe zone**, big enough to read on a phone, matching the audio word for word.
+- **Add captions inside the safe zone**, big enough to read on a phone, matching the voiceover word for word.
 - **Use B-roll on the proof.** When the script names the product or the result, cut away from the presenter so the viewer sees it.
 - **Use licensed music only.** Trending sounds in the app are often not licensed for paid ads. Use the platform's commercial library, or music licensed for that placement.
 - **Export in 9:16** at the platform's recommended resolution, with the variant name in the file name.
@@ -269,27 +302,27 @@ And check at every hand-off:
 | Hand-off | Check before moving on |
 | --- | --- |
 | Brief → Script | Every claim is on the approved list; the length fits the time budget. |
-| Script → Audio | Names, numbers and dates read correctly; no tags read aloud; 2.3–2.7 words per second; versioned file name. |
-| Audio → Avatar | Same audio version as approved; lip-sync tight at start and end; hands and background clean. |
-| Avatar → Edit | Captions match the audio word for word; safe zone respected; CTA matches the offer; music licensed. |
+| Script → Voiceover | Names, numbers and dates read correctly; no tags read aloud; 2.3–2.7 words per second; versioned file name. |
+| Voiceover → Avatar | Same audio version as approved; lip-sync tight at start and end; hands and background clean. |
+| Avatar → Edit | Captions match the voiceover word for word; safe zone respected; CTA matches the offer; music licensed. |
 | Edit → Publish | Right ratio and resolution; AI label set; ad names match the file names. |
 
-One rule saves a lot of confusion: don't regenerate an earlier stage after later work is done unless you redo everything after it. Changing one word in the audio means a new avatar render and a new edit. That's cheap in credits, but expensive in confusion if versions aren't tracked.
+One rule saves a lot of confusion: don't regenerate an earlier stage after later work is done unless you redo everything after it. Changing one word in the voiceover means a new avatar render and a new edit. That's cheap in credits, but expensive in confusion if versions aren't tracked.
 
 ### The whole campaign, step by step
 
 1. Fill in the one-page brief and the approved-claims list. Get written sign-off.
 2. Run the scripting prompt. Pick 3–5 hooks and one body. Get sign-off on claims and disclosure.
 3. Prepare the text for speech: numbers as words, the pronunciation dictionary, pauses.
-4. Generate audio for each hook plus the shared body. Listen to every file end to end.
+4. Generate the voiceover for each hook plus the shared body. Listen to every file end to end.
 5. Render the avatar clips in HeyGen from the approved audio. Check them at full size on a phone.
-6. Finish in Captions with the client's locked template. Export named variants.
+6. Finish in Captions AI with the client's locked template. Export named variants.
 7. Run the quality and disclosure checks.
 8. Publish 3–5 variants. Measure for 48–72 hours. Keep, iterate or kill.
 
 ## Step 8: Test hooks, not videos
 
-The pipeline's real value isn't one video. It's ten comparable videos and a decision.
+The pipeline's real value isn't one video. It's ten comparable AI video ads and a decision.
 
 A traditional shoot gives you one or two versions. The pipeline gives you a matrix. But a matrix only tells you something if you change one thing at a time and read the right numbers.
 
@@ -322,7 +355,7 @@ So build disclosure into your template instead of treating it as a risk to manag
 - **Consent and rights** for every real face and voice, with renewal dates and a takedown plan in the calendar.
 - **Claims** checked against the approved list — especially in health, finance and anything regulated.
 
-## Step 10: Work out what it really costs
+## Step 10: Work out what AI UGC really costs
 
 Every tool in this pipeline is a subscription with credits, and re-renders burn credits just as fast as finished videos.
 
@@ -338,11 +371,11 @@ monthly delivery cost =
     subscriptions + (variants × credits per variant) + (hours × rate)
 ```
 
-Be honest about re-renders for your first few campaigns. A variant that needed three avatar renders and two audio takes costs several times the "one render" a pricing page suggests. That ratio, not the list price, decides your margin.
+Be honest about re-renders for your first few campaigns. A variant that needed three avatar renders and two voiceover takes costs several times the "one render" a pricing page suggests. That ratio, not the list price, decides your margin.
 
 And watch your credit balances, plan limits and budget alerts across all four tools. Running out of avatar credits two days before a client's launch is an entirely avoidable emergency.
 
-## Step 11: Package it and sell it
+## Step 11: Price and sell AI UGC ads as a service
 
 ### Qualify the client in 15 minutes
 
@@ -356,7 +389,7 @@ Before you produce anything, find out whether the client is a good fit. Good sig
 
 A client with no ad budget, nothing they can prove, and five people who need to approve every line won't get value from a testing pipeline, however good the videos look.
 
-### Offer three levels
+### AI UGC pricing: offer three levels
 
 Package by outcome and by how much of the process you run — not by seconds of video:
 
@@ -366,7 +399,7 @@ Package by outcome and by how much of the process you run — not by seconds of 
 | Creative + testing | The batch, plus the test rounds, decisions and a monthly report | Small businesses running their own ad account |
 | Full service | Several formats or platforms, a Digital Twin with managed consent, reporting from the ad account | Clients who want one supplier for creative performance |
 
-Price the monthly levels as a retainer with a set number of variants and revision rounds. Treat extra variants and extra rounds as add-ons. Keep the one-off setup — brief, claims list, voice and presenter choice, locked template — as a separate fee.
+Price the monthly levels as a retainer with a set number of variants and revision rounds. Treat extra variants and extra rounds as add-ons. Keep the one-off setup — brief, claims list, voice and presenter choice, locked template — as a separate fee. Set the numbers from your cost per variant in Step 10, not from what a competitor charges.
 
 ### Start with a pilot
 
@@ -380,14 +413,23 @@ One page that shows value: what was published, hook rate and cost per result for
 
 It's the document that stops a retainer from feeling like rent.
 
-## The checklists
+### Running it as an AI UGC agency
+
+If you sell AI UGC to several clients, a few habits make it scale:
+
+- **Pick one niche** — clinics, e-commerce brands, local services. Briefs, claims lists, hooks and templates carry over from one client to the next.
+- **Use your own test results as case studies.** Hook rates and cost per result from real rounds sell better than a showreel.
+- **Keep a consent register** for every real face and voice you use, with renewal dates.
+- **Be honest about the limits.** Say up front that AI UGC is for testing and volume, not for cinematic brand films.
+
+## The AI UGC checklists
 
 A checklist doesn't replace judgement, but it stops you forgetting things in a repeatable process. Turn these into tasks in your project tool, and put a name and a date next to every critical check. "It looked fine on my laptop" is not a test.
 
 **Before a demo**
 - The brief exists, and the demo script uses only approved claims.
 - A stock or photo avatar is used — no real likeness without consent.
-- The voice is generated on a paid ElevenLabs plan, and the brand name is pronounced correctly.
+- The voiceover is generated on a paid ElevenLabs plan, and the brand name is pronounced correctly.
 - Captions are inside the safe zone, and the hook works muted.
 - The AI presenter label is visible.
 - Three hook variants show the testing idea.
@@ -410,6 +452,18 @@ A checklist doesn't replace judgement, but it stops you forgetting things in a r
 
 ## Frequently asked questions
 
+### What is AI UGC?
+
+AI UGC is user-generated-style video made with AI: an AI avatar presents a script written with a language model, in a synthetic voiceover, edited to look like a creator filmed it on a phone. Brands use AI UGC ads to produce and test many ad variations quickly without filming days.
+
+### How do you make UGC ads with AI?
+
+Write a one-page brief with approved claims and a success metric. Generate five hooks and one body with ChatGPT or Claude. Record the voiceover in ElevenLabs, render the presenter with a HeyGen avatar, and edit in Captions AI with captions inside the safe zone. Then publish three to five variants, measure hook rate and cost per result for 48–72 hours, and keep the winner.
+
+### What's the best AI video ad generator?
+
+It depends on how much control you need. All-in-one AI video ad generators are fastest for trying ideas and producing volume. A pipeline of specialist tools — a language model, ElevenLabs, HeyGen and an editor such as Captions AI — takes more steps but gives you control over every claim, voice and frame, which matters for client work and regulated products.
+
 ### Are AI UGC ads allowed on TikTok and Meta?
 
 Yes, as long as they follow the platforms' advertising policies. That means labelling realistic AI-generated content, avoiding restricted claims and personal-attribute targeting, using licensed music, and never presenting an AI presenter as a real customer.
@@ -418,9 +472,9 @@ Yes, as long as they follow the platforms' advertising policies. That means labe
 
 Generally, yes. The major platforms ask for realistic AI-generated or altered content to be labelled, and consumer protection rules in many markets treat misleading AI testimonials as unfair or illegal. The simplest approach is to set the platform label on every variant and add an on-screen note where the audience would reasonably assume a real person.
 
-### Can I clone a client's voice or face?
+### Can I use a HeyGen Digital Twin of a real person in ads?
 
-Only with the person's explicit consent, a signed release that covers where and how long it will be used, and the platform's own verification — such as HeyGen's consent recording for a Digital Twin. Put a renewal date and a takedown procedure in writing.
+Only with the person's explicit consent, a signed release that covers where and how long it will be used, and HeyGen's own consent recording. The same applies to cloning a voice in ElevenLabs. Put a renewal date and a takedown procedure in writing.
 
 ### How many variants should I test at once?
 
@@ -430,7 +484,7 @@ Three to five per round is a good start, changing only one thing at a time — t
 
 A 25–35 second vertical (9:16) video is a sensible first format: long enough for hook, problem, solution, proof and offer, short enough to hold attention. Once you have 20–30 published variants, your own data will tell you whether a shorter or longer cut works better.
 
-### What should I charge for AI video ads?
+### How much should I charge for AI UGC ads?
 
 Work out your real cost per variant first — subscriptions, credits including re-renders, and your time — using the formula in Step 10. Then price by outcome in tiers, with a set number of variants and revision rounds per month, and a separate fee for the one-off setup.
 
