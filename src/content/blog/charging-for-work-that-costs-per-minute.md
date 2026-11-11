@@ -3,7 +3,7 @@ title: What to charge when the work costs you per minute
 description: Flat monthly fees and variable costs do not mix. Here is the arithmetic that stops your busiest client from quietly becoming your worst margin.
 pubDate: 2026-09-02
 tags: [Pricing]
-guide: ai-receptionist-voice-assistant-guide
+guide: ai-receptionist-guide
 ---
 
 Most services people sell have costs that sit still. You do the work once, you send the invoice, the cost of delivering it next month is roughly the cost of delivering it this month.
@@ -59,3 +59,5 @@ What they are buying is that the phone gets answered, or that ten tested creativ
 Sometimes the arithmetic simply does not work. Very long calls with a low value per call, a client whose volume is unpredictable and whose budget is fixed, an offer where each conversion is worth less than what it costs you to have the conversation.
 
 Recognising this early is worth as much as any pricing model. The unprofitable client rarely arrives labelled — they arrive enthusiastic, ask for a start next week, and only become a problem in month four. Doing the bad-month calculation during the first conversation is what tells them apart from the good ones, and it takes about five minutes.
+
+For how this applies to voice agents specifically — allowances, overage and what goes into the set-up fee — see the pricing step of the [AI receptionist guide](/blog/ai-receptionist-guide).

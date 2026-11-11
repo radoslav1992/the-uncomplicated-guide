@@ -51,7 +51,7 @@ function guideArticles() {
  * redirects: the Cloudflare adapter appends them to `public/_redirects`, which holds
  * the wildcard ones (`/download/*`, `/samples/*`) Astro cannot express.
  */
-const AI_RECEPTIONIST_GUIDE = '/blog/ai-receptionist-voice-assistant-guide';
+const AI_RECEPTIONIST_GUIDE = '/blog/ai-receptionist-guide';
 const AI_VIDEO_GUIDE = '/blog/ai-ugc-video-ads-guide';
 const moved = (destination) => ({ status: 301, destination });
 const redirects = {
@@ -67,6 +67,8 @@ const redirects = {
   '/checkout': moved('/guides'),
   '/thank-you': moved('/guides'),
   '/refunds': moved('/terms'),
+  // Renamed for search: the guide's first slug, live for a few hours.
+  '/blog/ai-receptionist-voice-assistant-guide': moved(AI_RECEPTIONIST_GUIDE),
   // An article about the shop's sales pages, retired with them.
   '/blog/who-its-not-for': moved('/blog'),
 };

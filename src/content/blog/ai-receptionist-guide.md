@@ -1,24 +1,24 @@
 ---
-title: "How to Build, Run and Sell an AI Receptionist"
-seoTitle: "AI Receptionist Guide: How to Build, Test and Price a Voice Agent"
-description: "A step-by-step guide to AI receptionists: how to tell whether a business needs one, write a prompt that holds, connect a real calendar, sort out the phone line, test it properly and price it so busy clients don't cost you money."
+title: "AI Receptionist: How to Build, Price and Sell an AI Phone Answering Service"
+seoTitle: "AI Receptionist: How to Build, Price and Sell One"
+description: "What an AI receptionist is, what it costs, and how to build one that books real appointments. A step-by-step guide for small businesses and agencies."
 pubDate: 2026-11-11
 kind: guide
-tags: [Voice agents, AI receptionist, Telephony, Pricing]
-image: "/articles/ai-receptionist-voice-assistant-guide.webp"
-imageAlt: "A glowing telephone handset over sound waves, representing an AI voice assistant answering calls"
-socialImage: "/social/ai-receptionist-voice-assistant-guide.png"
+tags: [AI receptionist, AI answering service, Voice agents, Pricing]
+image: "/articles/ai-receptionist-guide.webp"
+imageAlt: "AI receptionist illustration: a glowing phone handset over sound waves, representing AI answering a business's calls"
+socialImage: "/social/ai-receptionist-guide.png"
 takeaways:
-  - "Start with the calls a business is already missing, not with its hardest conversations."
-  - "Do the money maths before the demo: missed calls × share that would book × value of a booking."
+  - "An AI receptionist pays off when a business misses repetitive calls — not when it wants AI to take its hardest conversations."
+  - "Do the maths before the demo: missed calls × share that would book × value of a booking."
   - "Decide what a successful call leaves behind before you write a single line of prompt."
-  - "Give the agent a few narrow tools, and never let it confirm something the calendar rejected."
-  - "Telephony is where projects stall. Settle the number, the forwarding and the fallbacks early."
+  - "For AI appointment booking, give the agent a few narrow tools and never let it confirm something the calendar rejected."
+  - "The phone line is where projects stall. Settle the number, the forwarding and the fallbacks early."
   - "Run at least 40 deliberately awkward tests before a real caller hears it."
-  - "Charge for the build and the running separately, with a minutes allowance and a stated overage."
+  - "Price the build and the running separately, with a minutes allowance and a stated overage."
 ---
 
-*The demo takes an afternoon. Getting it onto a real phone line, and keeping it there, is the actual job.*
+*An AI receptionist takes an afternoon to demo. Getting it onto a real phone line — and keeping it there — is the actual job.*
 
 I build voice agents for a living — the kind that answer real phone lines and put real appointments into real calendars.
 
@@ -28,35 +28,61 @@ Then come the questions nobody asks during a demo. Which number does the agent a
 
 That second half is where most AI receptionist projects quietly stop. Not because it is hard, but because it is boring, and boring things rarely make it into tutorials.
 
-So this guide is mostly about the boring half. It walks through the whole job in the order it happens: deciding whether a business should have an AI receptionist at all, scoping and prompting it, connecting it to a calendar, sorting out the phone line, testing it until it stops surprising you, and pricing it.
+So this guide covers both halves. It starts with what an AI receptionist actually is and when an off-the-shelf AI answering service is the better choice. Then it walks through building one in the order the work happens: deciding whether a business needs it, scoping and prompting it, connecting a calendar, sorting out the phone line, testing it until it stops surprising you, pricing it — and, if you are an agency, selling it.
 
-It is for you if you are a developer or a studio that wants to *sell* voice agents and not only build them, a business owner with more calls than people to answer them, or someone who has already tried and got stuck somewhere around the telephony.
+It is for you if you are a developer or a studio that wants to *sell* AI receptionists and not only build them, a small business with more calls than people to answer them, or someone who has already tried and got stuck somewhere around the telephony.
 
 What it won't give you is a ready-to-import agent or a complete API tutorial. You will still configure the tools and build your own integrations. This is everything around that.
 
-## What an AI receptionist actually is
+## What is an AI receptionist?
 
-An AI receptionist is a voice agent that answers a business's phone, has a real conversation, and finishes with something done: an appointment booked, an enquiry logged, or the caller passed to the right person with a short summary.
+An AI receptionist is an AI phone agent that answers a business's calls, holds a natural conversation and finishes with something done: an appointment booked, an enquiry logged, or the caller transferred to the right person with a short summary. Unlike voicemail or a "press 1" menu, it understands free speech, and it can answer around the clock.
 
-That last part is the whole point. A system that talks pleasantly and then tells you to ring back during office hours is a recording with better manners.
+You will also see it called an AI answering service, an AI phone receptionist, AI call answering, a virtual receptionist AI or simply an AI voice agent. They describe the same thing. What matters is the last part of the definition: *finishes with something done*. A system that talks pleasantly and then tells you to ring back during office hours is a recording with better manners.
+
+### What an AI receptionist can do
+
+A well-built AI receptionist can:
+
+- **Answer every call, 24/7** — including the ones that arrive while the team is busy, at lunch or closed.
+- **Answer the repeat questions** — prices, opening hours, address, parking, what a service includes.
+- **Book, move and cancel appointments** in the business's real calendar.
+- **Take messages and qualify leads**, logging them in a CRM or sending them to the right person.
+- **Transfer calls** to a person when the caller needs one, with the context already summarised.
+
+What it should not do is improvise: diagnose, give legal or financial advice, promise discounts, or pretend to be human.
+
+### How it works
 
 Under the hood, every turn of the conversation runs through the same loop. The caller's audio arrives over the phone line. Speech recognition turns it into text while they are still talking. The system decides they have finished — a surprisingly hard problem. A language model reads the conversation and decides what to say or do, calling a tool if it needs a real fact like *is Thursday at three free?* Then text-to-speech turns the answer back into audio.
 
 Every one of those steps takes time, and the caller feels the total. Push much past a second of silence and people start talking over the agent, or asking *hello?* — which arrives as new input and makes everything worse.
 
-If you want the full anatomy — endpointing, barge-in, and why latency decides whether it feels human — I wrote it up separately in [What a voice agent actually is](/blog/what-a-voice-agent-actually-is). Here we are going to put one to work.
+If you want the full anatomy — endpointing, barge-in, and why latency decides whether it feels human — I wrote it up separately in [What a voice agent actually is](/blog/what-a-voice-agent-actually-is).
 
-## What you'll need
+## AI receptionist vs answering service: build or buy?
+
+Before building anything, it is worth knowing the alternatives, because for some businesses the right answer is to buy.
+
+| Option | What it is | Best for | Watch out for |
+| --- | --- | --- | --- |
+| Off-the-shelf AI answering service | A subscription product you set up with a form, a knowledge base and a calendar connection | Standard booking businesses that want to start this week | Limited customisation, and pricing per call or per minute |
+| Human or hybrid answering service | Live receptionists, often helped by AI — Smith.ai is a well-known example | High-value or sensitive calls where a person must answer | Higher cost per call, and less control over the script |
+| Custom-built AI receptionist | Your own agent on a voice platform such as ElevenLabs Agents, connected to the business's own systems | Specific workflows and integrations, and agencies building for clients | You own the testing, the phone line and the support |
+
+The rest of this guide is about the third option. But even if you end up buying, the steps below are how you judge whether a product will actually work for the business: the same assessment, the same maths, the same tests.
+
+## How to build an AI receptionist: what you'll need
 
 Before you start, line up:
 
-- **A voice agent platform.** Something that combines speech recognition, a language model, a voice, turn-taking settings and tool calls. The examples here mention ElevenLabs Agents, but the steps apply to any of the serious platforms.
+- **A voice agent platform.** Something that combines speech recognition, a language model, a voice, turn-taking settings and tool calls. The examples here mention ElevenLabs Agents (formerly ElevenLabs Conversational AI), but the steps apply to any of the serious platforms.
 - **A phone route.** Either a number on the platform, or forwarding from the business's existing number. Step 6 covers both.
 - **Access to the business's calendar or CRM** — through an API, or through a small webhook or n8n layer you put in between.
 - **A couple of real phones on different networks** for testing. A laptop on office Wi-Fi tells you very little.
 - **An hour with whoever answers the phone today.** Not the owner. The person at reception. They know what callers actually ask.
 
-## Step 1: Check the business actually needs one
+## Step 1: Check whether the business needs an AI receptionist
 
 AI receptionists earn their keep when three things are true at the same time: the calls are repetitive, the request is narrow, and somebody is currently missing them.
 
@@ -69,6 +95,15 @@ They work badly where the conversation itself is the value. I would not start wi
 - A business with very few calls and almost no missed opportunities.
 - A complex sale that needs trust, negotiation and a custom offer in the very first conversation.
 - Outbound cold calling without a valid legal basis and consent.
+
+### Where AI receptionists work best for small businesses
+
+The best fits are small businesses whose phone rings while everyone's hands are busy. If you are weighing up an AI receptionist for a small business, these are the cases where it tends to pay back fastest:
+
+- **Dentists.** Booking and rescheduling, new-patient enquiries, opening hours and after-hours calls. Anything clinical goes to a person.
+- **Medical offices.** Appointment booking and routine questions, with strict boundaries: no medical advice, and a clear route to a person or emergency services. Health data needs extra care — check where recordings and transcripts are stored, and that the platform will sign the agreements your rules require (a BAA under HIPAA in the US, a data processing agreement under GDPR in the EU).
+- **Salons and barbers.** Bookings, changes and cancellations, which tend to arrive while the stylist is mid-cut.
+- **Trades and home services.** Plumbers and electricians miss calls while they are on a job. Here the agent's job is to capture the lead, the address and the urgency, and promise a callback.
 
 ### Don't start with the hardest calls
 
@@ -96,9 +131,9 @@ These five questions do most of the work:
 
 Five good answers and you have a project. Two or fewer, and the most useful thing you can do is say so — and keep the client's trust for the day the numbers change.
 
-## Step 2: Do the maths before the demo
+## Step 2: Work out what the AI receptionist is worth
 
-Before anyone spends an hour on the build, work out what the agent is worth, using the client's own numbers. Most of the value of an AI receptionist is the value of calls that are currently lost:
+Before anyone spends an hour on the build, work out what the agent is worth, using the business's own numbers. Most of the value of an AI receptionist is the value of calls that are currently lost:
 
 ```text
 monthly value ≈ missed calls per month
@@ -112,7 +147,7 @@ A clinic misses about 30 calls a week — roughly 130 a month. The staff reckon 
 
 That is about $1,950 a month walking to the next clinic on the list.
 
-Now compare it with what the service would cost the clinic each month. If the recovered value is several times the fee, the project can survive the awkward first weeks of tuning. If it is roughly equal, the agent has to be perfect from day one to justify itself, and it won't be. And if the clinic only misses three calls a week, the honest answer is a voicemail that somebody actually checks.
+Now compare it with what the service would cost each month. If the recovered value is several times the fee, the project can survive the awkward first weeks of tuning. If it is roughly equal, the agent has to be perfect from day one to justify itself, and it won't be. And if the clinic only misses three calls a week, the honest answer is a voicemail that somebody actually checks.
 
 While you are at it, check two more things:
 
@@ -137,9 +172,9 @@ Then decide where each one goes. A mobile number. A colleague's extension. A cal
 
 An agent that says *"I'll have someone call you back about that within the hour"* — and reliably makes that happen — is worth more than one that improvises. The handover is a feature, not a failure.
 
-## Step 4: Write a prompt that keeps the agent on the rails
+## Step 4: Write an AI receptionist prompt that stays on the rails
 
-A good prompt for a voice agent is short, specific and organised by job. It is not a page of adjectives about being friendly and helpful.
+A good prompt for an AI receptionist is short, specific and organised by job. It is not a page of adjectives about being friendly and helpful.
 
 This is the structure I start from. Replace the placeholders and the boundaries with the client's own:
 
@@ -204,7 +239,7 @@ Don't edit the prompt after one odd call. Collect a few similar examples, work o
 
 That way every change fixes a whole class of problems and stays protected when you change something else later.
 
-## Step 5: Connect it to a real calendar
+## Step 5: Set up AI appointment booking with a real calendar
 
 The conversation is the part everyone sees. The tools are where the agent becomes useful — and where it can do real damage.
 
@@ -221,7 +256,7 @@ Give the model a small set of well-described actions, each with a narrow job. Fo
 
 Keep static facts — opening hours, address, services, parking — in the knowledge base. Anything that changes — availability, an existing booking, an order status — must come from a tool, every single time. An agent that answers "are you free on Thursday?" from a document written last month will be wrong with total confidence.
 
-Three rules prevent most tool disasters:
+Three rules prevent most booking disasters:
 
 1. **Read back before any write.** Name, date, time and service, confirmed by the caller, before `book_appointment` runs.
 2. **Assume every write can happen twice.** Callers say "yes" twice, networks retry, models call tools again. Send a unique request reference so the calendar can refuse a duplicate instead of creating one.
@@ -229,9 +264,9 @@ Three rules prevent most tool disasters:
 
 No API? That doesn't have to end the project. A small webhook or n8n layer between the agent and a shared calendar is often enough for a first version. Just test its failure modes as seriously as you would a real API's.
 
-## Step 6: Sort out the phone line
+## Step 6: Connect the phone line
 
-Every voice agent demo runs in a browser. A live agent needs a phone number, a route from that number to the agent, a plan for every way a call can go wrong, and someone paying for the minutes.
+Every voice agent demo runs in a browser. A live AI phone answering service needs a phone number, a route from that number to the agent, a plan for every way a call can go wrong, and someone paying for the minutes.
 
 This is the part that stalls projects two-thirds of the way in. I wrote a whole piece on why — [The part of a voice agent nobody demos](/blog/the-part-nobody-demos) — so here is the practical version.
 
@@ -274,11 +309,11 @@ Voice costs stack up per minute: the phone line, speech recognition, the languag
 
 Decide who carries them — you, inside a monthly fee with an allowance, or the client directly — before anything goes live. Step 8 shows how to do the arithmetic.
 
-## Step 7: Try to break it before callers do
+## Step 7: Test your AI receptionist before callers do
 
 The goal is not for the agent to pass the perfect scenario. It is for it to behave safely in the bad one.
 
-Voice agents look ready after a few good demos, which is exactly why demos are misleading: they follow the creator's script. Real callers interrupt, change the subject, mumble, and ask the one thing nobody thought of. Your tests have to create those situations on purpose.
+AI receptionists look ready after a few good demos, which is exactly why demos are misleading: they follow the creator's script. Real callers interrupt, change the subject, mumble, and ask the one thing nobody thought of. Your tests have to create those situations on purpose.
 
 I split tests into two kinds. **Deterministic tests** check one specific rule or answer. **Simulation tests** follow a whole conversation and check that it reaches a result. Then I add **real phone calls**, because a text simulation can't detect a problem with a pause, background noise or an interruption.
 
@@ -321,11 +356,20 @@ Start with a limited pilot: outside working hours only, one type of call, or a s
 
 Then adjust the prompt, the knowledge base, the tools and the turn-taking based on what you heard — not on what you feel.
 
-## Step 8: Price it so busy clients don't cost you money
+## Step 8: Set your AI receptionist pricing
 
-Most services have costs that sit still. A voice agent costs you something every minute it is on the phone, which means your bill depends on how well your client's business is doing.
+Most services have costs that sit still. An AI receptionist costs you something every minute it is on the phone, which means your bill depends on how well your client's business is doing.
 
 Price it the usual way — one flat monthly number — and your happiest clients slowly become your worst margins. There is a longer version of this in [What to charge when the work costs you per minute](/blog/charging-for-work-that-costs-per-minute). Here are the rules I work by.
+
+### Common AI receptionist pricing models
+
+Off-the-shelf AI answering services and agencies tend to use one of four models:
+
+- **A monthly plan with included minutes or calls**, and a rate for anything above it.
+- **Pay per minute** — simple, but it invites comparison with the cheapest minutes on the market.
+- **Pay per call or per booking** — easy for the client to understand, harder for you when calls run long.
+- **A set-up fee plus a monthly retainer** — the usual agency model, and the one the rest of this step assumes.
 
 ### Charge for the build and the running separately
 
@@ -364,7 +408,7 @@ What they are buying is a phone that gets answered and a calendar that fills. If
 
 ## Step 9: Keep it boring after launch
 
-A voice agent isn't finished when it goes live. It is finished when it becomes boring.
+An AI receptionist isn't finished when it goes live. It is finished when it becomes boring.
 
 The work after launch is small, regular and very easy to skip:
 
@@ -378,7 +422,19 @@ Above all, tell the client in advance where the agent will break. Every agent ha
 
 A client who heard about those edges from you at the start treats them as known limits. A client who discovers them alone treats them as your failure.
 
-## The launch checklist
+## How to sell AI receptionists as an agency
+
+If you are building AI receptionists for clients, the selling follows the same order as the build. A few things make it much easier:
+
+- **Pick one niche.** Dentists, salons or trades — not "small businesses". The prompt, the tests, the calendar integrations and the case studies carry over from one client to the next, and you learn the calls that niche actually gets.
+- **Lead with missed calls, not the demo.** Offer the 15-minute assessment and the missed-call maths from Steps 1 and 2. A business that sees "about $1,950 a month going to the clinic down the road" doesn't need a clever demo.
+- **Demo on their own questions.** Load their real opening hours, prices and the five questions from the assessment. A generic demo impresses; a demo that knows their parking situation sells.
+- **Sell a small pilot.** After hours only, or one type of call, with the success criteria agreed up front. It lowers the risk for the client and gives you real conversations to tune on.
+- **Price set-up and running separately**, with an allowance and an overage, as in Step 8.
+- **Keep clients with the monthly report.** Calls answered, bookings made, money recovered. It is the document that turns a pilot into a retainer.
+- **Be honest about the limits.** Say where the agent will break before the client finds out. It is the cheapest trust you will ever buy.
+
+## The AI receptionist launch checklist
 
 Use this as the last gate before real callers reach the agent.
 
@@ -407,9 +463,25 @@ Use this as the last gate before real callers reach the agent.
 
 ## Frequently asked questions
 
-### How much does an AI receptionist cost to run?
+### What is an AI receptionist?
 
-There is a fixed part — platform subscriptions and a monthly fee for the number — and a per-minute part made up of the phone line, speech recognition, the language model and the voice. Prices vary by provider and change often, so work out an all-in cost per minute from the current price pages and use the formula in Step 8. Always check the result at three or four times the expected call volume.
+An AI receptionist is an AI phone agent that answers a business's calls, understands what callers say, and completes a task — booking an appointment, answering a question, taking a message or transferring the call to a person. It can answer 24/7, including when the team is busy or closed.
+
+### How much does an AI receptionist cost?
+
+Off-the-shelf AI answering services usually charge a monthly plan with included minutes or calls, or a per-minute rate. A custom-built AI receptionist has a one-off set-up cost plus running costs: a fixed part (platform subscriptions and a monthly fee for the number) and a per-minute part (the phone line, speech recognition, the language model and the voice). Prices change often, so work out an all-in cost per minute from current price pages and check it at three or four times the expected call volume, as in Step 8.
+
+### Is an AI receptionist worth it for a small business?
+
+It is worth it when the business misses calls that would have turned into bookings or sales. Multiply missed calls per month by the share that would have booked and by the value of one booking. If that is several times the monthly cost, it is usually worth it. If the business rarely misses calls, a voicemail that someone checks is cheaper.
+
+### What's the difference between an AI receptionist and an answering service?
+
+A traditional answering service uses people to take messages. An AI receptionist — sometimes sold as an AI answering service — handles the call itself: it answers questions, books appointments in the real calendar and transfers calls when needed. Hybrid services combine AI with human receptionists for the calls that need a person.
+
+### Can an AI receptionist book appointments?
+
+Yes, if it is connected to the business's calendar through tools that check availability and create bookings. It should read the details back before booking and must report the calendar's real answer — never confirm a booking the calendar rejected.
 
 ### Can an AI receptionist use the business's existing phone number?
 
@@ -423,18 +495,18 @@ It should, on every call. In the EU the AI Act requires people to be told when t
 
 A well-built agent says which part it missed and asks again, confirms names and numbers back, and hands over to a person — or takes a callback request — when it still can't help. That behaviour has to be written into the prompt and tested; it doesn't happen by default.
 
-### How long does it take to build one?
+### How long does it take to build an AI receptionist?
 
 A working prototype can come together in a day or two. The time goes into the parts around it: integrations, the phone line and forwarding, the tests and the pilot. Plan the whole project in weeks rather than days, and let the pilot decide when it is ready.
 
-### Can it make outbound calls too?
+### Can an AI receptionist make outbound calls?
 
-Technically, yes. But outbound calling has stricter legal requirements — consent and a valid legal basis, depending on the country — and it is a poor first project. Get an inbound agent working reliably first.
+Technically, yes. But outbound calling has stricter legal requirements — consent and a valid legal basis, depending on the country — and it is a poor first project. Get an inbound AI receptionist working reliably first.
 
 ## Where to start
 
-If you only do one thing after reading this, do the 15-minute assessment from Step 1 with a real business, and run the numbers from Step 2 on their figures. You will know within the hour whether there is a project.
+If you only do one thing after reading this, do the 15-minute assessment from Step 1 with a real business, and run the numbers from Step 2 on their figures. You will know within the hour whether there is a project — or whether an off-the-shelf AI answering service is enough.
 
-If there is, build in the order of this guide: the result, then the prompt, then the tools, then the phone line, then the tests. The voice and the clever demo come last, because they matter least.
+If there is a project, build in the order of this guide: the result, then the prompt, then the tools, then the phone line, then the tests. The voice and the clever demo come last, because they matter least.
 
 And if you want the next guide when it's out, the newsletter below sends one email when something new is published. Nothing else.
