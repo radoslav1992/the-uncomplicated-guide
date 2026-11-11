@@ -6,7 +6,6 @@
 import Base from "../../../layouts/Base.astro";
 import ArticleCard from "../../../components/ArticleCard.astro";
 import CategoryNav from "../../../components/CategoryNav.astro";
-import SignupForm from "../../../components/SignupForm.astro";
 import { site } from "../../../data/site";
 import { categoriesWithPosts, getPosts, postUrl } from "../../../lib/blog";
 
@@ -57,6 +56,8 @@ const jsonLd = [
   description={category.description}
   current="Articles"
   jsonLd={jsonLd}
+  signupSource={`category:${category.slug}`}
+  signupTopic={category.slug}
 >
   <div class="container">
     <header class="page-head">
@@ -64,40 +65,34 @@ const jsonLd = [
         <a href="/">Home</a>{" / "}<a href="/blog">Articles</a>{" / "}
         <span aria-current="page">{category.name}</span>
       </nav>
-      <p class="eyebrow">Category</p>
-      <h1>{category.name}</h1>
-      <p class="lead">{category.intro}</p>
-      <ul class="facts">
-        <li>
-          {category.posts.length}
-          {category.posts.length === 1 ? " article" : " articles"}
-        </li>
-        <li>Free to read</li>
-      </ul>
+      <span class="pill">Category</span>
+      <h1 class="title-xl">{category.name}</h1>
+      <div class="page-head-foot">
+        <p class="lead">{category.intro}</p>
+        <ul class="facts">
+          <li class="chip">
+            {category.posts.length}
+            {category.posts.length === 1 ? " article" : " articles"}
+          </li>
+          <li class="chip">Free to read</li>
+        </ul>
+      </div>
     </header>
 
-    <section aria-labelledby="category-articles">
+    <section class="listing" aria-labelledby="category-articles">
       <h2 id="category-articles" class="visually-hidden">{category.name} articles</h2>
       <CategoryNav posts={posts} current={category.slug} />
       <div class="card-grid">
-        {category.posts.map((post) => (
-          <ArticleCard post={post} headingLevel={3} />
+        {category.posts.map((post, i) => (
+          <ArticleCard post={post} index={i} headingLevel={3} />
         ))}
-      </div>
-    </section>
-
-    <section class="home-section listing-signup">
-      <div class="signup-box">
-        <div>
-          <p class="eyebrow">Newsletter</p>
-          <h2>Get the next {category.name} article.</h2>
-          <p>
-            One email when something new is published — a couple a month at
-            most, and one click to leave.
-          </p>
-        </div>
-        <SignupForm source={`category:${category.slug}`} topic={category.slug} />
       </div>
     </section>
   </div>
 </Base>
+
+<style>
+  .listing {
+    padding-bottom: clamp(72px, 10vw, 140px);
+  }
+</style>

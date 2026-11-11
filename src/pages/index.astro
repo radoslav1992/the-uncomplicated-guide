@@ -3,20 +3,42 @@ import { Image } from "astro:assets";
 import Base from "../layouts/Base.astro";
 import ArticleCard from "../components/ArticleCard.astro";
 import FeaturedArticle from "../components/FeaturedArticle.astro";
-import SignupForm from "../components/SignupForm.astro";
 import portrait from "../assets/portrait.webp";
 import { site } from "../data/site";
-import {
-  categoriesWithPosts,
-  getPosts,
-  postUrl,
-} from "../lib/blog";
+import { categoriesWithPosts, getPosts, postUrl, readingTime } from "../lib/blog";
 
 const posts = await getPosts();
 const featured = posts.filter((post) => post.data.featured);
 // Featured articles already lead the page; the latest list shows the rest.
 const latest = posts.filter((post) => !post.data.featured).slice(0, 6);
 const categories = categoriesWithPosts(posts);
+const minutes = posts.reduce((sum, post) => sum + readingTime(post.body), 0);
+const pad = (n: number) => String(n).padStart(2, "0");
+
+// Rendered on the page and marked up as FAQPage from this same array, so the
+// structured data never says something the page does not.
+const FAQ = [
+  {
+    q: "Is everything here really free?",
+    a: "Yes. Every article is free to read in full, with no account and no paywall. The newsletter is optional and you can leave it with one click.",
+  },
+  {
+    q: "Who writes the articles?",
+    a: `${site.author.name}. ${site.author.bio}`,
+  },
+  {
+    q: "Can I use the prompts and checklists with my clients?",
+    a: "Yes. Take the prompts, tables and checklists into your own work and your clients' projects, with or without changes. If you share an article, link to it rather than republishing it.",
+  },
+  {
+    q: "How current is the information?",
+    a: "Each article shows the date it was published and, when it has been revised, the date it was updated. Tool prices, features and platform rules change, so check the official source before committing a budget.",
+  },
+  {
+    q: "How do I hear about new articles?",
+    a: "Subscribe to the newsletter at the bottom of any page: one email when something new is published, nothing else. There is also an RSS feed.",
+  },
+];
 
 const origin = site.url;
 const jsonLd = [
@@ -42,6 +64,15 @@ const jsonLd = [
       datePublished: post.data.pubDate.toISOString(),
     })),
   },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  },
 ];
 ---
 
@@ -50,124 +81,204 @@ const jsonLd = [
   description={site.description}
   current="Home"
   jsonLd={jsonLd}
+  signupSource="home"
 >
   <div class="container">
     <section class="home-hero">
-      <div>
-        <p class="eyebrow">Free to read · No paywall · No sign-up</p>
-        <h1>
-          Practical AI guides, <em>without the noise.</em>
-        </h1>
-        <p class="lead">
-          Step-by-step articles and field notes on AI receptionists, AI video
-          ads and side projects built with AI: what to build, what it costs, and
-          what breaks before a client finds out.
+      <div class="hero-top">
+        <p class="hero-note">
+          — Free to read.
+          <span>No paywall, no sign-up.</span>
         </p>
-        <div class="hero-actions">
-          <a href="#featured" class="btn btn-accent">Start reading</a>
-          <a href="/blog" class="btn btn-outline">Browse all articles</a>
+        <h1 class="title-xl">
+          Practical AI guides, <em>without the noise</em>
+        </h1>
+      </div>
+      <div class="hero-bottom">
+        <div>
+          <p class="lead">
+            Step-by-step articles and field notes on AI receptionists, AI video
+            ads and side projects built with AI: what to build, what it costs,
+            and what breaks before a client finds out.
+          </p>
+          <div class="hero-actions">
+            <a href="#featured" class="btn" data-text="Start reading">
+              <span>Start reading</span>
+            </a>
+            <a href="/blog" class="arrow-link">Browse all articles</a>
+          </div>
         </div>
       </div>
-      {categories.length > 0 && (
-        <nav class="topics-box" aria-label="Browse by topic">
-          <p>Browse by topic</p>
-          <ul>
-            {categories.map((category) => (
-              <li>
-                <a href={category.url}>
-                  <span class="topic-name">
-                    {category.name}
-                    <span class="topic-count">
-                      {category.posts.length}
-                      {category.posts.length === 1 ? " article" : " articles"}
-                    </span>
-                  </span>
-                  <span class="topic-desc">{category.description}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      )}
+    </section>
+
+    <section class="stats" aria-label="The site in numbers">
+      <div class="stat stat-soft" data-reveal style="--i: 0">
+        <span class="stat-label">free articles</span>
+        <img src="/theme/shape-s-10.webp" alt="" width="170" height="115" loading="lazy" />
+        <span class="stat-number">{pad(posts.length)}</span>
+      </div>
+      <div class="stat stat-accent" data-reveal style="--i: 1">
+        <span class="stat-label">minutes of reading</span>
+        <img src="/theme/shape-s-12.webp" alt="" width="127" height="189" loading="lazy" />
+        <span class="stat-number">{minutes}</span>
+      </div>
+      <div class="stat stat-ink" data-reveal style="--i: 2">
+        <span class="stat-label">paywalls</span>
+        <img src="/theme/shape-s-11.webp" alt="" width="170" height="115" loading="lazy" />
+        <span class="stat-number">0</span>
+      </div>
     </section>
 
     {featured.length > 0 && (
-      <section id="featured" class="home-section" aria-labelledby="featured-heading">
+      <section id="featured" class="home-featured" aria-labelledby="featured-heading">
         <div class="section-head">
-          <div>
-            <p class="eyebrow">Featured</p>
-            <h2 id="featured-heading">Long reads, start to finish</h2>
+          <span class="pill">Featured</span>
+          <div class="section-title-row">
+            <h2 id="featured-heading" class="title-lg">
+              Long reads, <em>start to finish</em>
+            </h2>
+            <a href="/blog" class="arrow-link">All articles</a>
           </div>
-          <a href="/blog" class="arrow-link">All articles →</a>
         </div>
         <div class="featured-grid">
-          {featured.slice(0, 2).map((post) => (
-            <FeaturedArticle post={post} />
+          {featured.slice(0, 2).map((post, i) => (
+            <FeaturedArticle post={post} index={i} />
           ))}
         </div>
       </section>
     )}
+  </div>
 
-    {latest.length > 0 && (
-      <section id="latest" class="home-section" aria-labelledby="latest-heading">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Latest</p>
-            <h2 id="latest-heading">Recent articles</h2>
+  {categories.length > 0 && (
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-track">
+        {[0, 1].map(() => (
+          <div class="marquee-group">
+            {categories.map((category) => (
+              <Fragment>
+                <span>{category.name}</span>
+                <img src="/theme/icon-s-10.webp" alt="" width="80" height="80" loading="lazy" />
+              </Fragment>
+            ))}
           </div>
-          <a href="/blog" class="arrow-link">All articles →</a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {categories.length > 0 && (
+    <section id="categories" class="band topics" aria-labelledby="categories-heading">
+      <div class="container">
+        <div class="section-head">
+          <span class="pill">Categories</span>
+          <div class="section-title-row">
+            <h2 id="categories-heading" class="title-lg">
+              Pick a <em>topic</em>
+            </h2>
+          </div>
+        </div>
+        <ul class="topic-list">
+          {categories.map((category, i) => (
+            <li data-reveal>
+              <a href={category.url}>
+                <span class="topic-no">{pad(i + 1)}</span>
+                <span class="topic-name">{category.name}</span>
+                <span class="topic-desc">{category.description}</span>
+                <span class="topic-count">
+                  {category.posts.length}
+                  {category.posts.length === 1 ? " article" : " articles"}
+                  <i aria-hidden="true">→</i>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <div class="container">
+    {latest.length > 0 && (
+      <section id="latest" class="section" aria-labelledby="latest-heading">
+        <div class="section-head">
+          <span class="pill">Journal</span>
+          <div class="section-title-row">
+            <h2 id="latest-heading" class="title-lg">
+              Recent <em>articles</em>
+            </h2>
+            <a href="/blog" class="arrow-link">All articles</a>
+          </div>
         </div>
         <div class="card-grid">
-          {latest.map((post) => (
-            <ArticleCard post={post} />
+          {latest.map((post, i) => (
+            <ArticleCard post={post} index={i} />
           ))}
         </div>
       </section>
     )}
 
-    <section id="author" class="home-section" aria-labelledby="author-heading">
+    <section id="author" class="section home-author" aria-labelledby="author-heading">
       <div class="author-block">
-        <Image
-          src={portrait}
-          alt={site.author.name}
-          widths={[220, 440]}
-          sizes="220px"
-          loading="lazy"
-        />
-        <div>
-          <p class="eyebrow">About the author</p>
-          <h2 id="author-heading">Hello, I’m {site.author.name}.</h2>
+        <div class="author-side">
+          <span class="pill">About the author</span>
+          <Image
+            src={portrait}
+            alt={site.author.name}
+            widths={[300, 600]}
+            sizes="(max-width: 760px) 180px, 300px"
+            loading="lazy"
+          />
+        </div>
+        <div class="author-copy">
+          <h2 id="author-heading" class="author-statement">
+            Hello, I’m {site.author.name}. I teach generative AI at university
+            and run a software studio in Sofia that builds voice agents,
+            automations and <em>internal systems</em>.
+          </h2>
           <p>
-            I teach generative AI and natural language processing at university
-            and am a PhD candidate in computer science. I run a software studio
-            in Sofia, building voice agents, automations and internal systems.
+            I am also a PhD candidate in computer science. The articles here
+            collect the decisions, checks and commercial considerations behind
+            that work — the parts that rarely make it into a tutorial. They are
+            free to read and free to use in your own projects.
           </p>
-          <p>
-            The articles here collect the decisions, checks and commercial
-            considerations behind that work — the parts that rarely make it into
-            a tutorial. They are free to read and free to use in your own
-            projects.
-          </p>
-          <a href="/contact" class="arrow-link">Ask a question or suggest a topic →</a>
+          <a href="/contact" class="arrow-link">Ask a question or suggest a topic</a>
         </div>
       </div>
     </section>
 
-    <section id="signup" class="home-section">
-      <div class="signup-box">
-        <div>
-          <p class="eyebrow">Newsletter</p>
-          <h2>The next useful article, in your inbox.</h2>
-          <p>
-            One email when a new article is published. No sequences, no sales,
-            and one click to leave.
-          </p>
+    <section id="faq" class="section home-faq" aria-labelledby="faq-heading">
+      <div class="faq-block">
+        <div class="faq-side">
+          <span class="pill">FAQ</span>
+          <h2 id="faq-heading" class="title-lg">
+            Good <em>questions</em>
+          </h2>
+          <img class="faq-shape" src="/theme/shape-s-8.webp" alt="" width="90" height="90" loading="lazy" />
         </div>
-        <div>
-          <SignupForm source="home" buttonLabel="Subscribe" />
-          <p class="small">A confirmation email keeps the choice yours.</p>
+        <div class="faq-list">
+          {FAQ.map((item, i) => (
+            <details class="faq-item" name="faq" open={i === 0}>
+              <summary>
+                <span>{pad(i + 1)}</span>
+                {item.q}
+              </summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
         </div>
       </div>
     </section>
   </div>
 </Base>
+
+<style>
+  .home-featured {
+    padding-bottom: clamp(64px, 9vw, 130px);
+  }
+  .home-author {
+    border-top: 1px solid var(--border);
+  }
+  .home-faq {
+    border-top: 1px solid var(--border);
+  }
+</style>

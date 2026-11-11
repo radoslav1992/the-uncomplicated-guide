@@ -25,14 +25,16 @@ src/
   pages/                ← / , /blog, /blog/[slug], /blog/category/[category], /newsletter, /contact, legal pages,
                           /admin/newsletter, /media/[...key] (R2 images), /rss.xml
   pages/api/            ← newsletter/{subscribe,confirm,unsubscribe}, contact
-  components/           ← Header, Footer, ArticleCard, FeaturedArticle, CategoryNav, SignupForm…
+  components/           ← Header, Footer, ArticleCard, FeaturedArticle, Cover, CategoryNav, SignupForm…
   lib/                  ← blog helpers, newsletter, email, tokens, rate limiting
   styles/               ← global.css (tokens, type, prose, forms), blog.css (listings, home)
+  assets/fonts/         ← BDO Grotesk and PP Editorial New Italic from the Adon theme (WOFF2)
   worker.ts             ← Worker entry: Astro fetch handler, `email()` for Email Routing,
                           `scheduled()` for newsletter delivery
 public/
   articles/             ← 16:9 hero images for articles kept in the repository
   social/               ← 1200×630 social cards
+  theme/                ← shapes and icons from the Adon theme (stat cards, covers)
   _redirects            ← wildcard redirects for retired shop URLs (the rest are in astro.config.mjs)
 migrations/             ← D1 schema (applied by the deploy command)
 wrangler.jsonc          ← bindings, vars and the deploy config
@@ -82,7 +84,8 @@ updatedDate: 2026-12-01      # optional: set for material revisions, not typo fi
 category: ai-video           # required: a slug from src/data/categories.ts
 tags: [Video, Ads]           # free-form topics; used for related articles
 featured: false              # optional: true puts it at the top of the home page
-image: /articles/my-article.webp          # optional 16:9 hero, or /media/article-images/<file> from R2
+image: /articles/my-article.webp          # optional 16:9 hero, or /media/article-images/<file> from R2;
+                                          # without one, cards show a generated cover
 imageAlt: What the image shows
 socialImage: /social/my-article.png       # optional 1200×630 share card
 takeaways:                                # optional "Key takeaways" box above the body

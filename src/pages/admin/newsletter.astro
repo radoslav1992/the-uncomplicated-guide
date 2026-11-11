@@ -68,7 +68,7 @@ const stats = authed ? await subscriberStats(env) : null;
 const letters = authed ? await listNewsletters(env) : [];
 ---
 
-<Base title="Newsletter admin" noindex current="">
+<Base title="Newsletter admin" noindex current="" hideFooterSignup>
   <div class="container wrap">
     <p class="eyebrow">Admin</p>
     <h1 class="display">Newsletter</h1>
