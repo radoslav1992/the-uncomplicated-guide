@@ -1,76 +1,128 @@
 ---
-title: "AI Video Ads & UGC: How to Script, Voice, Animate and Edit AI UGC Ads — and Sell Them as a Service"
-seoTitle: "AI UGC Video Ads: A Complete Production and Pricing Guide"
-description: "A free guide to producing UGC-style AI video ads with ChatGPT or Claude, ElevenLabs, HeyGen and Captions: the brief, the hooks, voice and avatar settings, testing, disclosure, and how to price it as a monthly service."
+title: "How to Make AI UGC Video Ads — and Sell Them as a Service"
+seoTitle: "How to Make AI UGC Video Ads: Script, Voice, Avatar and Edit"
+description: "A step-by-step guide to UGC-style AI video ads with ChatGPT or Claude, ElevenLabs, HeyGen and Captions: the brief, five hooks per script, natural voices, believable avatars, testing, disclosure, and how to price it as a monthly service."
 pubDate: 2026-11-11
 kind: guide
 tags: [AI video, UGC ads, ElevenLabs, HeyGen]
 image: "/articles/ai-ugc-video-ads-guide.webp"
 imageAlt: "A phone showing an AI presenter between audio waveforms, representing AI-generated UGC video ads"
 socialImage: "/social/ai-ugc-video-ads-guide.png"
+takeaways:
+  - "Start from a one-page brief with approved claims and one number that defines success."
+  - "Write one body and five hooks. Test the first three seconds, not whole videos."
+  - "Most robotic voices are writing problems. Fix the text before touching the settings."
+  - "Check every avatar render on a phone at full size: lips, hands, background."
+  - "Name and version every file, or your test results stop meaning anything."
+  - "Label AI content, get consent for real faces and voices, and never fake a testimonial."
+  - "Price from real costs — re-renders included — and sell outcomes, not seconds of video."
 ---
 
-UGC-style ads — a person talking to camera, phone-shot, captions on — are the format short-form feeds reward. They are also slow and expensive to produce with real people: casting, filming days, reshoots for every new angle. An AI pipeline changes the economics. A script model writes the hooks, a voice model reads them, an avatar presents them, and an editor turns the clip into a native post. The result is not one video, but ten comparable ones and a decision about which works.
+*The avatar is the part that feels like magic. It is also the part that matters least.*
 
-This guide is not a catalogue of buttons in four apps. It is a working manual that starts from the business goal, goes through script, voice, avatar and edit, and ends with testing, disclosure, pricing and a monthly report. The four tools it uses are **ChatGPT or Claude** for the script, **ElevenLabs** for the voice, **HeyGen** for the avatar and **Captions** for the edit — but the process is the point, and it survives a change of tools. It started as a paid PDF and is now free to read here.
+UGC-style ads are everywhere for a reason. A person talking to camera, shot on a phone, captions on — it is the format short-form feeds reward.
 
-**Who it is for.** Small-business owners and marketers who want a steady stream of UGC-style ads and Reels without filming days; freelancers and AI agencies who want to sell video creatives as a repeatable monthly service; and anyone who made one impressive avatar demo and got stuck turning it into a process.
+It is also slow and expensive to make with real people. Casting. Filming days. A reshoot every time you want to try a new opening line.
 
-**What it is not.** The tools cannot deliver the polish of a cinematic brand film or an emotional launch video yet, and this guide does not pretend otherwise. It is not a way to make fake testimonials — reviews implying a customer experience that did not happen are illegal in many markets, not just risky. And it is not one magic button: it is a production line with hand-offs, checks and versions.
+AI changes the economics. A script model writes the hooks, a voice model reads them, an avatar presents them, and an editor turns the clip into something that looks native to the feed. Done properly, you don't end up with one video. You end up with ten comparable ones — and a clear answer about which one works.
 
-## The pipeline at a glance
+Done badly, you end up with an uncanny presenter reading the About page to an audience that has already scrolled away.
 
-Each tool does one job, and every hand-off has a check before the next tool starts:
+I run a software studio, and this is the pipeline we use for real client creatives: the same folders, the same checklists, the same way of pricing it. This guide walks through it step by step, from the business goal to the monthly report.
 
-| Stage | Tool | Input | Output | The check before moving on |
+It uses four tools — **ChatGPT or Claude** for the script, **ElevenLabs** for the voice, **HeyGen** for the avatar and **Captions** for the edit. But the process is what matters, and it survives swapping any of them.
+
+It is for you if you are a small business or marketer who wants a steady stream of UGC-style ads without filming days, a freelancer or agency who wants to sell video creatives as a monthly service, or someone who made one impressive avatar demo and then got stuck turning it into a process.
+
+Two things it won't do. It can't make AI video look like a cinematic brand film — the tools aren't there yet, and pretending otherwise wastes a week. And it won't help you fake testimonials. A review implying a customer experience that never happened is illegal in many markets, not just risky.
+
+## What AI UGC actually is
+
+"UGC" stands for user-generated content: videos that look like a real person filmed them, not a studio. In advertising it has come to mean a particular style — a presenter talking straight to camera, handheld framing, captions, a quick hook and a clear call to action.
+
+An AI UGC ad keeps that style but replaces the filming. The presenter is an AI avatar. The voice is synthetic. The script comes from a language model, guided by a brief.
+
+The trick is that none of these pieces is impressive on its own. What makes the approach worth doing is the *production line*: once the brief and the body of the script are right, producing five more versions with different openings costs almost nothing. That is where the value is — far more than in the saving on a film crew.
+
+## What you'll need
+
+- **ChatGPT or Claude** for the scripts.
+- **ElevenLabs on a paid plan** for the voice. Free tiers don't carry the commercial licence you need for client ads.
+- **HeyGen** for the avatar.
+- **Captions** (or a similar editor) for cutting, captions, B-roll and export.
+- **A real phone** for checking every render. Laptops lie about how video looks in a feed.
+- **One person on the client's side** who can sign off claims within a day.
+- **Access to the ad account**, or at least a reporting export, so you can measure results.
+
+Here is how the pieces fit together. Every arrow is a hand-off, and every hand-off has a check:
+
+| Stage | Tool | What goes in | What comes out | Check before moving on |
 | --- | --- | --- | --- | --- |
 | Brief | — | The client's goal | A one-page brief and approved claims | Signed off by someone who knows the product |
-| Script | ChatGPT or Claude | The brief | Five hooks and one body | Every claim is on the approved list; length fits the time budget |
-| Voice | ElevenLabs | The approved script | One audio file per hook plus the body | Names and numbers correct by ear; pace and tone right |
-| Avatar | HeyGen | The approved audio | Presenter clips | Lip-sync, hands and background clean on a phone screen |
-| Edit | Captions | The clips | Finished 9:16 variants | Captions in the safe zone; CTA matches the offer; music licensed |
+| Script | ChatGPT or Claude | The brief | Five hooks and one body | Every claim is approved; length fits |
+| Voice | ElevenLabs | The approved script | One audio file per hook, plus the body | Names and numbers right by ear |
+| Avatar | HeyGen | The approved audio | Presenter clips | Lips, hands and background clean on a phone |
+| Edit | Captions | The clips | Finished 9:16 variants | Captions safe, CTA right, music licensed |
 
-The order matters more than the tools. Most failed AI video projects started with the avatar, because that is the part that feels like magic — and then discovered that the script was about the product rather than the viewer, and nobody had agreed what the ad was for.
+## Step 1: Write a one-page brief before opening any tool
 
-## Start from the business goal: the one-page brief
+Most failed AI video projects start with the avatar, because that is the fun part. Then they discover that nobody agreed what the ad was for.
 
-Describe the most common video on one sheet before any tool is opened. The brief is the contract between the business and the production pipeline. It does not need to be long, but every field must be filled by someone who knows the product. Show it to the person who answers customer questions — they know the real objections the owner often forgets.
+So start with one sheet of paper. The brief is the contract between the business and the production line. It doesn't need to be long, but every field has to be filled in by someone who knows the product.
+
+Here is a filled-in example for a dental clinic:
 
 | Field | Example |
 | --- | --- |
-| Goal | Leads for a teeth-whitening offer at a dental clinic. |
-| Audience | Women 25–40, city, scrolls Reels in the evening, price-sensitive. |
+| Goal | Leads for a teeth-whitening offer. |
+| Audience | Women 25–40, in the city, scroll Reels in the evening, price-sensitive. |
 | Offer | Free consultation plus 20% off the first session this month. |
 | Approved claims | "Visible result after one session for most patients" — not "guaranteed white teeth". |
-| Forbidden claims | Medical outcomes, comparisons to named competitors, "no pain". |
-| Proof available | Number of sessions done, before/after photos with signed release. |
-| Format | 9:16, 25–35 s, captions on, sound on, avatar presenter with product B-roll. |
-| Success | Hook rate above 35% and cost per lead below the current creative within 72 h. |
+| Forbidden claims | Medical outcomes, comparisons with named competitors, "no pain". |
+| Proof available | Number of sessions done, before/after photos with signed releases. |
+| Format | 9:16, 25–35 seconds, captions on, sound on, avatar presenter with product B-roll. |
+| Success | Hook rate above 35% and cost per lead below the current creative within 72 hours. |
 
-Two fields do most of the work. **Approved claims** is the list the script is checked against at every stage; anything not on it does not go in. **Success** is a number agreed before production, so that nobody argues about taste afterwards.
+Two fields do most of the work.
 
-### Don't start with "it can do everything"
+**Approved claims** is the list every script gets checked against, at every stage. If a claim isn't on it, it doesn't go in the video.
 
-The first system should produce one format reliably: one platform, one length, one presenter. After 20–30 published variants you will know which second format actually brings value.
+**Success** is a number agreed *before* production. Without it, every review turns into a debate about taste.
 
-## Platforms, formats and the first three seconds
+One more tip: show the brief to whoever answers customer questions. They know the real objections, and the owner usually forgets half of them.
 
-The same clip is not "fine everywhere". Each platform has its own frame, safe zone and rhythm. But short-form platforms reward the same shape: a hook that earns three seconds, a body that earns twenty, and a close that earns the tap. Map the beats before writing a word:
+### Don't promise "it can do everything"
 
-1. **Hook (0–3 s):** a pattern interrupt, a question or a bold-but-true statement addressed to the target viewer.
+The first version of the pipeline should produce one format reliably: one platform, one length, one presenter. After 20–30 published variants you will know which second format is actually worth adding.
+
+## Step 2: Plan the first three seconds — and the 27 after them
+
+The same clip is not "fine everywhere". Each platform has its own frame, its own safe zone and its own rhythm.
+
+But short-form platforms reward the same basic shape: a hook that earns three seconds, a body that earns twenty, and a close that earns the tap.
+
+Before writing a word of script, map the beats:
+
+1. **Hook (0–3 s):** a pattern interrupt, a question, or a bold-but-true statement aimed at the viewer.
 2. **Problem (3–8 s):** the pain in the viewer's words, not the brand's.
 3. **Solution (8–18 s):** what the product does, shown or named concretely.
-4. **Proof (18–25 s):** a demonstrable fact, a number you can back up, a before/after that complies with policy.
-5. **Offer and CTA (25–30 s):** one action, one place to do it, one reason to do it now.
-6. **Disclosure:** the AI label, sponsorship tag or "dramatised" note the platform or law requires.
+4. **Proof (18–25 s):** a fact you can demonstrate, a number you can back up, or a before/after that complies with policy.
+5. **Offer and call to action (25–30 s):** one action, one place to do it, one reason to do it now.
+6. **Disclosure:** the AI label, sponsorship tag or "dramatised" note the platform or the law requires.
 
-Build for vertical 9:16 first, with sound on but a hook that works muted — a large share of the feed watches without audio, so the first line must also be on screen. Keep text and faces out of the bottom and right-hand edges, where every app puts its own buttons and captions; the exact height changes with each app update, so check on a real phone rather than trusting an editor's overlay.
+Build for vertical 9:16 first. Assume the sound is on, but make sure the hook works with it off — a lot of people watch muted, so the first line needs to be on screen as text too.
 
-Why the first three seconds get so much attention here: whatever ranking systems do downstream, they cannot rank a video people swipe past in the first second. There is a longer piece on this in [Your ad gets three seconds](/blog/your-ad-gets-three-seconds).
+And keep text and faces away from the bottom and right-hand edges. That is where every app puts its buttons and captions, and the exact position changes with app updates. Check on a real phone instead of trusting the overlay in your editor.
 
-## Script: a prompt that holds hard constraints
+Why so much fuss about three seconds? Because no ranking system can promote a video people swipe past in the first second. I wrote more about that in [Your ad gets three seconds](/blog/your-ad-gets-three-seconds).
 
-A model asked for "an ad for a dental clinic" returns something that reads like the About page set to music. Give it the brief, the beats and constraints it is not allowed to break — length, claims, disclosure — and ask for hooks and a body separately.
+## Step 3: Script five hooks and one body
+
+Ask a model for "an ad for a dental clinic" and you get something that sounds like the clinic's About page set to music.
+
+The fix is to give it the brief, the beats, and constraints it isn't allowed to break: length, claims, disclosure. And to ask for hooks and body separately.
+
+Here is a prompt to start from:
 
 ```text
 You are a direct-response scriptwriter for short-form video ads
@@ -105,81 +157,99 @@ OUTPUT
 4. A one-line on-screen text version of each hook for muted viewers.
 ```
 
-The third output item is the useful one for review: every line arrives with the approved claim it depends on, so the person signing off can check claims in a minute rather than re-reading the brief.
+The third output item is the one that saves time later. Every line arrives with the approved claim it depends on, so whoever signs off can check the claims in a minute instead of re-reading the brief.
 
-### Five hooks, one body
+### Why one body and five hooks?
 
-The useful unit of work is not a video but one body with several openings. Get the body right once, then produce hooks against it. Same voice, same avatar, same edit — the only variable is the first three seconds. Producing the extra hooks costs almost nothing once the body exists, which is the real business case for the pipeline, far more than the saving on a film crew.
+Because the useful unit of work isn't a video. It is one body with several openings.
 
-### Hooks that work and hooks that get rejected
+Get the body right once. Then produce hooks against it — same voice, same avatar, same edit. The only thing that changes is the first three seconds.
 
-Hooks that tend to hold attention open in the middle of something: a question the viewer would answer "yes" to, a specific number, a mistake the viewer is probably making, a before/after you can show and back up, or a flat contradiction of what the audience assumes.
+Publish them all. Within a couple of days it is usually obvious which hook holds attention, and it is often not the one you liked best in the edit.
 
-Hooks that get scrolled past, or rejected by an ad review:
+### Hooks that work — and hooks that get rejected
 
-- Generic openers — *"In today's fast-paced world…"* — that announce an ad before saying anything.
-- Claims the client cannot prove, or anything implying a guaranteed result.
-- Lines that assert or imply something about the viewer's personal characteristics — health, body, finances, beliefs. Ad platforms restrict these, and "Struggling with your weight?" is the classic way to get a creative rejected.
-- Fake urgency the offer does not have, and any line that makes the presenter sound like a real customer.
+Hooks that hold attention tend to open in the middle of something: a question the viewer would answer "yes" to, a specific number, a mistake they are probably making, a before/after you can show and back up, or a flat contradiction of what they assume.
 
-## Voice: ElevenLabs without the robot
+Hooks that get scrolled past, or rejected by ad review:
 
-Synthetic speech performs punctuation, not meaning. A wall of text with no commas, sentence breaks or pacing gets read at an even canter that sounds like a train announcement. Fixing the writing fixes most of the voice.
+- Generic openers like *"In today's fast-paced world…"* that announce an ad before saying anything.
+- Claims the client can't prove, or anything implying a guaranteed result.
+- Lines that say or imply something about the viewer's personal characteristics — health, body, money, beliefs. Ad platforms restrict these, and "Struggling with your weight?" is the classic way to get an ad rejected.
+- Fake urgency the offer doesn't actually have, and anything that makes the presenter sound like a real customer.
+
+## Step 4: Make the voice sound human
+
+Here is the thing nobody tells you about synthetic voices: they perform punctuation, not meaning.
+
+Give a voice model a wall of text with no commas or sentence breaks and it will read it at an even canter, like a train announcement. Fix the writing and you have fixed most of the voice.
 
 ### Prepare the text for speech
 
-- **Write numbers in words**, the way they should be said: "twenty percent", "three thirty", "two hundred and fifty".
-- **Add the brand to a pronunciation dictionary** — the clinic's name, the product, the street — so every render says it the same way.
-- **Use punctuation as direction.** Short sentences, commas where you would breathe, a full stop before the offer. Add breaks deliberately where a pause sells the line.
-- **Keep the pace between 2.3 and 2.7 words per second.** Faster sounds like a disclaimer; slower drags in a feed.
+- **Write numbers as words**, the way they should be said: "twenty percent", "half past three", "two hundred and fifty".
+- **Add the brand to a pronunciation dictionary** — the business name, the product, the street — so every render says them the same way.
+- **Use punctuation as direction.** Short sentences. Commas where you'd breathe. A full stop before the offer.
+- **Aim for 2.3–2.7 words per second.** Faster sounds like a legal disclaimer. Slower drags in a feed.
 
-### Model and settings
+### Pick a model and lock the settings
 
-ElevenLabs offers several speech models that trade expressiveness against speed and cost, and the line-up changes; check the current list rather than a tutorial's. For ads, the most expressive model is usually worth it — a flat read wastes the hook. If the model supports inline delivery tags, use them sparingly and listen for tags being read out loud.
+ElevenLabs has several speech models that trade expressiveness against speed and cost, and the line-up changes often — so check the current list rather than an old tutorial. For ads, the most expressive model is usually worth it. A flat read wastes a good hook.
 
-In the voice settings, lower stability gives more expressive and less predictable reads; higher stability gives steadier, flatter ones. Generate a few takes of each hook and choose by ear. Changing settings between hooks of the same test breaks the comparison, so lock them once chosen.
+If the model supports inline delivery tags, use them sparingly, and listen out for tags being read aloud.
 
-### Choosing or cloning a voice
+In the voice settings, lower stability gives more expressive but less predictable reads; higher stability gives steadier, flatter ones. Generate a few takes of each hook and choose by ear. Then lock the settings — changing them between hooks in the same test ruins the comparison.
 
-A library voice is the fast, safe start. Cloning a real person's voice — the business owner, a regular presenter — needs that person's explicit consent and the platform's verification, and the rights to use it should be written down with an end date.
+### Choose a voice — or clone one properly
 
-### Export and plan rules
+A voice from the library is the fast, safe start.
 
-Generate anything a client will publish on a paid plan — free tiers do not carry the commercial licence. Export at full quality, name every file with its version, and listen to each one end to end before it leaves your hands: names, numbers, dates and the brand, checked by ear rather than by waveform.
+Cloning a real person's voice — the business owner, a regular presenter — needs that person's explicit consent and the platform's verification. Put the rights in writing, with an end date.
 
-## Avatar: HeyGen, from stock presenter to Digital Twin
+### Export and listen
 
-HeyGen offers three broad options. **Stock avatars** are ready-made presenters: fastest to start, fine for demos and many ads. **Photo avatars** animate a still image: useful for a consistent brand character, but they need the most scrutiny. A **Digital Twin** is trained on footage of a real person and looks the most natural — and needs the most care with consent.
+Generate anything a client will publish on a paid plan. Export at full quality, put the version in every file name, and listen to every file from start to finish before it moves on: names, numbers, dates and the brand, checked by ear rather than by looking at a waveform.
 
-Drive the avatar with the approved ElevenLabs audio rather than the avatar tool's own text-to-speech. That keeps one voice across every variant and means the audio you checked by ear is exactly the audio the viewer hears.
+## Step 5: Put a face on it with HeyGen
 
-### The artefacts to check
+HeyGen gives you three broad options:
 
-Watch every render at 100% on a phone screen, not as a thumbnail on a laptop:
+- **Stock avatars** — ready-made presenters. The fastest start, and fine for demos and many ads.
+- **Photo avatars** — a still image brought to life. Good for a consistent brand character, but they need the most scrutiny.
+- **Digital Twin** — trained on footage of a real person. The most natural-looking, and the one that needs the most care with consent.
 
-- **Lips.** Lip-sync tends to hold for a few seconds and then loosen, especially around numbers, names and anything the audio rushes. Check that it is tight at the start and at the end.
-- **Hands.** Gestures that repeat, freeze or melt are the fastest giveaway.
-- **Background.** Edges around the hair and shoulders, flicker, and objects that change between cuts.
+Whichever you use, drive it with the approved ElevenLabs audio rather than the avatar tool's built-in voice. You get one consistent voice across every variant, and the audio you checked by ear is exactly what the viewer hears.
 
-### Consent before a real likeness goes on camera
+### Check every render on a phone
 
-A Digital Twin of a real person — owner, employee, hired presenter — needs a signed release that covers where and how long the likeness will be used, plus the consent recording the platform asks for. Keep both on file per client, with a renewal date and a takedown procedure. A stock or photo avatar is the right choice for demos; never put a real likeness in a demo without consent.
+Watch each render at full size on a phone, not as a thumbnail on a laptop. Look at three things:
 
-## Edit: Captions turns a clip into a native post
+- **Lips.** Lip-sync tends to hold for a few seconds and then drift, especially around numbers, names and fast audio. Make sure it is tight at the start and at the end.
+- **Hands.** Gestures that repeat, freeze or melt are the quickest giveaway.
+- **Background.** Edges around hair and shoulders, flicker, and objects that change between cuts.
 
-The raw avatar clip is not an ad yet. The edit is what makes it look like it belongs in the feed:
+### Get consent before a real face goes on camera
 
-- **Cut the dead air.** Trim the first half-second and every pause that does not sell something.
-- **Captions inside the safe zone,** large enough to read on a phone, matching the audio word for word.
-- **B-roll on the proof.** Cut away from the presenter when the script names the product or the result, so the viewer sees it.
-- **Licensed music only.** Trending sounds in the app are often not licensed for paid ads; use the platform's commercial library or a licence that covers the placement.
-- **Export 9:16** at the platform's recommended resolution, with the variant name in the file name.
+A Digital Twin of a real person — owner, employee or hired presenter — needs a signed release covering where and for how long the likeness will be used, plus the consent recording the platform asks for.
 
-Build a **locked template** per client — fonts, colours, caption style, CTA card, logo position — so every variant differs only in what you are testing.
+Keep both on file for each client, with a renewal date and a plan for taking the videos down. And use stock or photo avatars for demos. Never put a real person's likeness in a demo without consent.
 
-## Assembling the pipeline: folders, names and checkpoints
+## Step 6: Edit it into something that belongs in the feed
 
-The pipeline's value disappears the moment nobody can tell which audio went into which video. One folder per campaign, numbered by stage, and one naming rule:
+A raw avatar clip isn't an ad yet. The edit is what makes it look like it belongs in someone's feed. In Captions (or your editor of choice):
+
+- **Cut the dead air.** Trim the first half-second and every pause that isn't selling something.
+- **Add captions inside the safe zone**, big enough to read on a phone, matching the audio word for word.
+- **Use B-roll on the proof.** When the script names the product or the result, cut away from the presenter so the viewer sees it.
+- **Use licensed music only.** Trending sounds in the app are often not licensed for paid ads. Use the platform's commercial library, or music licensed for that placement.
+- **Export in 9:16** at the platform's recommended resolution, with the variant name in the file name.
+
+Then build a **locked template** for each client — fonts, colours, caption style, call-to-action card, logo position. Every variant should differ only in the thing you are testing.
+
+## Step 7: Keep your versions straight
+
+This is the unglamorous step that makes everything else work. The moment nobody can tell which audio went into which video, your test results stop meaning anything.
+
+Use one folder per campaign, numbered by stage, and one naming rule for every file:
 
 ```text
 2026-09_whitening/
@@ -194,63 +264,69 @@ The pipeline's value disappears the moment nobody can tell which audio went into
 name = {campaign}_{hook}_{version}_{stage}.{ext}
 ```
 
-### Checkpoints between tools
+And check at every hand-off:
 
 | Hand-off | Check before moving on |
 | --- | --- |
-| Brief → Script | Every claim in the script appears in the approved list; length within the time budget. |
-| Script → Audio | Names, numbers and dates read correctly; no audible tags; pace 2.3–2.7 words per second; file named with version. |
-| Audio → Avatar | Same audio version as approved; lip-sync tight at the start and end; hands and background clean. |
-| Avatar → Edit | Captions match the audio word for word; safe zone respected; CTA card matches the offer; music licensed for the platform. |
-| Edit → Publish | Correct ratio and resolution; AI label set where required; ad-account naming matches the file name. |
+| Brief → Script | Every claim is on the approved list; the length fits the time budget. |
+| Script → Audio | Names, numbers and dates read correctly; no tags read aloud; 2.3–2.7 words per second; versioned file name. |
+| Audio → Avatar | Same audio version as approved; lip-sync tight at start and end; hands and background clean. |
+| Avatar → Edit | Captions match the audio word for word; safe zone respected; CTA matches the offer; music licensed. |
+| Edit → Publish | Right ratio and resolution; AI label set; ad names match the file names. |
 
-Do not re-generate upstream after downstream work is done unless you re-run everything below it. A changed word in the audio means a new avatar render and a new edit; that is cheap in credits but expensive in confusion if the versions are not tracked.
+One rule saves a lot of confusion: don't regenerate an earlier stage after later work is done unless you redo everything after it. Changing one word in the audio means a new avatar render and a new edit. That's cheap in credits, but expensive in confusion if versions aren't tracked.
 
-### Step by step for one campaign
+### The whole campaign, step by step
 
-1. Fill the one-page brief and the approved-claims list; get written sign-off.
-2. Run the scripting prompt; pick 3–5 hooks and one body; get sign-off on claims and disclosure.
-3. Prepare the text for speech: numbers in words, pronunciation dictionary for the brand, breaks.
-4. Generate audio for each hook plus the shared body; listen to every file end to end.
-5. Render avatar clips in HeyGen from the approved audio; inspect at 100% zoom on a phone.
-6. Finish in Captions with the client's locked template; export named variants.
-7. Run the quality checklist and the disclosure checks below.
-8. Publish 3–5 variants; measure for 48–72 hours; keep, iterate or kill.
+1. Fill in the one-page brief and the approved-claims list. Get written sign-off.
+2. Run the scripting prompt. Pick 3–5 hooks and one body. Get sign-off on claims and disclosure.
+3. Prepare the text for speech: numbers as words, the pronunciation dictionary, pauses.
+4. Generate audio for each hook plus the shared body. Listen to every file end to end.
+5. Render the avatar clips in HeyGen from the approved audio. Check them at full size on a phone.
+6. Finish in Captions with the client's locked template. Export named variants.
+7. Run the quality and disclosure checks.
+8. Publish 3–5 variants. Measure for 48–72 hours. Keep, iterate or kill.
 
-## Variations, testing and what to measure
+## Step 8: Test hooks, not videos
 
-The pipeline's real value is not one video — it is ten comparable videos and a decision.
+The pipeline's real value isn't one video. It's ten comparable videos and a decision.
 
-Creative testing is where the AI chain pays for itself. A human shoot gives you one or two versions; the pipeline gives you a matrix. But a matrix only works if you change one variable at a time and read the right numbers. The ad platforms broadly agree on the basics: test a handful of creatives at a time, judge after a short window, and refresh when delivery declines.
+A traditional shoot gives you one or two versions. The pipeline gives you a matrix. But a matrix only tells you something if you change one thing at a time and read the right numbers.
 
-| Round | What changes | What stays fixed |
+Run the tests in rounds:
+
+| Round | What changes | What stays the same |
 | --- | --- | --- |
 | 1 | The hook (3–5 versions) | Body, voice, presenter, edit, offer |
-| 2 | The proof or problem section | The winning hook and everything else |
-| 3 | The offer framing and CTA | The winning hook and body |
-| 4 | Presenter or voice | The winning script |
+| 2 | The problem or proof section | The winning hook, and everything else |
+| 3 | The offer framing and call to action | The winning hook and body |
+| 4 | The presenter or the voice | The winning script |
 
-Three numbers decide each round:
+And three numbers decide each round:
 
-- **Hook rate** — the share of impressions still watching at three seconds. It diagnoses the opening.
+- **Hook rate** — the share of viewers still watching at three seconds. It tells you whether the opening works.
 - **Hold** — where the retention graph falls off a cliff. That timestamp is a line in your script, and you can go and read it.
-- **Cost per result** — whatever the client actually sells, per unit of spend. Everything else is decoration.
+- **Cost per result** — whatever the client actually sells, per unit of ad spend. Everything else is decoration.
 
-Given those three, a failing video tells you which link of the chain broke. Without them, you are re-editing on taste.
+With those three, a failing video tells you exactly which part broke. Without them, you're re-editing on taste.
 
-## Disclosure, consent and platform rules
+## Step 9: Label it, and get consent
 
-The label is not what loses the viewer; a weak second sentence is. Build disclosure into the template rather than treating it as a risk to manage:
+The AI label isn't what loses viewers. A weak second sentence is.
 
-- **AI labels.** TikTok, Meta and YouTube each ask for realistic AI-generated or altered content to be labelled, and may apply labels themselves when they detect it. Set the platform's label on every variant, and add an on-screen "AI presenter" note where the client's market or industry expects it.
-- **No fake testimonials.** A presenter must never claim or imply a personal experience with the product that did not happen. In the US the FTC's rule on fake reviews and testimonials explicitly covers AI-generated ones, and EU consumer law treats them as an unfair practice. "Dramatised" scenarios should say so.
-- **Sponsorship and paid partnership tags** where a real creator's likeness or account is involved.
-- **Consent and rights** for every real face and voice, with renewal dates and a takedown procedure on the calendar.
-- **Claims** checked against the approved list, especially in health, finance and anything regulated.
+So build disclosure into your template instead of treating it as a risk to manage:
 
-## Real costs and a cost formula
+- **AI labels.** TikTok, Meta and YouTube all ask for realistic AI-generated or altered content to be labelled, and may add labels themselves when they detect it. Set the platform's label on every variant, and add an on-screen "AI presenter" note where the client's market or industry expects it.
+- **No fake testimonials.** A presenter must never claim or imply personal experience with the product that didn't happen. In the US, the FTC's rule on fake reviews and testimonials explicitly covers AI-generated ones, and EU consumer law treats them as an unfair practice. If a scene is dramatised, say so.
+- **Sponsorship tags** wherever a real creator's likeness or account is involved.
+- **Consent and rights** for every real face and voice, with renewal dates and a takedown plan in the calendar.
+- **Claims** checked against the approved list — especially in health, finance and anything regulated.
 
-Every tool in the chain is a subscription with credits, and the credits are consumed by re-renders as much as by finished videos. Prices and plan limits change often, so take the current numbers from each tool's pricing page and put them into a formula rather than a guess:
+## Step 10: Work out what it really costs
+
+Every tool in this pipeline is a subscription with credits, and re-renders burn credits just as fast as finished videos.
+
+Prices and plan limits change often, so don't rely on anyone's blog post for numbers — including this one. Take the current prices from each tool and put them into a formula:
 
 ```text
 cost per finished variant =
@@ -262,60 +338,106 @@ monthly delivery cost =
     subscriptions + (variants × credits per variant) + (hours × rate)
 ```
 
-Track re-renders honestly for the first few campaigns. A variant that needed three avatar renders and two audio takes costs several times the "one render" a sales page suggests — and that ratio, not the list price, is what decides your margin.
+Be honest about re-renders for your first few campaigns. A variant that needed three avatar renders and two audio takes costs several times the "one render" a pricing page suggests. That ratio, not the list price, decides your margin.
 
-Watch the credit balances, plan limits and budget alerts across all four tools. Running out of avatar credits two days before a client's launch is an avoidable kind of emergency.
+And watch your credit balances, plan limits and budget alerts across all four tools. Running out of avatar credits two days before a client's launch is an entirely avoidable emergency.
 
-## Selling it: assessment, offers, pilot and report
+## Step 11: Package it and sell it
 
-### A 15-minute assessment before you build a demo
+### Qualify the client in 15 minutes
 
-Before producing anything, find out whether the client is a fit. Signals of a good one: they already run paid social or are ready to fund a test budget; the product can be explained or shown in thirty seconds; they have proof — numbers, results, photos with releases — not only enthusiasm; one person can sign off claims within a day; and there is a measurable result to aim at. A client with no ad budget, nothing they can prove, and five people who need to approve every line will not get value from a testing pipeline, however good the videos look.
+Before you produce anything, find out whether the client is a good fit. Good signs:
 
-### Three levels of offer
+- They already run paid social, or have a budget ready for testing.
+- The product can be explained or shown in thirty seconds.
+- They have proof — numbers, results, photos with releases — not just enthusiasm.
+- One person can sign off claims within a day.
+- There is a result you can measure.
 
-Package by outcome and by how much of the loop you run, not by the number of seconds produced:
+A client with no ad budget, nothing they can prove, and five people who need to approve every line won't get value from a testing pipeline, however good the videos look.
+
+### Offer three levels
+
+Package by outcome and by how much of the process you run — not by seconds of video:
 
 | Level | What the client gets | Who it suits |
 | --- | --- | --- |
-| Creative only | A monthly batch of tested-format variants for one platform, one presenter, one length | Clients with an in-house ad manager |
-| Creative + testing | The batch plus the test matrix, round-by-round decisions and the monthly report | Small businesses running their own ad account |
-| Full service | Several formats or platforms, a Digital Twin with managed consent, and reporting from the ad account | Clients who want one supplier for creative performance |
+| Creative only | A monthly batch of variants for one platform, one presenter, one length | Clients with their own ad manager |
+| Creative + testing | The batch, plus the test rounds, decisions and a monthly report | Small businesses running their own ad account |
+| Full service | Several formats or platforms, a Digital Twin with managed consent, reporting from the ad account | Clients who want one supplier for creative performance |
 
-Price the monthly levels as a retainer with a stated number of variants and revision rounds, and treat extra variants and extra rounds as add-ons. Keep the one-off set-up — brief, claims list, voice and presenter choice, locked template — as a separate fee.
+Price the monthly levels as a retainer with a set number of variants and revision rounds. Treat extra variants and extra rounds as add-ons. Keep the one-off setup — brief, claims list, voice and presenter choice, locked template — as a separate fee.
 
-### A pilot that proves value
+### Start with a pilot
 
-Offer a short, fixed-price pilot: one product, one platform, one format, a batch of variants built around a hook test, published and measured against the success number from the brief. Agree before it starts what result turns the pilot into a monthly service. A pilot without a pre-agreed success measure ends in a discussion about taste.
+Offer a short, fixed-price pilot: one product, one platform, one format, a batch of variants built around a hook test, published and measured against the success number in the brief.
 
-### The monthly report
+Agree before it starts what result turns it into a monthly service. A pilot without an agreed success measure ends in a discussion about taste.
 
-One page that shows value: what was published, hook rate and cost per result per variant, which hook won and why, what the next round will test, and anything that changed in the tools or the rules. It is the document that keeps the retainer from looking like rent.
+### Send a monthly report
 
-## Final checklists
+One page that shows value: what was published, hook rate and cost per result for each variant, which hook won and why, what the next round will test, and anything that changed in the tools or the rules.
 
-A checklist does not replace judgement, but it protects against omissions in a repeatable process. Turn these into tasks in your project tool and require a name and date next to every critical check. The answer "it looked fine on my laptop" is not a test.
+It's the document that stops a retainer from feeling like rent.
 
-**Demo readiness**
-- The brief exists and the demo script uses only approved claims.
+## The checklists
+
+A checklist doesn't replace judgement, but it stops you forgetting things in a repeatable process. Turn these into tasks in your project tool, and put a name and a date next to every critical check. "It looked fine on my laptop" is not a test.
+
+**Before a demo**
+- The brief exists, and the demo script uses only approved claims.
 - A stock or photo avatar is used — no real likeness without consent.
-- Voice generated on a paid ElevenLabs plan; brand name pronounced correctly.
-- Captions inside the safe zone; the hook works muted.
+- The voice is generated on a paid ElevenLabs plan, and the brand name is pronounced correctly.
+- Captions are inside the safe zone, and the hook works muted.
 - The AI presenter label is visible.
-- Three hook variants demonstrate the testing idea.
+- Three hook variants show the testing idea.
 
-**Pilot readiness**
-- Signed releases and consent videos on file for every real presenter.
-- Claims list, forbidden list and disclosure text approved by the client's owner.
-- Locked finishing template and naming convention.
-- Quality checklist passed on real phones for every variant.
-- Platform AI labels set; music licensed for the placement.
-- Ad-account access or a reporting export agreed; owner of the daily check named.
+**Before a pilot**
+- Signed releases and consent videos are on file for every real presenter.
+- The claims list, forbidden list and disclosure text are approved by the client.
+- The finishing template and naming convention are locked.
+- Every variant has passed the quality checks on real phones.
+- Platform AI labels are set, and the music is licensed for the placement.
+- Ad-account access or a reporting export is agreed, and someone owns the daily check.
 
-**Production readiness**
-- Credits, plan limits and budget alerts monitored across all four tools.
-- A fallback presenter or tool in case a twin is rejected or a service is down.
-- Rights renewals and takedown procedure calendared.
-- Prompt, template and settings versions traceable to published variants.
-- The client knows what the system can and cannot do.
-- A periodic report and an improvement loop are in place.
+**Before production**
+- Credits, plan limits and budget alerts are monitored across all four tools.
+- There is a fallback presenter or tool if a twin is rejected or a service is down.
+- Rights renewals and the takedown procedure are in the calendar.
+- Prompt, template and settings versions can be traced to every published variant.
+- The client knows what the system can and can't do.
+- There is a regular report and an improvement loop.
+
+## Frequently asked questions
+
+### Are AI UGC ads allowed on TikTok and Meta?
+
+Yes, as long as they follow the platforms' advertising policies. That means labelling realistic AI-generated content, avoiding restricted claims and personal-attribute targeting, using licensed music, and never presenting an AI presenter as a real customer.
+
+### Do I have to disclose that an ad uses an AI avatar?
+
+Generally, yes. The major platforms ask for realistic AI-generated or altered content to be labelled, and consumer protection rules in many markets treat misleading AI testimonials as unfair or illegal. The simplest approach is to set the platform label on every variant and add an on-screen note where the audience would reasonably assume a real person.
+
+### Can I clone a client's voice or face?
+
+Only with the person's explicit consent, a signed release that covers where and how long it will be used, and the platform's own verification — such as HeyGen's consent recording for a Digital Twin. Put a renewal date and a takedown procedure in writing.
+
+### How many variants should I test at once?
+
+Three to five per round is a good start, changing only one thing at a time — the hook first. Judge after 48–72 hours on hook rate, hold and cost per result, then keep, iterate or kill.
+
+### How long should an AI UGC ad be?
+
+A 25–35 second vertical (9:16) video is a sensible first format: long enough for hook, problem, solution, proof and offer, short enough to hold attention. Once you have 20–30 published variants, your own data will tell you whether a shorter or longer cut works better.
+
+### What should I charge for AI video ads?
+
+Work out your real cost per variant first — subscriptions, credits including re-renders, and your time — using the formula in Step 10. Then price by outcome in tiers, with a set number of variants and revision rounds per month, and a separate fee for the one-off setup.
+
+## Where to start
+
+If you do one thing after reading this, write the one-page brief from Step 1 for a real product — even your own. Fill in the approved claims and the success number. You will find out quickly whether there is enough to make an ad about.
+
+Then make one body and five hooks, publish them, and look at the hook rates. That single test teaches you more about AI UGC than any amount of fiddling with avatars.
+
+And if you want the next guide when it's out, the newsletter below sends one email when something new is published. Nothing else.

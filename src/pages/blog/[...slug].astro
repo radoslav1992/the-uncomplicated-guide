@@ -178,8 +178,20 @@ const jsonLd = [
         </aside>
       )}
 
-      <div class="body prose" data-prose>
-        <Content />
+      <div class="body">
+        {post.data.takeaways && post.data.takeaways.length > 0 && (
+          <aside class="takeaways" aria-labelledby="takeaways-heading">
+            <p class="takeaways-heading" id="takeaways-heading">Key takeaways</p>
+            <ul>
+              {post.data.takeaways.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </aside>
+        )}
+        <div class="prose" data-prose>
+          <Content />
+        </div>
       </div>
     </div>
 
@@ -510,6 +522,41 @@ const jsonLd = [
   }
   .body {
     min-width: 0;
+  }
+  .takeaways {
+    margin: 0 0 clamp(28px, 4vw, 40px);
+    padding: 22px 24px 20px;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    background: var(--card);
+  }
+  .takeaways-heading {
+    margin: 0 0 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .takeaways ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .takeaways li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .takeaways li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
   }
   .body :global(h2),
   .body :global(h3) {

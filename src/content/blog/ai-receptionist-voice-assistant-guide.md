@@ -1,98 +1,147 @@
 ---
-title: "24/7 AI Assistants: How to Build, Run and Sell an AI Receptionist"
-seoTitle: "AI Receptionist Guide: Plan, Build, Test and Price a Voice Agent"
-description: "A free, practical guide to AI receptionists and voice agents: where they pay off, how to scope and prompt one, the telephony nobody demos, the tests to run before launch, and how to price a service whose costs rise with every call."
+title: "How to Build, Run and Sell an AI Receptionist"
+seoTitle: "AI Receptionist Guide: How to Build, Test and Price a Voice Agent"
+description: "A step-by-step guide to AI receptionists: how to tell whether a business needs one, write a prompt that holds, connect a real calendar, sort out the phone line, test it properly and price it so busy clients don't cost you money."
 pubDate: 2026-11-11
 kind: guide
 tags: [Voice agents, AI receptionist, Telephony, Pricing]
 image: "/articles/ai-receptionist-voice-assistant-guide.webp"
 imageAlt: "A glowing telephone handset over sound waves, representing an AI voice assistant answering calls"
 socialImage: "/social/ai-receptionist-voice-assistant-guide.png"
+takeaways:
+  - "Start with the calls a business is already missing, not with its hardest conversations."
+  - "Do the money maths before the demo: missed calls × share that would book × value of a booking."
+  - "Decide what a successful call leaves behind before you write a single line of prompt."
+  - "Give the agent a few narrow tools, and never let it confirm something the calendar rejected."
+  - "Telephony is where projects stall. Settle the number, the forwarding and the fallbacks early."
+  - "Run at least 40 deliberately awkward tests before a real caller hears it."
+  - "Charge for the build and the running separately, with a minutes allowance and a stated overage."
 ---
 
-An AI receptionist is a voice agent that answers a business's phone, holds a real conversation, and finishes with something done: an appointment in the calendar, an enquiry in the CRM, or the caller passed to the right person with a short summary. Built well, it picks up the calls nobody was free to answer — at seven in the evening, on a Sunday, while the only person on reception is dealing with someone at the desk.
+*The demo takes an afternoon. Getting it onto a real phone line, and keeping it there, is the actual job.*
 
-Built badly, it is a pleasant voice that solves nothing, and a phone bill that grows with every call.
+I build voice agents for a living — the kind that answer real phone lines and put real appointments into real calendars.
 
-This guide covers the whole job in the order it happens: deciding whether a business should have one at all, scoping and prompting the agent, connecting it to a real calendar, the telephony that most tutorials leave out, the tests to run before it takes a real call, and how to price it so your busiest client does not become your worst margin. It started as a paid PDF and is now free to read here.
+Every one of them looks finished on day one. Someone opens a browser tab, clicks the microphone, asks for an appointment on Thursday, and gets one. Everybody smiles.
 
-**Who it is for.** Developers and studios who want to sell voice agents, not only build them; business owners with a lot of calls who are thinking of doing it themselves; and people who have tried already and got stuck on the telephony.
+Then come the questions nobody asks during a demo. Which number does the agent answer? What happens when the calendar is down? What does it say when somebody asks about a refund? Who pays for the minutes when the client has a busy month?
 
-**What it is not.** It is not a ready-to-import agent or a complete API tutorial — you will still configure the tools and build your own integrations. It explains why as well as how. And it does not pretend the agent replaces a person: it takes the repetitive part, and judgement stays human.
+That second half is where most AI receptionist projects quietly stop. Not because it is hard, but because it is boring, and boring things rarely make it into tutorials.
 
-## What an AI receptionist actually does
+So this guide is mostly about the boring half. It walks through the whole job in the order it happens: deciding whether a business should have an AI receptionist at all, scoping and prompting it, connecting it to a calendar, sorting out the phone line, testing it until it stops surprising you, and pricing it.
 
-Under the friendly voice, every turn of the conversation runs through the same loop. Audio arrives over the phone line. Speech recognition turns it into text while the caller is still speaking. The system decides the caller has finished — the hard, underrated part. A language model reads the conversation and its instructions and decides what to say or do. If it needs a fact — is Thursday at three free? — it calls a tool that asks a real system. Then text-to-speech turns the reply back into audio, streaming the first words before the sentence is complete.
+It is for you if you are a developer or a studio that wants to *sell* voice agents and not only build them, a business owner with more calls than people to answer them, or someone who has already tried and got stuck somewhere around the telephony.
 
-Every stage costs time, and the delay the caller feels is the sum of all of them. Push much past a second of silence and people start talking over the agent or asking *hello?* — which arrives as new input and makes everything worse. That is why the useful engineering question is never "which model is best" but "where is the time going".
+What it won't give you is a ready-to-import agent or a complete API tutorial. You will still configure the tools and build your own integrations. This is everything around that.
 
-What makes it an *agent* rather than a talking FAQ is the last step: it can act in another system. That is also where most of the difficulty moves once the conversation works. If you want the full anatomy — endpointing, barge-in, the pipeline versus speech-to-speech models, and the vocabulary — read [What a voice agent actually is](/blog/what-a-voice-agent-actually-is). The rest of this guide is about putting one to work.
+## What an AI receptionist actually is
 
-## Where it makes sense — and where it doesn't
+An AI receptionist is a voice agent that answers a business's phone, has a real conversation, and finishes with something done: an appointment booked, an enquiry logged, or the caller passed to the right person with a short summary.
 
-Voice agents earn their keep where three things are true at once: the calls are repetitive, the request is narrow, and someone is currently missing them. The appointments nobody answered after hours. The same five questions about prices, opening times and parking, all day. The orders taken on a line that is always engaged.
+That last part is the whole point. A system that talks pleasantly and then tells you to ring back during office hours is a recording with better manners.
 
-They work badly where the conversation *is* the value. Do not start with:
+Under the hood, every turn of the conversation runs through the same loop. The caller's audio arrives over the phone line. Speech recognition turns it into text while they are still talking. The system decides they have finished — a surprisingly hard problem. A language model reads the conversation and decides what to say or do, calling a tool if it needs a real fact like *is Thursday at three free?* Then text-to-speech turns the answer back into audio.
+
+Every one of those steps takes time, and the caller feels the total. Push much past a second of silence and people start talking over the agent, or asking *hello?* — which arrives as new input and makes everything worse.
+
+If you want the full anatomy — endpointing, barge-in, and why latency decides whether it feels human — I wrote it up separately in [What a voice agent actually is](/blog/what-a-voice-agent-actually-is). Here we are going to put one to work.
+
+## What you'll need
+
+Before you start, line up:
+
+- **A voice agent platform.** Something that combines speech recognition, a language model, a voice, turn-taking settings and tool calls. The examples here mention ElevenLabs Agents, but the steps apply to any of the serious platforms.
+- **A phone route.** Either a number on the platform, or forwarding from the business's existing number. Step 6 covers both.
+- **Access to the business's calendar or CRM** — through an API, or through a small webhook or n8n layer you put in between.
+- **A couple of real phones on different networks** for testing. A laptop on office Wi-Fi tells you very little.
+- **An hour with whoever answers the phone today.** Not the owner. The person at reception. They know what callers actually ask.
+
+## Step 1: Check the business actually needs one
+
+AI receptionists earn their keep when three things are true at the same time: the calls are repetitive, the request is narrow, and somebody is currently missing them.
+
+Think of the appointments nobody answered at seven in the evening. The same five questions about prices, opening hours and parking, all day long. The orders taken on a line that is always engaged.
+
+They work badly where the conversation itself is the value. I would not start with:
 
 - Urgent medical, legal or financial decisions where a mistake can cause serious harm.
 - A process without clear rules, where even people in the company give different answers.
-- A case with a very low number of calls and almost no missed opportunities.
-- A complex sale that requires trust, negotiation and a custom offer in the very first conversation.
-- Outbound cold campaigns without a valid legal basis and consent control.
+- A business with very few calls and almost no missed opportunities.
+- A complex sale that needs trust, negotiation and a custom offer in the very first conversation.
+- Outbound cold calling without a valid legal basis and consent.
 
-### Bad first use cases
+### Don't start with the hardest calls
 
-Sometimes the client will want the agent to take over the hardest conversations, because those are the ones that burden the team. That is understandable but not a sensible first stage. When the decision depends on professional judgement, sensitive personal data or a high-value negotiation, the agent is more useful as an assistant: it gathers context, prepares a summary and routes the call to a person.
+Clients often want the agent to take over the most difficult conversations, because those are the ones that wear the team out. It is an understandable wish and a bad first stage.
 
-Start with the dull, high-volume calls. Earn trust there. The harder conversations can come later, if they come at all.
+When the decision depends on professional judgement, sensitive personal data or a high-value negotiation, the agent is far more useful as an assistant: it gathers the context, writes a short summary and routes the call to a person.
 
-## A 15-minute assessment before any demo
+Start with the dull, high-volume calls. Earn trust there. The difficult conversations can come later — if they come at all.
 
-Before you do a technical demonstration, have a short conversation with the owner or the person at reception. Do not ask only what they want the AI to do. Ask how they work now, where calls are lost and how they know a conversation was successful. You will often find that the real problem is not a missing answer but a missing follow-up task or a poor handover to a colleague.
+### Run a 15-minute assessment
 
-| Question | Signal of a good fit |
+Before any demo, have a short conversation with the owner or, better, the person at reception. Don't only ask what they want the AI to do. Ask how they work now, where calls get lost, and how they know a call went well.
+
+You will often find the real problem is not a missing answer but a missing follow-up, or a clumsy handover to a colleague.
+
+These five questions do most of the work:
+
+| Question | What a good fit sounds like |
 | --- | --- |
-| How many calls are missed? | There is a measurable number per week or during peak periods. |
+| How many calls do you miss? | A real number per week, or during peak times. |
 | Do the questions repeat? | More than half are about prices, availability, address, hours and booking. |
-| Is there a clear next step? | Booking, lead, transfer, request or status. |
-| What is one successful conversation worth? | One appointment or order covers a significant part of the monthly price. |
-| Is there access to a calendar, CRM or API? | Yes, or a simple webhook or n8n layer can be added. |
+| Is there a clear next step? | Booking, lead, transfer, request or status update. |
+| What is one successful call worth? | One appointment or order covers a big part of the monthly price. |
+| Can we reach your calendar or CRM? | Yes — or a simple webhook or n8n layer can be added. |
 
-Five "yes" answers and you have a project. Two or fewer and the most useful thing you can do is say so — and keep the client's trust for the day the numbers change.
+Five good answers and you have a project. Two or fewer, and the most useful thing you can do is say so — and keep the client's trust for the day the numbers change.
 
-## Work out whether the numbers add up
+## Step 2: Do the maths before the demo
 
-Do this before a single hour goes into the build, and do it with the client's own figures. The value of an AI receptionist is mostly the value of calls that are currently lost:
+Before anyone spends an hour on the build, work out what the agent is worth, using the client's own numbers. Most of the value of an AI receptionist is the value of calls that are currently lost:
 
 ```text
 monthly value ≈ missed calls per month
-              × share that would have become a booking or sale
+              × share that would have booked or bought
               × value of one booking or sale
 ```
 
-An example, with round numbers you should replace with real ones. A clinic misses about 30 calls a week — roughly 130 a month. Its staff think a quarter of those were people trying to book, so about 32 bookings. A first appointment is worth $60. That is around $1,950 a month of business walking to the next clinic on the list.
+Here is an example with round numbers. Replace them with real ones.
 
-Now compare it with what the service would cost the client each month. If the recovered value is several times the fee, the project can survive the awkward first weeks of tuning. If it is roughly equal, the agent has to be perfect from day one to justify itself, and it will not be. If the clinic only misses three calls a week, the honest answer is that they need a voicemail that gets checked, not an AI.
+A clinic misses about 30 calls a week — roughly 130 a month. The staff reckon a quarter of those were people trying to book, so around 32 bookings. A first appointment is worth $60.
 
-Two things are worth checking while you are there. First, *when* calls are missed: a peak at lunchtime is a different design problem from evenings and weekends. Second, whether the business can actually take the bookings the agent would make — an agent that fills a calendar nobody has time to serve is a new problem, not a solution.
+That is about $1,950 a month walking to the next clinic on the list.
 
-## Define the result before the technology
+Now compare it with what the service would cost the clinic each month. If the recovered value is several times the fee, the project can survive the awkward first weeks of tuning. If it is roughly equal, the agent has to be perfect from day one to justify itself, and it won't be. And if the clinic only misses three calls a week, the honest answer is a voicemail that somebody actually checks.
 
-An agent needs a clear job, clear boundaries and a clear criterion for success.
+While you are at it, check two more things:
 
-It is tempting to start from the prompt or the choice of voice. That creates a feeling of quick progress but often leads to an agent that talks pleasantly and solves nothing. The better order is to describe what should be different at the end of the conversation. For example: the calendar has a valid appointment, the CRM has a qualified lead, or the caller has been transferred to the right person with a short summary.
+- **When the calls are missed.** A lunchtime peak is a different design problem from evenings and weekends.
+- **Whether the business can serve the extra bookings.** An agent that fills a calendar nobody has time for is a new problem, not a solution.
 
-The result must be verifiable by a system or a person. "The customer received good service" is too vague. "The customer was given two real free slots and one of them was booked" is verifiable. The clearer the result, the easier it is to write the prompt, design the tools and build the tests.
+## Step 3: Decide what "done" looks like for a call
+
+It is tempting to start with the prompt or the choice of voice. It feels like progress. It usually produces an agent that talks nicely and solves nothing.
+
+Start instead with what should be different when the call ends. The calendar has a valid appointment. The CRM has a qualified lead. The caller has been transferred to the right person with a one-line summary.
+
+Make it something a system or a person can check. "The customer received good service" is too vague. "The customer was offered two real free slots and booked one of them" is checkable.
+
+The clearer the result, the easier everything after it gets: the prompt, the tools, and especially the tests.
 
 ### Decide where the agent must stop
 
-Write down, with the client and in their words, the situations where the agent hands over: a complaint, an angry caller, anything clinical or legal, a refund, a price it has no business quoting, a caller who asks for a person and means it. Then decide where each one goes — a mobile, a colleague's extension, a callback within the hour.
+Now write down — with the client, in their words — the situations where the agent hands over to a person: a complaint, an angry caller, anything clinical or legal, a refund, a price it has no business quoting, someone who asks for a human and means it.
 
-An agent that says *"I'll have someone call you back about that within the hour"* and reliably makes it happen is worth more than one that improvises. The handover is a feature, not a failure. Put the stop conditions in the prompt as hard rules, and test them by trying to talk the agent past them.
+Then decide where each one goes. A mobile number. A colleague's extension. A callback within the hour.
 
-## A prompt that keeps the agent on the rails
+An agent that says *"I'll have someone call you back about that within the hour"* — and reliably makes that happen — is worth more than one that improvises. The handover is a feature, not a failure.
 
-A good system prompt for a voice agent is short, specific and organised by job, not a page of adjectives. This structure has held up across real builds; replace the placeholders and the boundaries with the client's own.
+## Step 4: Write a prompt that keeps the agent on the rails
+
+A good prompt for a voice agent is short, specific and organised by job. It is not a page of adjectives about being friendly and helpful.
+
+This is the structure I start from. Replace the placeholders and the boundaries with the client's own:
 
 ```text
 # ROLE
@@ -135,187 +184,257 @@ Summarise in one sentence what was done and what happens next.
 Ask whether there is anything else. If not, close politely.
 ```
 
-Notice what is doing the work. *One question at a time* and *short lines* matter more on the phone than anywhere else — a caller cannot scroll back. *Confirm it back* catches the misheard name before it becomes a wrong booking. And *report the tool's actual result* is the line that stops the most damaging failure of all: an agent cheerfully confirming an appointment the calendar rejected.
+A few lines are doing more work than they look:
 
-### What the prompt does not control
+- **"One question at a time" and "short lines"** matter more on the phone than anywhere else. A caller can't scroll back.
+- **"Confirm it back"** catches the misheard name before it turns into a wrong booking.
+- **"Report the tool's actual result"** prevents the most damaging failure of all: an agent cheerfully confirming an appointment the calendar rejected.
 
-The prompt is not the place for pause, interruption and conversation-length settings. Platforms such as ElevenLabs separate the conversation-flow mechanics from the behaviour of the language model. Configure them in the corresponding sections of the platform.
+### Some problems aren't prompt problems
 
-This separation helps with diagnosis. If the agent cuts the caller off, the problem is probably in the turn-taking settings, not in the instruction "be patient". If it talks too long, then the prompt really does matter: require short lines and one question at a time. Always change the right layer, otherwise you pile up instructions that cannot affect the problem.
+Pauses, interruptions and conversation length are not controlled by the prompt. Platforms such as ElevenLabs keep the conversation-flow mechanics separate from the language model's behaviour, and you configure them in their own settings.
 
-### How to improve the prompt
+That separation is useful when something goes wrong. If the agent cuts callers off, the problem is probably the turn-taking settings, not a missing instruction to "be patient". If it talks too long, then the prompt really does matter — ask for short lines and one question at a time.
 
-Do not edit the prompt after one odd conversation. Collect a few similar examples and formulate the general rule that is missing. Then create a test for that case. This way every change solves a class of problems and stays protected from future regressions.
+Always change the right layer. Otherwise you pile up instructions that can't affect the problem.
 
-## Connecting a real calendar and real data
+### Improve it with patterns, not panic
 
-The conversation is the visible part. The tools are where an agent becomes useful — and where it can do real damage. Give the model a small set of well-described actions, each with a narrow job:
+Don't edit the prompt after one odd call. Collect a few similar examples, work out the general rule that is missing, and add a test for that case.
 
-| Tool | What it does | What it must handle |
+That way every change fixes a whole class of problems and stays protected when you change something else later.
+
+## Step 5: Connect it to a real calendar
+
+The conversation is the part everyone sees. The tools are where the agent becomes useful — and where it can do real damage.
+
+Give the model a small set of well-described actions, each with a narrow job. For a typical booking business, that looks something like this:
+
+| Tool | What it does | What it has to cope with |
 | --- | --- | --- |
-| `check_availability` | Returns real free slots for a service and date range | No slots; a date in the past; a closed day |
-| `book_appointment` | Writes a booking after the caller confirmed it | Slot taken in the meantime; duplicate request; invalid phone number |
-| `find_booking` | Finds an existing booking by phone number and name | No match; several matches |
-| `move_or_cancel` | Changes or cancels a booking the caller owns | Booking not found; change too close to the time |
+| `check_availability` | Returns real free slots for a service and date range | No slots, a past date, a closed day |
+| `book_appointment` | Books a slot the caller has confirmed | Slot taken meanwhile, a duplicate request, a bad phone number |
+| `find_booking` | Finds an existing booking by phone number and name | No match, several matches |
+| `move_or_cancel` | Changes or cancels a booking the caller owns | Booking not found, change too close to the time |
 | `create_enquiry` | Logs a callback request or lead with a summary | Missing contact details |
-| `transfer_call` | Hands the call to a person with context | Nobody answers; line busy; out of hours |
+| `transfer_call` | Hands the call to a person, with context | Nobody answers, line busy, out of hours |
 
-Static facts — opening hours, address, services, parking — belong in the knowledge base. Anything that changes — availability, a customer's booking, an order status — must come from a tool, every time. An agent that answers "are you free on Thursday?" from a knowledge base written last month will be confidently wrong.
+Keep static facts — opening hours, address, services, parking — in the knowledge base. Anything that changes — availability, an existing booking, an order status — must come from a tool, every single time. An agent that answers "are you free on Thursday?" from a document written last month will be wrong with total confidence.
 
 Three rules prevent most tool disasters:
 
 1. **Read back before any write.** Name, date, time and service, confirmed by the caller, before `book_appointment` runs.
-2. **Treat every write as possibly repeated.** Callers say "yes" twice, networks retry, the model calls a tool again. Pass a unique request reference so the calendar can refuse a duplicate rather than create one.
-3. **Decide in advance what the agent says when a tool fails.** A timeout, a 401 or a 500 should lead to a calm, honest line — "I can't confirm that right now; I'll make sure someone calls you back today" — and an enquiry logged for a person, never an invented confirmation.
+2. **Assume every write can happen twice.** Callers say "yes" twice, networks retry, models call tools again. Send a unique request reference so the calendar can refuse a duplicate instead of creating one.
+3. **Decide in advance what the agent says when a tool fails.** A timeout or a server error should lead to a calm, honest line — *"I can't confirm that right now; I'll make sure someone calls you back today"* — and an enquiry logged for a person. Never an invented confirmation.
 
-If the business has no API, it does not have to stop the project. A small webhook or n8n layer between the agent and a shared calendar is often enough for a first version — just test its failure modes as seriously as you would a real API's.
+No API? That doesn't have to end the project. A small webhook or n8n layer between the agent and a shared calendar is often enough for a first version. Just test its failure modes as seriously as you would a real API's.
 
-## Telephony: the part nobody demos
+## Step 6: Sort out the phone line
 
-Every voice agent demo runs in a browser tab. A live agent needs a phone number, a route from that number into the model, a defined outcome for every way the call can go wrong, and somebody paying for the minutes. That missing half is where projects stall two-thirds of the way in — not because it is technical, but because it is boring and involves other people's money. There is a longer piece on this in [The part of a voice agent nobody demos](/blog/the-part-nobody-demos); here is the working version.
+Every voice agent demo runs in a browser. A live agent needs a phone number, a route from that number to the agent, a plan for every way a call can go wrong, and someone paying for the minutes.
 
-### Who owns the number
+This is the part that stalls projects two-thirds of the way in. I wrote a whole piece on why — [The part of a voice agent nobody demos](/blog/the-part-nobody-demos) — so here is the practical version.
 
-The number is the client's asset, often older than their website and printed on things you cannot recall. There are three paths:
+### Choose how the calls reach the agent
 
-- **Forward the existing number** to a number on the agent's platform. The fastest way live: nothing is moved, and switching back is one setting.
-- **Port the number** to the platform or telephony provider that runs the agent. Cleaner long-term, slower, and a process with the client's current carrier rather than with you.
-- **Take a new number** for a trial — a separate line for out-of-hours calls, or for one campaign — and leave the main line untouched.
+The phone number belongs to the client. It is often older than their website and printed on things you can't recall. You have three options:
 
-For a first project, forwarding is almost always right.
+- **Forward the existing number** to a number on the agent's platform. Fastest to go live, nothing moves, and switching back is one setting.
+- **Port the number** to the platform or telephony provider that runs the agent. Cleaner in the long run, slower, and a process with the client's current carrier rather than with you.
+- **Use a new number** for a trial — say, a separate out-of-hours line — and leave the main line alone.
 
-### Forwarding when the line is busy or unanswered
+For a first project, forwarding is almost always the right call.
 
-The agent rarely needs to answer every call. More often it should take the calls the team cannot: when the line is busy, when nobody picks up after a few rings, and outside opening hours. Most carriers support exactly this as *conditional call forwarding* — separate rules for busy, no answer and unreachable. On many mobile networks they can be set from the handset with standard codes (for example `**67*` for busy and `**61*` for no answer, followed by the number); on landlines and business phone systems it is a setting in the provider's portal. Check with the carrier rather than assuming.
+### Forward only the calls the team can't take
 
-Then test every condition from an outside phone: call while the line is busy, let it ring out, call after hours. Check also whether the caller's number reaches the agent — without caller ID, a "we'll call you back" promise is much harder to keep.
+The agent rarely needs to answer every call. More often it should take the ones the team can't: when the line is busy, when nobody picks up after a few rings, and outside opening hours.
 
-### What happens when the agent doesn't answer
+Most carriers support exactly this as *conditional call forwarding*, with separate rules for busy, no answer and unreachable. On many mobile networks you can set them from the handset with standard codes — for example `**67*` for busy and `**61*` for no answer, followed by the number. On landlines and business phone systems it is a setting in the provider's portal. Check with the carrier rather than assuming.
 
-Not *if*. Write this table before you write the prompt:
+Then test every condition from an outside phone. Call while the line is busy. Let it ring out. Call after hours. And check that the caller's number actually reaches the agent — without caller ID, "we'll call you back" is a much harder promise to keep.
+
+### Plan for when the agent can't answer
+
+Not *if*. *When*. Write this table before you write the prompt:
 
 | Situation | Where the call goes |
 | --- | --- |
-| The agent platform or model is down | Straight to a human number or a voicemail box that someone checks |
-| The question is out of scope | A callback promise, an enquiry logged with a summary |
+| The agent platform or model is down | Straight to a person, or a voicemail someone checks |
+| The question is out of scope | A callback promise and an enquiry with a summary |
 | The caller asks for a person | Transfer to the agreed number, with context |
-| The transfer is not answered | Take a message, confirm a callback time, log it |
-| Two calls arrive at once | Within the concurrency limit: answered; above it: voicemail or a polite "please call back in a few minutes" |
+| Nobody answers the transfer | Take a message, confirm a callback time, log it |
+| Two calls arrive at once | Within the concurrency limit: answered. Above it: voicemail or "please call back in a few minutes" |
 | Out of hours, urgent matter | The out-of-hours instruction the client gave you — never improvised |
 
-It takes twenty minutes, and it is the difference between a system and a demo with a phone number attached.
+It takes about twenty minutes. It is the difference between a system and a demo with a phone number attached.
 
-### Who pays for the minutes
+### Agree who pays for the minutes
 
-Voice costs stack per minute: the telephony leg, speech recognition, the language model, speech synthesis, plus a monthly rent for the number. Every one of those scales with how well the client's business is doing. Decide who carries them — you, inside a monthly fee with an allowance, or the client directly on their own accounts — before anything goes live. The pricing chapter below shows how to do the arithmetic.
+Voice costs stack up per minute: the phone line, speech recognition, the language model and the voice, plus a monthly fee for the number. All of them grow with how well the client's business is doing.
 
-## Testing before production
+Decide who carries them — you, inside a monthly fee with an allowance, or the client directly — before anything goes live. Step 8 shows how to do the arithmetic.
 
-The goal is not for the agent to pass the ideal scenario, but to behave safely in the bad one.
+## Step 7: Try to break it before callers do
 
-Voice agents often look ready after a few good demonstrations. That is misleading, because the demonstration follows the creator's script. A real caller interrupts, changes the subject, speaks unclearly and asks a question nobody anticipated. Tests must deliberately create these situations.
+The goal is not for the agent to pass the perfect scenario. It is for it to behave safely in the bad one.
 
-Split the tests into two groups. Deterministic tests check a specific rule or answer. Simulation tests follow whether the whole conversation reaches a result. Add real phone tests too, because a text simulation cannot detect a problem with a pause, noise or an interruption.
+Voice agents look ready after a few good demos, which is exactly why demos are misleading: they follow the creator's script. Real callers interrupt, change the subject, mumble, and ask the one thing nobody thought of. Your tests have to create those situations on purpose.
 
-### A minimum of 40 tests
+I split tests into two kinds. **Deterministic tests** check one specific rule or answer. **Simulation tests** follow a whole conversation and check that it reaches a result. Then I add **real phone calls**, because a text simulation can't detect a problem with a pause, background noise or an interruption.
 
-The number is not magic. It simply forces you out of the five comfortable scenarios. For each tool create at least one success, one business error and one technical error. For each critical field test unclear pronunciation and a correction from the caller.
+### Aim for at least 40 tests
 
-| Group | Example tests |
+There is nothing magic about forty. It simply forces you out of the five comfortable scenarios.
+
+For every tool, test at least one success, one business error and one technical error. For every critical field — names, numbers, dates — test unclear pronunciation and a caller correcting themselves.
+
+| Area | What to throw at it |
 | --- | --- |
-| Normal | The 5 most common questions, booking, change, cancellation, transfer |
-| Speech | Noise, quiet speech, fast speech, interruption, long pause, dialect |
-| Data | Local names, phone number in groups, email, address, date and time |
+| Normal calls | The 5 most common questions, booking, change, cancellation, transfer |
+| Speech | Noise, quiet speech, fast speech, interruption, long pause, accents |
+| Data | Local names, phone numbers read in groups, email, address, dates and times |
 | Tools | No slot, conflict, timeout, 401, 500, duplicate, invalid input |
-| Boundaries | Discount, personal data, medical or legal question, prompt injection |
-| Escalation | No operator, busy, failed transfer, callback |
-| Telephony | Different carriers, caller ID, voicemail, bad connection, long conversation |
+| Boundaries | Discount requests, personal data, medical or legal questions, prompt injection |
+| Escalation | No operator, busy line, failed transfer, callback |
+| Telephony | Different carriers, caller ID, voicemail, bad connection, very long calls |
 
-### Launch criteria
+### Agree what "ready" means before testing
 
-The criteria must be agreed in advance. Otherwise, after the tests, everyone will have a different opinion about whether the agent is "good enough". Divide defects into blocking, serious and cosmetic. An invented action, an incorrect confirmation or a missing disclosure are blocking, while a slightly unnatural phrase can wait until after the pilot.
+Agree the launch criteria with the client *before* the tests. Otherwise everyone ends up with a different opinion of "good enough".
 
-- Zero invented bookings or confirmations on tool failure.
-- 100% correct notification that it is an AI agent.
-- All write actions have confirmation before execution.
-- Critical fields are read back.
-- The transfer and fallback process work.
-- There is monitoring, an incident owner and a way to switch off or reroute quickly.
+Sort defects into blocking, serious and cosmetic. An invented action, a wrong confirmation or a missing AI disclosure is blocking. A slightly unnatural phrase can wait until after the pilot.
 
-The AI disclosure is not a nicety. In the EU, the AI Act requires that people are told when they are talking to an AI system, and many other countries and telecom rules point the same way. If calls are recorded or transcribed, say that at the start too; the rules on recording differ by country.
+These are my minimum launch criteria:
 
-### Pilot
+- Zero invented bookings or confirmations when a tool fails.
+- The agent says it is an AI on every call.
+- Every write action is confirmed by the caller first.
+- Critical details are read back.
+- Transfers and fallbacks work.
+- There is monitoring, a named person responsible for incidents, and a quick way to switch the agent off or reroute calls.
 
-Start with a limited window: outside working hours, one type of call or a percentage of traffic. Review the first 20–50 conversations manually. Then adjust the prompt, knowledge, tools and turn-taking based on data, not on feel.
+The AI disclosure is not just good manners. In the EU, the AI Act requires that people are told when they are talking to an AI system, and other countries and telecom rules point the same way. If calls are recorded or transcribed, say that at the start as well — recording rules differ from country to country.
 
-## Pricing a service whose costs rise with every call
+### Launch small
 
-Most services have costs that sit still. A voice agent costs you something every minute it is on a call, which means the bill you receive is set by how well your client's business is going. Price it the usual way — one flat monthly number — and the clients you are happiest to have quietly become your worst margin. The long version is [What to charge when the work costs you per minute](/blog/charging-for-work-that-costs-per-minute); these are the rules.
+Start with a limited pilot: outside working hours only, one type of call, or a share of the traffic. Listen to the first 20–50 conversations yourself.
 
-### Separate what happens once from what happens monthly
+Then adjust the prompt, the knowledge base, the tools and the turn-taking based on what you heard — not on what you feel.
 
-**The one-off price** covers the build: the assessment, scoping the result and the stop conditions, the prompt, the knowledge base, the tool connections, the telephony set-up and forwarding tests, the 40-plus tests and the pilot review. It is worth what it is worth whether the client stays two months or two years.
+## Step 8: Price it so busy clients don't cost you money
 
-**The monthly fee** covers the running: platform subscriptions, the number, usage up to an included allowance, monitoring, conversation reviews, prompt and knowledge updates, re-running the tests after every change, and a short monthly report.
+Most services have costs that sit still. A voice agent costs you something every minute it is on the phone, which means your bill depends on how well your client's business is doing.
 
-Do not bury the build inside a low monthly fee to make the first invoice friendlier. You will have financed the client's setup, recoverable only if they stay — which they are least likely to do in exactly the case where you spent the most.
+Price it the usual way — one flat monthly number — and your happiest clients slowly become your worst margins. There is a longer version of this in [What to charge when the work costs you per minute](/blog/charging-for-work-that-costs-per-minute). Here are the rules I work by.
 
-### Do the arithmetic on a bad month
+### Charge for the build and the running separately
 
-Write the running cost as what it is:
+**The one-off price** covers the build: the assessment, defining the result and the stop conditions, the prompt, the knowledge base, the tool connections, the telephony and forwarding tests, the 40-plus tests and the pilot review.
+
+**The monthly fee** covers the running: platform subscriptions, the number, usage up to an included allowance, monitoring, reviewing conversations, updates to the prompt and knowledge base, re-running the tests after each change, and a short monthly report.
+
+Don't hide the build inside a low monthly fee to make the first invoice look friendlier. You will have financed the client's setup, and you only get it back if they stay — which is least likely in exactly the projects where you spent the most.
+
+### Run the numbers on a bad month
+
+Write the running cost as what it really is:
 
 ```text
 monthly cost = fixed platform and number costs
              + (minutes × all-in cost per minute)
 ```
 
-Then calculate it at three or four times the volume the client expects — the month they put the number on a van, or a competitor closes. If that month loses you money, the structure is wrong, not the price.
+Then calculate it at three or four times the volume the client expects. That is the month they put the number on their van, or a competitor closes down. If that month loses you money, the structure is wrong — not the price.
 
 ### Include an allowance and state the overage
 
+Something like this, in writing, before anyone signs:
+
 > $400 a month includes up to 800 minutes. Above that, 25 cents a minute, billed monthly.
 
-Two sentences, said before anyone signs, replace a difficult email six months later. Set the allowance near what the client actually expects to use: an allowance nobody reaches is a discount you gave away; one everybody blows through by the fourth of the month is an argument every month.
+Two sentences now save a very awkward email six months later.
 
-### Price the outcome, meter the usage
+Set the allowance close to what the client actually expects to use. An allowance nobody reaches is a discount you gave away. One that everyone blows through by the fourth of the month is an argument every month.
 
-Meter the minutes so the cost side never runs away from you. But do not sell the service *as* minutes, or the client will compare you with the cheapest possible source of minutes. What they are buying is that the phone gets answered and the calendar fills. If the assessment showed that is worth a couple of thousand a month to them, the conversation about your fee is not a conversation about your costs.
+### Sell the outcome, meter the minutes
 
-## Running it after launch
+Meter the minutes so your costs never run away from you. But don't sell the service *as* minutes, or the client will compare you with the cheapest minutes they can find.
 
-A voice agent is not finished when it goes live; it is finished when it is boring. The work after launch is small, regular and easy to skip:
+What they are buying is a phone that gets answered and a calendar that fills. If the maths from Step 2 says that is worth a couple of thousand a month to them, the conversation about your fee isn't really about your costs.
 
-- **Review conversations weekly** at first, then monthly. Read the ones that ended in a transfer, a failed tool call or a hang-up before the result.
-- **Version the prompt and the knowledge base.** Every change gets a date, a reason and a re-run of the test suite. A fix for one class of call that breaks another is the most common regression.
-- **Watch the failure signals:** tool errors, transfers nobody answered, calls longer than usual, minutes far above the allowance.
-- **Name an incident owner** and keep the switch-off route tested: if the platform has a bad day, calls must go straight to a person.
-- **Send a one-page monthly report:** calls answered, bookings or enquiries created, transfers, failures and what was changed. It is what makes the monthly fee feel like value rather than rent.
+## Step 9: Keep it boring after launch
 
-Above all, tell the client in advance where it will break. Every agent has edges — a strong accent on a bad line, a request nobody anticipated, a calendar that went down. A client who heard about those edges from you at the start treats them as known limits. A client who discovers them alone treats them as your failure.
+A voice agent isn't finished when it goes live. It is finished when it becomes boring.
 
-## Launch checklist
+The work after launch is small, regular and very easy to skip:
 
-Use this as the last gate before real calls reach the agent.
+- **Review conversations** weekly at first, then monthly. Start with the ones that ended in a transfer, a failed tool call or a hang-up.
+- **Version the prompt and the knowledge base.** Every change gets a date, a reason and a re-run of the tests. A fix for one kind of call that breaks another is the most common regression.
+- **Watch the warning signs:** tool errors, unanswered transfers, unusually long calls, minutes far above the allowance.
+- **Keep the off-switch tested.** If the platform has a bad day, calls must go straight to a person.
+- **Send a one-page monthly report:** calls answered, bookings and enquiries created, transfers, failures, and what you changed. It is what makes the monthly fee feel like value instead of rent.
+
+Above all, tell the client in advance where the agent will break. Every agent has edges — a strong accent on a bad line, a request nobody expected, a calendar that went down for an hour.
+
+A client who heard about those edges from you at the start treats them as known limits. A client who discovers them alone treats them as your failure.
+
+## The launch checklist
+
+Use this as the last gate before real callers reach the agent.
 
 **Scope**
-- The result of a successful call is written down and verifiable.
-- Stop conditions and handover destinations are agreed with the client.
-- The numbers add up on the client's own figures, including a bad month.
+- The result of a successful call is written down and checkable.
+- Handover rules and destinations are agreed with the client.
+- The numbers work on the client's own figures — including a bad month.
 
 **Agent**
-- The prompt states that it is an AI assistant at the start of every call.
-- Critical fields are confirmed back; write actions need confirmation.
-- Every tool has a tested success, business error and technical error path.
+- It says it is an AI at the start of every call.
+- Critical details are confirmed back, and write actions need a "yes" first.
+- Every tool has a tested success, business-error and technical-error path.
 - Live facts come from tools; the knowledge base holds only stable facts.
 
-**Telephony**
+**Phone line**
 - Forwarding works for busy, no answer and out of hours, tested from an outside phone.
 - Caller ID reaches the agent, or the agent asks for a callback number.
-- The fallback route works when the agent platform is unavailable.
-- Concurrency limits are known and the overflow behaviour is tested.
+- There is a fallback route when the agent platform is down.
+- You know the concurrency limit, and the overflow behaviour is tested.
 
 **Launch**
 - At least 40 tests pass against the agreed launch criteria.
-- The pilot window is limited, and the first 20–50 conversations are reviewed by hand.
-- Monitoring, an incident owner and a switch-off route are in place.
+- The pilot is limited, and you have listened to the first 20–50 calls.
+- Monitoring, an incident owner and an off-switch are in place.
 - The client has the price, the allowance and the overage in writing — and knows where the agent will break.
+
+## Frequently asked questions
+
+### How much does an AI receptionist cost to run?
+
+There is a fixed part — platform subscriptions and a monthly fee for the number — and a per-minute part made up of the phone line, speech recognition, the language model and the voice. Prices vary by provider and change often, so work out an all-in cost per minute from the current price pages and use the formula in Step 8. Always check the result at three or four times the expected call volume.
+
+### Can an AI receptionist use the business's existing phone number?
+
+Yes. The quickest way is to forward calls from the existing number — often only when the line is busy, unanswered or closed — to a number on the agent's platform. You can also port the number to the provider that runs the agent, which is cleaner but slower.
+
+### Does an AI receptionist have to say it's an AI?
+
+It should, on every call. In the EU the AI Act requires people to be told when they are interacting with an AI system, and callers trust an agent more when it is upfront about it. If calls are recorded or transcribed, say so as well.
+
+### What happens when the AI doesn't understand the caller?
+
+A well-built agent says which part it missed and asks again, confirms names and numbers back, and hands over to a person — or takes a callback request — when it still can't help. That behaviour has to be written into the prompt and tested; it doesn't happen by default.
+
+### How long does it take to build one?
+
+A working prototype can come together in a day or two. The time goes into the parts around it: integrations, the phone line and forwarding, the tests and the pilot. Plan the whole project in weeks rather than days, and let the pilot decide when it is ready.
+
+### Can it make outbound calls too?
+
+Technically, yes. But outbound calling has stricter legal requirements — consent and a valid legal basis, depending on the country — and it is a poor first project. Get an inbound agent working reliably first.
+
+## Where to start
+
+If you only do one thing after reading this, do the 15-minute assessment from Step 1 with a real business, and run the numbers from Step 2 on their figures. You will know within the hour whether there is a project.
+
+If there is, build in the order of this guide: the result, then the prompt, then the tools, then the phone line, then the tests. The voice and the clever demo come last, because they matter least.
+
+And if you want the next guide when it's out, the newsletter below sends one email when something new is published. Nothing else.

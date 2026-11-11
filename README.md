@@ -81,6 +81,9 @@ tags: [Video, Ads]
 image: /articles/my-article.webp          # optional 16:9 hero, or /media/article-images/<file> from R2
 imageAlt: What the image shows
 socialImage: /social/my-article.png       # optional 1200×630 share card
+takeaways:                                # optional "Key takeaways" box above the body
+  - One line a reader can act on.
+  - Three to seven of them.
 guide: ai-ugc-video-ads-guide             # optional: the guide this article belongs with
 draft: false                              # optional: true keeps it out of the build
 ---

@@ -37,6 +37,11 @@ const blog = defineCollection({
      */
     socialImage: z.string().optional(),
     /**
+     * Optional "Key takeaways": three to seven one-line points, shown in a box above
+     * the article body. Write them so a reader who stops there still learns something.
+     */
+    takeaways: z.array(z.string()).optional(),
+    /**
      * Slug of a guide (another article with `kind: guide`) this piece belongs with.
      * Shows a "read the full guide" card at the end of the article.
      */
