@@ -3,7 +3,6 @@ import { render } from "astro:content";
 import { Image } from "astro:assets";
 import Base from "../../layouts/Base.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
-import SignupForm from "../../components/SignupForm.astro";
 import portrait from "../../assets/portrait.webp";
 import {
   getPosts,
@@ -95,48 +94,57 @@ const jsonLd = [
     section: category.name,
   }}
   jsonLd={jsonLd}
+  signupSource={`blog:${post.id}`.slice(0, 40)}
 >
   <article class="post">
-    <div class:list={["container post-grid", { "with-toc": showToc, "with-hero": post.data.image }]}>
+    <div class="container">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/blog">Articles</a></li>
+          <li><a href={categoryHref}>{category.name}</a></li>
+        </ol>
+      </nav>
+
       <header class="post-head">
-        <nav class="crumbs" aria-label="Breadcrumb">
-          <ol>
-            <li><a href="/">Home</a></li>
-            <li><a href="/blog">Articles</a></li>
-            <li><a href={categoryHref}>{category.name}</a></li>
-          </ol>
-        </nav>
-        <h1>{post.data.title}</h1>
-        <p class="standfirst">{post.data.description}</p>
-        <div class="byline">
-          <Image
-            src={portrait}
-            alt=""
-            width={44}
-            height={44}
-            widths={[44, 88]}
-            sizes="44px"
-            loading="eager"
-          />
-          <p>
-            <span class="byline-name">
-              By <a href="/#author">{site.author.name}</a>
-            </span>
-            <span class="byline-meta">
-              <time datetime={post.data.pubDate.toISOString()}>
+        <div class="post-meta">
+          <ul class="chips">
+            <li><a class="chip" href={categoryHref}>{category.name}</a></li>
+            <li>
+              <time class="chip" datetime={post.data.pubDate.toISOString()}>
                 {formatDate(post.data.pubDate)}
               </time>
-              {post.data.updatedDate && (
-                <Fragment>
-                  {" "}· Updated{" "}
-                  <time datetime={post.data.updatedDate.toISOString()}>
-                    {formatDate(post.data.updatedDate)}
-                  </time>
-                </Fragment>
-              )}
-              {" "}· {minutes} min read
-            </span>
-          </p>
+            </li>
+            <li><span class="chip">{minutes} min read</span></li>
+          </ul>
+          <div class="written-by">
+            <Image
+              src={portrait}
+              alt=""
+              width={64}
+              height={64}
+              widths={[64, 128]}
+              sizes="64px"
+              loading="eager"
+            />
+            <p>
+              <span>Written by</span>
+              <a href="/#author">{site.author.name}</a>
+              <span>{site.author.role}</span>
+            </p>
+          </div>
+        </div>
+        <div class="post-title">
+          <h1>{post.data.title}</h1>
+          <p class="standfirst">{post.data.description}</p>
+          {post.data.updatedDate && (
+            <p class="updated">
+              Updated{" "}
+              <time datetime={post.data.updatedDate.toISOString()}>
+                {formatDate(post.data.updatedDate)}
+              </time>
+            </p>
+          )}
         </div>
       </header>
 
@@ -154,131 +162,129 @@ const jsonLd = [
         </figure>
       )}
 
-      {showToc && (
-        <aside class="toc" aria-label="In this article">
-          <details open data-toc>
-            <summary>In this article</summary>
-            <ol>
-              {chapters.map((h) => (
-                <li>
-                  <a href={`#${h.slug}`} data-toc-link={h.slug}>
-                    {h.text}
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </details>
+      <div class:list={["post-grid", { "no-toc": !showToc, "no-hero": !post.data.image }]}>
+        <aside class="post-rail">
+          {showToc && (
+            <nav class="toc" aria-label="In this article">
+              <details open data-toc>
+                <summary>In this article</summary>
+                <ol>
+                  {chapters.map((h) => (
+                    <li>
+                      <a href={`#${h.slug}`} data-toc-link={h.slug}>
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </details>
+            </nav>
+          )}
         </aside>
-      )}
 
-      <div class="post-body">
-        {post.data.takeaways && post.data.takeaways.length > 0 && (
-          <aside class="takeaways" aria-labelledby="takeaways-heading">
-            <p class="takeaways-heading" id="takeaways-heading">Key takeaways</p>
-            <ul>
-              {post.data.takeaways.map((point) => (
-                <li>{point}</li>
-              ))}
-            </ul>
-          </aside>
-        )}
-        <div class="prose" data-prose>
-          <Content />
+        <div class="post-body">
+          {post.data.takeaways && post.data.takeaways.length > 0 && (
+            <aside class="takeaways" aria-labelledby="takeaways-heading">
+              <p class="pill" id="takeaways-heading">Key takeaways</p>
+              <ul>
+                {post.data.takeaways.map((point) => (
+                  <li>{point}</li>
+                ))}
+              </ul>
+            </aside>
+          )}
+          <div class="prose" data-prose>
+            <Content />
+          </div>
+
+          <footer class="post-foot">
+            {post.data.tags.length > 0 && (
+              <div class="tags">
+                <span>Tags:</span>
+                <ul class="tag-list" aria-label="Topics">
+                  {post.data.tags.map((tag) => (
+                    <li>{tag}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <div class="author-box">
+              <Image
+                src={portrait}
+                alt=""
+                width={96}
+                height={96}
+                widths={[96, 192]}
+                sizes="96px"
+                loading="lazy"
+              />
+              <div>
+                <p class="author-label">Written by</p>
+                <p class="author-name">{site.author.name}</p>
+                <p class="author-bio">{site.author.bio}</p>
+                <a href="/contact" class="arrow-link">Ask a question</a>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
-
-      <footer class="post-foot">
-        {post.data.tags.length > 0 && (
-          <ul class="tag-list" aria-label="Topics">
-            {post.data.tags.map((tag) => (
-              <li>{tag}</li>
-            ))}
-          </ul>
-        )}
-        <div class="author-box">
-          <Image
-            src={portrait}
-            alt=""
-            width={80}
-            height={80}
-            widths={[80, 160]}
-            sizes="80px"
-            loading="lazy"
-          />
-          <div>
-            <p class="author-label">Written by</p>
-            <p class="author-name">{site.author.name}</p>
-            <p class="author-bio">{site.author.bio}</p>
-            <a href="/contact" class="arrow-link">Ask a question →</a>
-          </div>
-        </div>
-      </footer>
     </div>
   </article>
 
-  <div class="container post-after">
-    {related.length > 0 && (
-      <section class="related" aria-labelledby="related-heading">
+  {related.length > 0 && (
+    <section class="related" aria-labelledby="related-heading">
+      <div class="container">
         <div class="section-head">
-          <div>
-            <p class="eyebrow">Keep reading</p>
-            <h2 id="related-heading">Related articles</h2>
+          <span class="pill">Journal</span>
+          <div class="section-title-row">
+            <h2 id="related-heading" class="title-lg">
+              Keep <em>reading</em>
+            </h2>
+            <a href={categoryHref} class="arrow-link">
+              All {category.name} articles
+            </a>
           </div>
-          <a href={categoryHref} class="arrow-link">
-            All {category.name} articles →
-          </a>
         </div>
         <div class="card-grid">
-          {related.map((p) => (
-            <ArticleCard post={p} />
+          {related.map((p, i) => (
+            <ArticleCard post={p} index={i} />
           ))}
         </div>
-      </section>
-    )}
-
-    <section class="post-signup">
-      <div class="signup-box">
-        <div>
-          <p class="eyebrow">Newsletter</p>
-          <h2>Get the next one.</h2>
-          <p>
-            One email when a new article is published. A couple a month at most,
-            one click to leave.
-          </p>
-        </div>
-        <SignupForm source={`blog:${post.id}`.slice(0, 40)} />
       </div>
     </section>
-  </div>
+  )}
 </Base>
 
 <script>
-  // Highlight the chapter being read in the table of contents.
-  const links = new Map<string, HTMLAnchorElement>();
-  document
-    .querySelectorAll<HTMLAnchorElement>("[data-toc-link]")
-    .forEach((a) => links.set(a.dataset.tocLink!, a));
-  if (links.size && "IntersectionObserver" in window) {
-    const visible = new Set<string>();
-    const order = [...links.keys()];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) visible.add(entry.target.id);
-          else visible.delete(entry.target.id);
-        }
-        const current = order.find((id) => visible.has(id));
-        if (!current) return;
-        links.forEach((a, id) =>
-          a.toggleAttribute("aria-current", id === current),
-        );
+  // Highlight the chapter being read in the table of contents: the last heading
+  // that has scrolled past the top of the viewport, or none above the first one.
+  const tocLinks = [...document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]")];
+  const headings = tocLinks
+    .map((link) => document.getElementById(link.dataset.tocLink!))
+    .filter((el): el is HTMLElement => Boolean(el));
+  if (headings.length) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      let current = "";
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top > 140) break;
+        current = heading.id;
+      }
+      for (const link of tocLinks) {
+        link.toggleAttribute("aria-current", link.dataset.tocLink === current);
+      }
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(update);
       },
-      { rootMargin: "-90px 0px -65% 0px" },
+      { passive: true },
     );
-    order.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
+    update();
   }
 
   // On narrow screens the table of contents starts closed and closes after a jump.
@@ -315,122 +321,107 @@ const jsonLd = [
 </script>
 
 <style>
-  .post-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 720px);
-    grid-template-areas:
-      "head"
-      "hero"
-      "toc"
-      "body"
-      "foot";
-    justify-content: center;
-    padding-top: clamp(28px, 5vw, 56px);
-  }
-  .post-head {
-    grid-area: head;
-  }
-  .post-hero {
-    grid-area: hero;
-  }
-  .toc {
-    grid-area: toc;
-  }
-  .post-body {
-    grid-area: body;
-    min-width: 0;
-  }
-  .post-foot {
-    grid-area: foot;
-  }
-  @media (min-width: 1101px) {
-    .post-grid.with-toc {
-      grid-template-columns: minmax(0, 720px) 250px;
-      column-gap: 64px;
-      grid-template-areas:
-        "head ."
-        "hero hero"
-        "body toc"
-        "foot .";
-    }
+  .post {
+    --rail: 250px;
+    --gap: clamp(32px, 5vw, 72px);
+    padding-top: clamp(24px, 3.4vw, 44px);
   }
 
-  /* Header */
+  /* Breadcrumb */
   .crumbs ol {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin: 0 0 18px;
+    margin: 0;
     padding: 0;
     font-size: 14px;
+    color: var(--muted);
   }
   .crumbs li {
     display: inline-flex;
     gap: 6px;
-    color: var(--muted);
   }
   .crumbs li + li::before {
     content: "/";
     color: var(--faint);
   }
-  .crumbs a {
-    color: var(--text-2);
-  }
+  .crumbs a:hover,
   .crumbs li:last-child a {
-    color: var(--accent-text);
-    font-weight: 600;
-  }
-  .crumbs a:hover {
-    color: var(--accent-hover);
-  }
-  .post-head h1 {
-    font-size: clamp(32px, 4.4vw, 50px);
-    line-height: 1.12;
-    letter-spacing: -0.03em;
-    margin: 0;
-  }
-  .standfirst {
-    margin: 18px 0 0;
-    font-size: clamp(18px, 1.7vw, 21px);
-    line-height: 1.55;
-    color: var(--text-2);
-  }
-  .byline {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 24px;
-    padding-bottom: 4px;
-  }
-  .byline :global(img) {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex: none;
-  }
-  .byline p {
-    margin: 0;
-    display: grid;
-    gap: 2px;
-    font-size: 14.5px;
-    line-height: 1.4;
-  }
-  .byline-name {
-    color: var(--text);
-    font-weight: 600;
-  }
-  .byline-name a {
     color: var(--ink);
   }
-  .byline-meta {
+
+  /* Header: meta on the left rail, big title beside it (the theme's article header). */
+  .post-head {
+    display: grid;
+    grid-template-columns: var(--rail) minmax(0, 1fr);
+    gap: 28px var(--gap);
+    align-items: start;
+    padding: clamp(28px, 4vw, 52px) 0 clamp(32px, 5vw, 64px);
+  }
+  .post-meta {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(28px, 5vw, 72px);
+  }
+  .chips {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .written-by {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .written-by :global(img) {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: 12px;
+    object-fit: cover;
+  }
+  .written-by p {
+    display: grid;
+    gap: 3px;
+    font-size: 14px;
+    line-height: 1.25;
+    color: var(--text-2);
+  }
+  .written-by a {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .written-by a:hover {
+    color: var(--accent-text);
+  }
+  .post-title h1 {
+    font-size: clamp(34px, 5vw, 76px);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .standfirst {
+    max-width: 58ch;
+    margin-top: clamp(18px, 2.2vw, 30px);
+    font-size: clamp(18px, 1.6vw, 22px);
+    line-height: 1.5;
+    color: var(--text-2);
+  }
+  .updated {
+    margin-top: 14px;
+    font-size: 14px;
     color: var(--muted);
   }
 
-  /* Hero */
+  /* Hero image */
   .post-hero {
-    margin: clamp(28px, 4vw, 40px) 0 0;
+    margin: 0;
   }
   .post-hero img {
     display: block;
@@ -438,176 +429,235 @@ const jsonLd = [
     height: auto;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: calc(var(--radius) + 4px);
-    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
   }
 
-  /* Body */
-  .post-body {
-    padding-top: clamp(28px, 4vw, 44px);
-  }
-  .takeaways {
-    margin: 0 0 clamp(28px, 4vw, 40px);
-    padding: 20px 24px;
-    background: var(--tint);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
-  .takeaways-heading {
-    margin: 0 0 10px;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--ink);
-  }
-  .takeaways ul {
-    margin: 0;
-    padding-left: 20px;
+  /* Body: contents on the rail, text in a readable column beside it. */
+  .post-grid {
     display: grid;
-    gap: 8px;
+    grid-template-columns: var(--rail) minmax(0, 760px);
+    gap: 28px var(--gap);
+    align-items: start;
+    padding: clamp(36px, 5vw, 72px) 0 clamp(56px, 8vw, 110px);
   }
-  .takeaways li {
-    font-size: 16px;
-    line-height: 1.55;
-    color: var(--text);
+  .post-grid.no-hero {
+    border-top: 1px solid var(--border);
   }
-  .takeaways li::marker {
-    color: var(--accent-text);
+  .post-rail {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    max-height: calc(100vh - var(--header-h) - 48px);
+    overflow-y: auto;
   }
-  .post-body :global(.code-wrap) {
-    position: relative;
-  }
-  .post-body :global(.copy-code) {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-family: var(--font-body);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 6px 10px;
-    border: 1px solid var(--border-2);
-    border-radius: 8px;
-    background: var(--card);
-    color: var(--ink);
-    cursor: pointer;
-  }
-  .post-body :global(.copy-code:hover) {
-    border-color: var(--ink);
+  .post-body {
+    min-width: 0;
   }
 
   /* Table of contents */
-  .toc {
-    padding-top: clamp(28px, 4vw, 44px);
-  }
-  .toc details {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    padding: 4px 16px;
-  }
   .toc summary {
-    list-style: none;
-    cursor: pointer;
-    padding: 12px 0;
-    font-size: 14.5px;
-    font-weight: 700;
-    color: var(--ink);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: 14px;
+    list-style: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
   }
   .toc summary::-webkit-details-marker {
     display: none;
   }
-  .toc summary::after {
-    content: "+";
-    color: var(--accent-text);
-    font-size: 18px;
-    line-height: 1;
-  }
-  .toc details[open] summary::after {
-    content: "–";
-  }
   .toc ol {
     list-style: none;
     margin: 0;
-    padding: 0 0 12px;
+    padding: 0;
+    border-top: 1px solid var(--border);
   }
   .toc a {
     display: block;
-    padding: 6px 0 6px 12px;
-    border-left: 2px solid var(--border);
-    font-size: 14.5px;
-    line-height: 1.4;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
     color: var(--text-2);
+    transition:
+      color 0.2s ease,
+      padding 0.25s ease;
   }
   .toc a:hover {
     color: var(--ink);
   }
   .toc a[aria-current] {
+    padding-left: 14px;
     color: var(--ink);
-    font-weight: 600;
-    border-left-color: var(--accent);
-  }
-  @media (min-width: 1101px) {
-    .toc details {
-      position: sticky;
-      top: calc(var(--header-h) + 24px);
-      max-height: calc(100vh - var(--header-h) - 48px);
-      overflow-y: auto;
-    }
+    box-shadow: inset 3px 0 0 var(--accent);
   }
 
-  /* Footer */
-  .post-foot {
-    padding: 36px 0 clamp(40px, 6vw, 64px);
+  /* Key takeaways */
+  .takeaways {
+    margin: 0 0 clamp(32px, 4vw, 48px);
+    padding: clamp(22px, 3vw, 34px);
+    border-radius: var(--radius);
+    background: var(--bg-alt);
   }
-  .post-foot .tag-list {
-    margin: 0 0 28px;
+  .takeaways ul {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .takeaways li {
+    position: relative;
+    padding-left: 28px;
+    font-size: 16.5px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .takeaways li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.42em;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Copy button on code blocks */
+  .post-body :global(.code-wrap) {
+    position: relative;
+  }
+  .post-body :global(.copy-code) {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 14px;
+    border: 1px solid var(--border-2);
+    border-radius: 999px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .post-body :global(.copy-code:hover) {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
+  }
+
+  /* Footer of the article */
+  .post-foot {
+    margin-top: clamp(40px, 5vw, 64px);
+  }
+  .tags {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 32px;
+    font-family: var(--font-display);
+    font-size: 19px;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  .tags :global(.tag-list) {
+    font-family: var(--font-body);
+    letter-spacing: 0;
   }
   .author-box {
     display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 20px;
+    grid-template-columns: 96px 1fr;
+    gap: 24px;
     align-items: start;
-    padding: 24px;
-    background: var(--bg-alt);
+    padding: clamp(22px, 3vw, 34px);
     border-radius: var(--radius);
+    background: var(--bg-alt);
   }
   .author-box :global(img) {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+    width: 96px;
+    height: 96px;
+    border-radius: 12px;
     object-fit: cover;
   }
   .author-label {
-    margin: 0;
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--muted);
   }
   .author-name {
-    margin: 2px 0 8px;
-    font-size: 18px;
-    font-weight: 700;
+    margin: 2px 0 10px;
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: -0.04em;
     color: var(--ink);
   }
   .author-bio {
-    margin: 0 0 12px;
-    font-size: 15.5px;
+    margin-bottom: 16px;
+    font-size: 16px;
     line-height: 1.65;
     color: var(--text-2);
   }
 
-  /* After the article */
-  .post-after {
+  /* Related articles */
+  .related {
+    padding: clamp(56px, 8vw, 120px) 0 clamp(72px, 10vw, 140px);
     border-top: 1px solid var(--border);
   }
-  .related {
-    padding: clamp(40px, 6vw, 64px) 0 0;
-  }
-  .post-signup {
-    padding: clamp(40px, 6vw, 64px) 0;
-  }
 
+  @media (max-width: 1100px) {
+    .post-head,
+    .post-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .post-meta {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px 32px;
+      order: 2;
+    }
+    .chips {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .post-grid {
+      max-width: 760px;
+    }
+    .post-rail {
+      position: static;
+      max-height: none;
+    }
+    .no-toc .post-rail {
+      display: none;
+    }
+    .toc {
+      padding: 4px 20px;
+      border: 1px solid var(--border-2);
+      border-radius: var(--radius);
+    }
+    .toc summary {
+      padding: 14px 0;
+      font-weight: 500;
+      color: var(--ink);
+    }
+    .toc summary::after {
+      content: "+";
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1;
+    }
+    .toc details[open] summary::after {
+      content: "–";
+    }
+    .toc li:last-child a {
+      border-bottom: 0;
+    }
+  }
   @media (max-width: 600px) {
     .author-box {
       grid-template-columns: 1fr;

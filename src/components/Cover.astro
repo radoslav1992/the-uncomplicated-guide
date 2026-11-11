@@ -1,0 +1,97 @@
+---
+/**
+ * A generated cover for articles that have no image: a tinted panel with one of the
+ * theme's line shapes, corner brackets and the category in the italic serif.
+ * The colour is picked from the article id, so an article always gets the same cover.
+ */
+import { postCategory, type Post } from "../lib/blog";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const category = postCategory(post);
+const tones = ["soft", "accent", "ink"] as const;
+const hash = [...post.id].reduce((sum, ch) => (sum * 31 + ch.charCodeAt(0)) >>> 0, 7);
+const tone = tones[hash % tones.length];
+---
+
+<div class:list={["cover", `cover-${tone}`]} aria-hidden="true">
+  <span class="cover-corners"></span>
+  <img
+    class="cover-shape"
+    src={`/theme/${category.shape}.webp`}
+    alt=""
+    width="80"
+    height="80"
+    loading="lazy"
+    decoding="async"
+  />
+  <span class="cover-word">{category.name}</span>
+</div>
+
+<style>
+  .cover {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: clamp(22px, 2.6vw, 36px);
+    overflow: hidden;
+  }
+  .cover-soft {
+    background: #ecebe7;
+    color: #111111;
+  }
+  .cover-accent {
+    background: #fb7515;
+    color: #111111;
+  }
+  .cover-ink {
+    background: #161616;
+    color: #ffffff;
+  }
+  .cover-ink .cover-shape {
+    filter: invert(1);
+  }
+  @media (prefers-color-scheme: dark) {
+    .cover-ink {
+      background: #222222;
+    }
+  }
+  /* Corner brackets, as on the theme's feature boxes. */
+  .cover-corners {
+    position: absolute;
+    inset: 12px;
+    opacity: 0.45;
+    --c: currentColor;
+    --l: 9px;
+    --t: 1px;
+    background:
+      linear-gradient(var(--c), var(--c)) top left / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) top left / var(--t) var(--l) no-repeat,
+      linear-gradient(var(--c), var(--c)) top right / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) top right / var(--t) var(--l) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom left / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom left / var(--t) var(--l) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom right / var(--l) var(--t) no-repeat,
+      linear-gradient(var(--c), var(--c)) bottom right / var(--t) var(--l) no-repeat;
+  }
+  .cover-shape {
+    position: relative;
+    width: clamp(56px, 6vw, 80px);
+    height: auto;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .cover-word {
+    position: relative;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(34px, 3.6vw, 52px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+</style>

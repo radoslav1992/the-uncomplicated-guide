@@ -32,33 +32,30 @@ const list = categoriesWithPosts(posts);
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin: 0 0 28px;
+    margin: 0 0 clamp(32px, 4vw, 56px);
   }
   .category-nav a {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    min-height: 40px;
-    padding: 8px 16px;
+    min-height: 42px;
+    padding: 8px 18px;
     border: 1px solid var(--border-2);
     border-radius: 999px;
-    background: var(--card);
     font-size: 15px;
-    font-weight: 600;
-    color: var(--text-2);
+    font-weight: 500;
+    color: var(--ink);
     transition:
-      background-color 0.16s ease,
-      color 0.16s ease,
-      border-color 0.16s ease;
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
   }
   .category-nav a span {
     font-size: 13px;
-    font-weight: 600;
     color: var(--muted);
   }
   .category-nav a:hover {
     border-color: var(--ink);
-    color: var(--ink);
   }
   .category-nav a[aria-current="page"] {
     background: var(--ink);
@@ -67,6 +64,6 @@ const list = categoriesWithPosts(posts);
   }
   .category-nav a[aria-current="page"] span {
     color: var(--bg);
-    opacity: 0.75;
+    opacity: 0.7;
   }
 </style>

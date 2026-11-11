@@ -1,8 +1,8 @@
 ---
-import "@fontsource-variable/onest";
-import "@fontsource-variable/literata/wght.css";
-import "@fontsource-variable/literata/wght-italic.css";
-import onestLatin from "@fontsource-variable/onest/files/onest-latin-wght-normal.woff2?url";
+import "@fontsource-variable/dm-sans/wght.css";
+import "@fontsource-variable/dm-sans/wght-italic.css";
+import dmSansLatin from "@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url";
+import displayFont from "../assets/fonts/BDOGrotesk-Medium.woff2?url";
 import "../styles/global.css";
 import "../styles/blog.css";
 import Header from "../components/Header.astro";
@@ -27,6 +27,12 @@ interface Props {
   article?: { publishedTime: Date; modifiedTime?: Date; tags?: string[]; section?: string };
   /** Extra JSON-LD to inject. */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Recorded with newsletter signups made in the footer of this page. */
+  signupSource?: string;
+  /** Optional interest tag recorded with footer signups (a category slug). */
+  signupTopic?: string;
+  /** Hide the footer's newsletter form on pages that already are one. */
+  hideFooterSignup?: boolean;
 }
 
 const {
@@ -37,6 +43,9 @@ const {
   noindex = false,
   article,
   jsonLd,
+  signupSource,
+  signupTopic,
+  hideFooterSignup = false,
 } = Astro.props;
 
 // Pages are built as `page.html` (build.format "file") but served as `/page`, so the
@@ -93,8 +102,8 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
       title={`${site.name} — articles`}
       href="/rss.xml"
     />
-    <meta name="theme-color" content="#faf8f4" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#151517" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
 
     <meta property="og:type" content={article ? "article" : "website"} />
@@ -140,13 +149,12 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <link
-      rel="preload"
-      href={onestLatin}
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={dmSansLatin} as="font" type="font/woff2" crossorigin />
+    {/* Opt in to scroll-reveal styles only when scripts run; content is visible without them. */}
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
 
     {jsonLd && (
       <script
@@ -215,7 +223,30 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
     <main id="main-content" tabindex="-1">
       <slot />
     </main>
-    <Footer />
+    <Footer source={signupSource} topic={signupTopic} hideSignup={hideFooterSignup} />
     {gaId && <CookieConsent />}
+    <script>
+      // Reveal sections as they scroll into view. Elements stay visible if this never runs
+      // (the hiding styles need the `js` class) or if the reader prefers reduced motion.
+      const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
+      if (items.length) {
+        const show = (el: Element) => el.classList.add("is-in");
+        if (!("IntersectionObserver" in window)) {
+          items.forEach(show);
+        } else {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                show(entry.target);
+                observer.unobserve(entry.target);
+              }
+            },
+            { rootMargin: "0px 0px -8% 0px", threshold: 0.05 },
+          );
+          items.forEach((el) => observer.observe(el));
+        }
+      }
+    </script>
   </body>
 </html>

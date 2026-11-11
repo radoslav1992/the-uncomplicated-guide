@@ -32,10 +32,10 @@ const sent = Astro.url.searchParams.get('sent') === '1';
 
   <fieldset class="topics">
     <legend>What is it about?</legend>
-    <div class="chips">
+    <div class="topic-chips">
       {
         TOPICS.map((t) => (
-          <label class="chip">
+          <label class="topic-chip">
             <input type="checkbox" name="topic" value={t} />
             <span>{t}</span>
           </label>
@@ -73,13 +73,14 @@ const sent = Astro.url.searchParams.get('sent') === '1';
 
 <style>
   .contact-form {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
-    padding: 32px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
+  }
+  .contact-form :global(.btn) {
+    align-self: flex-start;
+    width: auto;
+    min-width: 200px;
   }
   .row {
     display: grid;
@@ -96,59 +97,63 @@ const sent = Astro.url.searchParams.get('sent') === '1';
   }
   legend {
     padding: 0;
-    font-size: 14px;
-    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--ink);
   }
-  .chips {
+  .topic-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
   }
-  .chip {
+  .topic-chip {
     position: relative;
     display: inline-block;
     cursor: pointer;
   }
-  .chip input {
+  .topic-chip input {
     position: absolute;
     opacity: 0;
     width: 1px;
     height: 1px;
   }
-  .chip span {
+  .topic-chip span {
     display: inline-block;
-    font-size: 14.5px;
-    padding: 8px 14px;
-    border-radius: 999px;
+    padding: 9px 16px;
     border: 1px solid var(--border-input);
-    background: var(--bg-input);
-    color: var(--text);
+    border-radius: 999px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--ink);
     transition:
-      background-color 0.16s ease,
-      color 0.16s ease,
-      border-color 0.16s ease;
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
   }
-  .chip:hover span {
+  .topic-chip:hover span {
     border-color: var(--ink);
   }
-  .chip input:checked + span {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
+  .topic-chip input:checked + span {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--bg);
   }
-  .chip input:focus-visible + span {
-    outline: 2px solid var(--accent);
+  .topic-chip input:focus-visible + span {
+    outline: 2px solid var(--accent-text);
     outline-offset: 2px;
   }
   .alt {
     margin: 0;
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--muted);
   }
+  .alt a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
   @media (max-width: 560px) {
-    .contact-form {
-      padding: 22px;
-    }
     .row {
       grid-template-columns: 1fr;
     }

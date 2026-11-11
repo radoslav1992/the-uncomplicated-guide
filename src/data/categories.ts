@@ -6,12 +6,16 @@
  * /blog/category/<slug>, so `intro` should read as a real introduction to the topic —
  * it is the text search engines see on that page.
  *
+ * `shape` is one of the theme graphics in public/theme/, shown on the generated
+ * cover that articles without an image get (src/components/Cover.astro).
+ *
  * To add a category, add an entry here; the schema in src/content.config.ts picks it up.
  */
 export const categories = [
   {
     slug: 'voice-ai',
     name: 'Voice AI',
+    shape: 'icon-s-9',
     description:
       'AI receptionists and voice agents: what they are, how to build one that answers real calls, and how to price it.',
     intro:
@@ -20,6 +24,7 @@ export const categories = [
   {
     slug: 'ai-video',
     name: 'AI Video',
+    shape: 'icon-s-12',
     description:
       'AI UGC ads, avatars and voiceovers: how to make AI video ads that hold attention, and how to test them.',
     intro:
@@ -28,6 +33,7 @@ export const categories = [
   {
     slug: 'side-projects',
     name: 'Side Projects',
+    shape: 'icon-s-11',
     description:
       'Small things built with AI to earn on the side — games, websites and tools — with the honest economics.',
     intro:
@@ -36,6 +42,7 @@ export const categories = [
   {
     slug: 'selling-ai-services',
     name: 'Selling AI Services',
+    shape: 'icon-s-8',
     description:
       'Pricing, packaging and selling AI work to clients without losing money on your best customers.',
     intro:

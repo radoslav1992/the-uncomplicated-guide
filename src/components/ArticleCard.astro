@@ -1,28 +1,29 @@
 ---
 /**
- * One article in a grid: image (when the article has one), category, title,
- * description, date and reading time. The whole card is one link target.
+ * One article in a grid, after the theme's blog card: a rounded image (or a generated
+ * cover when the article has none), the title, a short description and a meta line.
  */
+import Cover from "./Cover.astro";
 import { formatDate } from "../lib/http";
 import { postCategory, postUrl, readingTime, type Post } from "../lib/blog";
 
 interface Props {
   post: Post;
-  /** Kept for callers that pass a position; cards no longer show it. */
+  /** Position in its grid; staggers the reveal animation. */
   index?: number;
   /** Heading level for the title, so cards sit correctly in each page's outline. */
   headingLevel?: 2 | 3;
 }
 
-const { post, headingLevel = 3 } = Astro.props;
+const { post, index = 0, headingLevel = 3 } = Astro.props;
 const Heading = `h${headingLevel}` as "h2" | "h3";
 const url = postUrl(post);
 const category = postCategory(post);
 ---
 
-<article class:list={["article-card", { "has-image": post.data.image }]}>
-  {post.data.image && (
-    <div class="card-media">
+<article class="post-card" data-reveal style={`--i: ${index % 3}`}>
+  <a href={url} class="thumb" tabindex="-1" aria-hidden="true">
+    {post.data.image ? (
       <img
         src={post.data.image}
         alt=""
@@ -31,15 +32,18 @@ const category = postCategory(post);
         loading="lazy"
         decoding="async"
       />
-    </div>
-  )}
-  <div class="card-body">
-    <p class="card-category">{category.name}</p>
-    <Heading class="card-title">
+    ) : (
+      <Cover post={post} />
+    )}
+  </a>
+  <div class="content">
+    <Heading class="title">
       <a href={url}>{post.data.title}</a>
     </Heading>
-    <p class="card-desc">{post.data.description}</p>
-    <p class="card-meta">
+    <p class="desc">{post.data.description}</p>
+    <p class="meta">
+      <span class="category">{category.name}</span>
+      <span aria-hidden="true">—</span>
       <time datetime={post.data.pubDate.toISOString()}>
         {formatDate(post.data.pubDate)}
       </time>
@@ -50,83 +54,67 @@ const category = postCategory(post);
 </article>
 
 <style>
-  .article-card {
-    position: relative;
+  .post-card {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    height: 100%;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+  }
+  .thumb {
+    display: block;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.2s ease;
-  }
-  .article-card:hover {
-    border-color: var(--border-2);
-    box-shadow: var(--shadow-card);
-    transform: translateY(-2px);
-  }
-  .article-card:focus-within {
-    border-color: var(--accent-text);
-  }
-  .card-media {
+    border-radius: var(--radius);
     background: var(--bg-alt);
-    border-bottom: 1px solid var(--border);
   }
-  .card-media img {
+  .thumb img {
     display: block;
     width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;
+    height: 100%;
     object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
-  .card-body {
+  .post-card:hover .thumb img {
+    transform: scale(1.06);
+  }
+  .post-card:hover .thumb :global(.cover-shape) {
+    transform: rotate(18deg) scale(1.08);
+  }
+  .content {
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 20px 22px 22px;
+    padding-top: 22px;
   }
-  .card-category {
-    margin: 0;
-    font-size: 13px;
-    font-weight: 650;
-    color: var(--accent-text);
+  .title {
+    font-size: clamp(22px, 2vw, 28px);
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+    max-width: 22ch;
   }
-  .card-title {
-    margin: 8px 0 0;
-    font-size: clamp(18.5px, 1.5vw, 21px);
-    line-height: 1.3;
-    letter-spacing: -0.015em;
-  }
-  .card-title a {
-    color: var(--ink);
-  }
-  /* Stretch the title link over the whole card. */
-  .card-title a::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-  .card-title a:focus-visible {
-    outline: none;
-  }
-  .card-desc {
-    margin: 10px 0 0;
-    font-size: 15px;
-    line-height: 1.6;
+  .title a:hover {
     color: var(--text-2);
   }
-  .card-meta {
+  .desc {
+    margin-top: 12px;
+    font-size: 15.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin: auto 0 0;
-    padding-top: 16px;
-    font-size: 13.5px;
+    gap: 5px;
+    margin-top: 16px;
+    font-size: 14px;
     color: var(--muted);
+  }
+  .category {
+    font-weight: 500;
+    color: var(--ink);
   }
 </style>
