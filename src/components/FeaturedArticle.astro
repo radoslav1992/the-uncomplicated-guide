@@ -1,9 +1,9 @@
 ---
 /**
- * A long-form guide, presented large: image, chapter count, reading time and
- * the chapter titles, so the reader sees what is inside before clicking.
+ * A featured article, presented large: image, category, chapter count, reading
+ * time and the chapter titles, so the reader sees what is inside before clicking.
  */
-import { postUrl, readingTime, type Post } from "../lib/blog";
+import { chapters as chaptersOf, postCategory, postUrl, readingTime, type Post } from "../lib/blog";
 
 interface Props {
   post: Post;
@@ -13,15 +13,12 @@ interface Props {
 const { post, headingLevel = 3 } = Astro.props;
 const Heading = `h${headingLevel}` as "h2" | "h3";
 const url = postUrl(post);
-// Chapters are the article's `## ` headings, read from the Markdown source.
-const chapters = (post.body ?? "")
-  .split("\n")
-  .filter((line) => /^## /.test(line))
-  .map((line) => line.replace(/^## /, "").replace(/[*_`]/g, "").trim());
+const category = postCategory(post);
+const chapters = chaptersOf(post);
 const shown = chapters.slice(0, 6);
 ---
 
-<article class="guide-feature" data-reveal>
+<article class="featured-article" data-reveal>
   <a href={url} class="feature-media" tabindex="-1" aria-hidden="true">
     {post.data.image && (
       <img
@@ -33,7 +30,7 @@ const shown = chapters.slice(0, 6);
         decoding="async"
       />
     )}
-    <span class="feature-badge">Free guide</span>
+    <span class="feature-badge">{category.name}</span>
   </a>
   <div class="feature-body">
     <div class="feature-meta">
@@ -55,13 +52,13 @@ const shown = chapters.slice(0, 6);
       </ol>
     )}
     <a href={url} class="rr-btn-classic feature-cta">
-      Read the guide <span class="button-arrow" aria-hidden="true">↗</span>
+      Read the article <span class="button-arrow" aria-hidden="true">↗</span>
     </a>
   </div>
 </article>
 
 <style>
-  .guide-feature {
+  .featured-article {
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -84,7 +81,7 @@ const shown = chapters.slice(0, 6);
     object-fit: cover;
     transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
-  .guide-feature:hover .feature-media img {
+  .featured-article:hover .feature-media img {
     transform: scale(1.03);
   }
   .feature-badge {

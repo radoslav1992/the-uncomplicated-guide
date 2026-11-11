@@ -2,8 +2,8 @@
 title: Your ad gets three seconds
 description: The difference between an AI video that sells and one the feed buries is rarely the avatar. It is the first three seconds, where the captions sit, and whether the thing reads as made by a machine that was not paying attention.
 pubDate: 2026-08-26
+category: ai-video
 tags: [Video, Ads]
-guide: ai-ugc-video-ads-guide
 ---
 
 The most common mistake in AI video is spending the afternoon on the avatar. The avatar is the part that feels like magic, so it gets the attention. Meanwhile the video opens with *In today's fast-paced world*, and nobody sees the avatar at all, because they are already looking at the next post.

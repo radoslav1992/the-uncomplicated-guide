@@ -4,7 +4,7 @@
  * a large index number in the display face, so text-only articles still read as cards.
  */
 import { formatDate } from "../lib/http";
-import { isGuide, postUrl, readingTime, type Post } from "../lib/blog";
+import { postCategory, postUrl, readingTime, type Post } from "../lib/blog";
 
 interface Props {
   post: Post;
@@ -17,7 +17,7 @@ interface Props {
 const { post, index = 0, headingLevel = 3 } = Astro.props;
 const Heading = `h${headingLevel}` as "h2" | "h3";
 const url = postUrl(post);
-const label = isGuide(post) ? "Free guide" : (post.data.tags[0] ?? "Article");
+const category = postCategory(post);
 ---
 
 <article class="article-card" data-reveal>
@@ -38,7 +38,7 @@ const label = isGuide(post) ? "Free guide" : (post.data.tags[0] ?? "Article");
     </span>
   )}
   <div class="card-meta">
-    <span class:list={{ "is-guide": isGuide(post) }}>{label}</span>
+    <span class="card-category">{category.name}</span>
     <span>{readingTime(post.body)} min read</span>
   </div>
   <Heading class="card-title">
@@ -98,7 +98,7 @@ const label = isGuide(post) ? "Free guide" : (post.data.tags[0] ?? "Article");
     text-transform: uppercase;
     color: var(--muted);
   }
-  .card-meta .is-guide {
+  .card-meta .card-category {
     color: var(--accent);
   }
   .card-title {

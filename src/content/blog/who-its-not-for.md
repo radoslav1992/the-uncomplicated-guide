@@ -2,6 +2,7 @@
 title: Every guide says who it is not for
 description: There is a column on every guide page listing the people who should not buy it. It costs sales. It is still the most useful thing on the page.
 pubDate: 2026-09-05
+category: selling-ai-services
 tags: [How this works]
 draft: true
 ---

@@ -15,7 +15,7 @@ interface Props {
   title: string;
   description?: string;
   /** Which top-nav item is highlighted. */
-  current?: "Home" | "Guides" | "Articles" | "About" | "Contact" | "";
+  current?: "Home" | "Articles" | "About" | "Contact" | "";
   /** Absolute or root-relative path to an Open Graph image. */
   image?: ImageMetadata | string;
   /** Set for pages that should not be indexed (status pages, admin). */
@@ -90,7 +90,7 @@ const gaId = noindex ? "" : import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
     <link
       rel="alternate"
       type="application/rss+xml"
-      title={`${site.name} — articles and guides`}
+      title={`${site.name} — articles`}
       href="/rss.xml"
     />
     <meta name="theme-color" content="#111111" />

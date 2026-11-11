@@ -3,7 +3,8 @@ title: "AI UGC Ads: How to Script, Voice, Animate and Edit AI Video Ads — and 
 seoTitle: "AI UGC: How to Make AI UGC Video Ads (and Sell Them)"
 description: "How to make AI UGC ads with ChatGPT, ElevenLabs, HeyGen and Captions AI — script, voiceover, avatar, edit and testing — plus how to price and sell them."
 pubDate: 2026-11-11
-kind: guide
+category: ai-video
+featured: true
 tags: [AI UGC, AI video ads, HeyGen, ElevenLabs, Captions AI]
 image: "/articles/ai-ugc-video-ads-guide.webp"
 imageAlt: "AI UGC video ad illustration: a phone showing an AI avatar presenter between audio waveforms"

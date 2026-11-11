@@ -1,12 +1,11 @@
 ---
 import { site } from "../data/site";
-import { getGuides, postUrl } from "../lib/blog";
+import { categoriesWithPosts, getPosts } from "../lib/blog";
 import SignupForm from "./SignupForm.astro";
 
 const year = new Date().getFullYear();
-const guides = await getGuides();
+const categories = categoriesWithPosts(await getPosts());
 const nav = [
-  { label: "All articles", href: "/blog" },
   { label: "Newsletter", href: "/newsletter" },
   { label: "About", href: "/#author" },
   { label: "Contact", href: "/contact" },
@@ -21,7 +20,7 @@ const nav = [
       <br />
       <em>starts here.</em>
     </p>
-    <a href="/guides">Start with a free guide ↗</a>
+    <a href="/blog">Start reading ↗</a>
   </div>
   <div class="container cols">
     <div class="col">
@@ -37,12 +36,12 @@ const nav = [
         <SignupForm compact source="footer" />
       </div>
     </div>
-    <nav class="col" aria-label="Free guides">
-      <p class="heading">Free guides</p>
-      {guides.map((g) => (
-        <a href={postUrl(g)}>{g.data.title}</a>
+    <nav class="col" aria-label="Categories">
+      <p class="heading">Categories</p>
+      {categories.map((category) => (
+        <a href={category.url}>{category.name}</a>
       ))}
-      <a href="/guides">All guides</a>
+      <a href="/blog">All articles</a>
     </nav>
     <nav class="col" aria-label="Footer navigation">
       <p class="heading">Read more</p>

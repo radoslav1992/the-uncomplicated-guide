@@ -7,12 +7,13 @@ import SignupForm from "../../components/SignupForm.astro";
 import portrait from "../../assets/portrait.webp";
 import {
   getPosts,
-  isGuide,
+  postCategory,
   postUrl,
   readingTime,
   relatedPosts,
   type Post,
 } from "../../lib/blog";
+import { categoryUrl } from "../../data/categories";
 import { site } from "../../data/site";
 import { formatDate } from "../../lib/http";
 
@@ -28,27 +29,14 @@ interface Props {
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 const all = await getPosts();
-const guide = isGuide(post);
 const minutes = readingTime(post.body);
 const words = (post.body ?? "").trim().split(/\s+/).filter(Boolean).length;
 const chapters = headings.filter((h) => h.depth === 2);
-const showToc = guide || chapters.length >= 5;
-
-// The guide this article belongs with, and — on a guide — the articles that go deeper.
-const parentGuide = post.data.guide
-  ? all.find((p) => p.id === post.data.guide && isGuide(p))
-  : undefined;
-const deeper = guide ? all.filter((p) => p.data.guide === post.id) : [];
-const related = relatedPosts(
-  post,
-  all.filter((p) => !deeper.includes(p) && p.id !== parentGuide?.id),
-  3,
-);
-
-const section = guide
-  ? { name: "Guides", href: "/guides" }
-  : { name: "Articles", href: "/blog" };
-const label = guide ? "Free guide" : (post.data.tags[0] ?? "Article");
+// Long reads get a table of contents; short notes don't need one.
+const showToc = chapters.length >= 5;
+const related = relatedPosts(post, all, 3);
+const category = postCategory(post);
+const categoryHref = categoryUrl(category.slug);
 
 const origin = (Astro.site ?? new URL(Astro.url.origin)).href.replace(/\/$/, "");
 const canonical = `${origin}${postUrl(post)}`;
@@ -57,7 +45,7 @@ const absolute = (src?: string) => (src ? new URL(src, `${origin}/`).href : unde
 const jsonLd = [
   {
     "@context": "https://schema.org",
-    "@type": guide ? "Article" : "BlogPosting",
+    "@type": "BlogPosting",
     headline: post.data.title,
     description: post.data.description,
     image: absolute(post.data.socialImage ?? post.data.image),
@@ -76,7 +64,7 @@ const jsonLd = [
       logo: { "@type": "ImageObject", url: `${origin}/brand/next-chapter-192.png` },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
-    articleSection: section.name,
+    articleSection: category.name,
     keywords: post.data.tags.join(", ") || undefined,
     wordCount: words,
     isAccessibleForFree: true,
@@ -87,8 +75,9 @@ const jsonLd = [
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: `${origin}/` },
-      { "@type": "ListItem", position: 2, name: section.name, item: `${origin}${section.href}` },
-      { "@type": "ListItem", position: 3, name: post.data.title, item: canonical },
+      { "@type": "ListItem", position: 2, name: "Articles", item: `${origin}/blog` },
+      { "@type": "ListItem", position: 3, name: category.name, item: `${origin}${categoryHref}` },
+      { "@type": "ListItem", position: 4, name: post.data.title, item: canonical },
     ],
   },
 ];
@@ -97,34 +86,35 @@ const jsonLd = [
 <Base
   title={post.data.seoTitle ?? post.data.title}
   description={post.data.description}
-  current={guide ? "Guides" : "Articles"}
+  current="Articles"
   image={post.data.socialImage ?? post.data.image}
   article={{
     publishedTime: post.data.pubDate,
     modifiedTime: post.data.updatedDate,
     tags: post.data.tags,
-    section: section.name,
+    section: category.name,
   }}
   jsonLd={jsonLd}
 >
-  <article class:list={["post", { "is-guide": guide }]}>
+  <article class="post">
     <header class="head container">
       <nav class="crumbs" aria-label="Breadcrumb">
         <ol>
           <li><a href="/">Home</a></li>
-          <li><a href={section.href}>{section.name}</a></li>
+          <li><a href="/blog">Articles</a></li>
+          <li><a href={categoryHref}>{category.name}</a></li>
           <li aria-current="page">{post.data.title}</li>
         </ol>
       </nav>
       <p class="meta">
-        <span class:list={["kind", { guide }]}>{label}</span>
+        <a class="kind" href={categoryHref}>{category.name}</a>
         <span aria-hidden="true">·</span>
         <time datetime={post.data.pubDate.toISOString()}>
           {formatDate(post.data.pubDate)}
         </time>
         <span aria-hidden="true">·</span>
         <span>{minutes} min read</span>
-        {guide && chapters.length > 0 && (
+        {showToc && (
           <Fragment>
             <span aria-hidden="true">·</span>
             <span>{chapters.length} chapters</span>
@@ -162,9 +152,9 @@ const jsonLd = [
 
     <div class:list={["layout container", { "with-toc": showToc }]}>
       {showToc && (
-        <aside class="toc" aria-label={guide ? "In this guide" : "In this article"}>
+        <aside class="toc" aria-label="In this article">
           <details open data-toc>
-            <summary>{guide ? "In this guide" : "In this article"}</summary>
+            <summary>In this article</summary>
             <ol>
               {chapters.map((h) => (
                 <li>
@@ -203,13 +193,6 @@ const jsonLd = [
           ))}
         </ul>
       )}
-      {guide && (
-        <p class="use-note">
-          Free to read and free to use: take the prompts, tables and checklists
-          into your own work and your clients' projects. If you share the guide,
-          link to this page rather than copying it.
-        </p>
-      )}
       <div class="author-box">
         <Image
           src={portrait}
@@ -230,53 +213,23 @@ const jsonLd = [
     </footer>
   </article>
 
-  {parentGuide && (
-    <section class="container parent-guide">
-      <a href={postUrl(parentGuide)} class="parent-card">
-        {parentGuide.data.image && (
-          <img src={parentGuide.data.image} alt="" width="1200" height="675" loading="lazy" decoding="async" />
-        )}
-        <span class="parent-copy">
-          <span class="parent-label">The full guide · free</span>
-          <span class="parent-title">{parentGuide.data.title}</span>
-          <span class="parent-desc">{parentGuide.data.description}</span>
-          <span class="parent-cta">
-            Read the guide · {readingTime(parentGuide.body)} min <span aria-hidden="true">↗</span>
-          </span>
-        </span>
-      </a>
-    </section>
-  )}
-
-  {(deeper.length > 0 || related.length > 0) && (
+  {related.length > 0 && (
     <section class="more">
       <div class="frame journal more-frame">
-        {deeper.length > 0 && (
-          <Fragment>
-            <div class="more-head">
-              <p class="section-index">[ GO DEEPER ]</p>
-              <h2>Articles that expand this guide</h2>
-            </div>
-            <div class="card-grid">
-              {deeper.map((p, i) => (
-                <ArticleCard post={p} index={i} />
-              ))}
-            </div>
-          </Fragment>
-        )}
-        {related.length > 0 && (
-          <Fragment>
-            <div class="more-head">
-              <p class="section-index">[ KEEP READING ]</p>
-              <h2>{deeper.length > 0 ? "More from the journal" : "Related articles"}</h2>
-            </div>
-            <div class="card-grid">
-              {related.map((p, i) => (
-                <ArticleCard post={p} index={i} />
-              ))}
-            </div>
-          </Fragment>
-        )}
+        <div class="more-head">
+          <div>
+            <p class="section-index">[ KEEP READING ]</p>
+            <h2>Related articles</h2>
+          </div>
+          <a href={categoryHref} class="arrow-link">
+            All {category.name} articles ↗
+          </a>
+        </div>
+        <div class="card-grid">
+          {related.map((p, i) => (
+            <ArticleCard post={p} index={i} />
+          ))}
+        </div>
       </div>
     </section>
   )}
@@ -286,7 +239,7 @@ const jsonLd = [
       <p class="section-index">[ NEWSLETTER ]</p>
       <p class="signup-title">Get the next one.</p>
       <p>
-        One email when a new guide or article is published. A couple a month
+        One email when a new article is published. A couple a month
         at most, one click to leave.
       </p>
     </div>
@@ -405,11 +358,15 @@ const jsonLd = [
     text-transform: uppercase;
     color: var(--muted);
   }
-  .kind.guide {
+  .kind {
     background: var(--accent);
     color: #111;
     font-weight: 700;
     padding: 5px 8px;
+  }
+  .kind:hover {
+    background: var(--ink);
+    color: #111;
   }
   .head h1 {
     font-size: clamp(32px, 5.4vw, 64px);
@@ -603,15 +560,6 @@ const jsonLd = [
   .foot .tag-list {
     margin: 0 0 22px;
   }
-  .use-note {
-    font-size: 14.5px;
-    line-height: 1.65;
-    color: var(--text);
-    border-left: 3px solid var(--accent);
-    padding: 4px 0 4px 16px;
-    margin: 0 0 28px;
-    max-width: 70ch;
-  }
   .author-box {
     display: grid;
     grid-template-columns: 96px 1fr;
@@ -647,59 +595,6 @@ const jsonLd = [
     color: var(--text);
   }
 
-  .parent-guide {
-    max-width: 1180px;
-    padding-bottom: clamp(48px, 7vw, 72px);
-  }
-  .parent-card {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--ink);
-    transition: border-color 0.25s;
-  }
-  .parent-card:hover {
-    border-color: var(--accent);
-  }
-  .parent-card img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-  .parent-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: clamp(22px, 3vw, 34px);
-  }
-  .parent-label {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-  .parent-title {
-    font: 300 clamp(24px, 2.6vw, 34px) / 1.08 var(--font-display);
-    text-transform: uppercase;
-  }
-  .parent-desc {
-    font-size: 15px;
-    line-height: 1.65;
-    color: var(--text);
-  }
-  .parent-cta {
-    margin-top: auto;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .parent-cta span {
-    color: var(--accent);
-    font-size: 18px;
-    margin-left: 4px;
-  }
 
   .more {
     border-top: 1px solid var(--border);
@@ -711,7 +606,15 @@ const jsonLd = [
     border-inline: 1px solid var(--border);
   }
   .more-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    flex-wrap: wrap;
+    gap: 16px;
     padding: 48px 22px 26px;
+  }
+  .more-head .arrow-link {
+    font-size: 12px;
   }
   .more-head .section-index {
     margin: 0 0 12px;
@@ -753,9 +656,6 @@ const jsonLd = [
     }
   }
   @media (max-width: 720px) {
-    .parent-card {
-      grid-template-columns: 1fr;
-    }
     .author-box {
       grid-template-columns: 64px 1fr;
       gap: 16px;

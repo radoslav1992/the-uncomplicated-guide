@@ -1,4 +1,4 @@
-/* Blog layout pieces shared by the home page, /blog and /guides.
+/* Blog layout pieces shared by the home page, /blog and the category pages.
    Built on the Adon tokens in adon.css: ruled frames, display type, orange accent. */
 
 /* ── Home hero: "start here" list in place of the old book covers ── */
@@ -72,7 +72,7 @@
   border-bottom: 0;
 }
 
-/* ── Listing pages (/blog, /guides) ── */
+/* ── Listing pages (/blog, /blog/category/*) ── */
 .listing-page .frame {
   width: calc(100% - var(--gutter) * 2);
   max-width: 1320px;
@@ -136,44 +136,84 @@
   font-size: 13px;
   color: var(--muted);
 }
-.guide-grid {
+.featured-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
   padding: 0 22px 46px;
 }
 
-/* ── Topic chips on /blog ── */
-.topic-bar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 22px 26px;
+/* ── Breadcrumb line on category pages ── */
+.listing-crumbs {
+  margin: 0 0 18px;
+  font-size: 12px;
+  color: var(--muted);
 }
-.topic-bar button {
-  font: inherit;
-  font-size: 11px;
-  letter-spacing: 0.06em;
+.listing-crumbs a {
+  color: var(--text-2);
+}
+.listing-crumbs a:hover {
+  color: var(--accent);
+}
+
+/* ── Newsletter block at the end of listings ── */
+.listing-signup {
+  margin-bottom: 70px;
+  scroll-margin-top: 110px;
+}
+.listing-signup h2 {
+  font: 300 clamp(26px, 3vw, 40px) / 1.08 var(--font-display);
   text-transform: uppercase;
-  padding: 9px 13px;
-  min-height: 36px;
-  border: 1px solid var(--border-2);
-  background: transparent;
-  color: var(--text-3);
-  cursor: pointer;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+  margin: 0;
 }
-.topic-bar button:hover {
-  border-color: var(--accent);
+
+/* ── Category tiles on the home page ── */
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--border);
+}
+.category-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 26px 22px 28px;
+  color: var(--ink);
+  transition: background 0.3s;
+}
+.category-tile + .category-tile {
+  border-left: 1px solid var(--border);
+}
+.category-tile:hover {
+  background: #ffffff05;
   color: var(--ink);
 }
-.topic-bar button[aria-pressed="true"] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #111;
+.category-count {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.category-name {
+  font: 300 clamp(24px, 2.2vw, 30px) / 1.1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+.category-desc {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--text);
+}
+.category-link {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+.category-link span {
+  color: var(--accent);
+  font-size: 18px;
+  margin-left: 6px;
 }
 
 /* ── "On the writing desk" list ── */
@@ -216,6 +256,15 @@
 }
 
 @media (max-width: 1050px) {
+  .category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .category-tile:nth-child(2n + 1) {
+    border-left: 0;
+  }
+  .category-tile:nth-child(n + 3) {
+    border-top: 1px solid var(--border);
+  }
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -235,6 +284,16 @@
   }
 }
 @media (max-width: 720px) {
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+  .category-tile + .category-tile {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+  .category-tile {
+    padding-inline: 15px;
+  }
   .hero-start {
     min-height: 0;
     padding: 18px 15px;
@@ -255,11 +314,10 @@
   .listing-intro {
     padding: 38px 15px 32px;
   }
-  .listing-section > .section-head,
-  .topic-bar {
+  .listing-section > .section-head {
     padding-inline: 15px;
   }
-  .guide-grid {
+  .featured-grid {
     grid-template-columns: 1fr;
     padding: 0 15px 32px;
   }

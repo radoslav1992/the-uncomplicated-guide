@@ -1,0 +1,106 @@
+---
+/**
+ * One page per category with published articles: /blog/category/<slug>.
+ * The intro text comes from src/data/categories.ts.
+ */
+import Base from "../../../layouts/Base.astro";
+import ArticleCard from "../../../components/ArticleCard.astro";
+import CategoryNav from "../../../components/CategoryNav.astro";
+import SignupForm from "../../../components/SignupForm.astro";
+import { site } from "../../../data/site";
+import { categoriesWithPosts, getPosts, postUrl } from "../../../lib/blog";
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return categoriesWithPosts(posts).map((category) => ({
+    params: { category: category.slug },
+    props: { category, posts },
+  }));
+}
+
+type Props = Awaited<ReturnType<typeof getStaticPaths>>[number]["props"];
+
+const { category, posts } = Astro.props;
+const url = `${site.url}${category.url}`;
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: `${category.name} — ${site.name}`,
+    url,
+    description: category.description,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: category.posts.map((post, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${site.url}${postUrl(post)}`,
+        name: post.data.title,
+      })),
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${site.url}/` },
+      { "@type": "ListItem", position: 2, name: "Articles", item: `${site.url}/blog` },
+      { "@type": "ListItem", position: 3, name: category.name, item: url },
+    ],
+  },
+];
+---
+
+<Base
+  title={`${category.name} articles`}
+  description={category.description}
+  current="Articles"
+  jsonLd={jsonLd}
+>
+  <div class="listing-page">
+    <section class="frame listing-intro">
+      <nav class="listing-crumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>{" / "}<a href="/blog">Articles</a>{" / "}
+        <span aria-current="page">{category.name}</span>
+      </nav>
+      <p class="section-index">[ CATEGORY ]</p>
+      <h1>{category.name}</h1>
+      <p class="lead">{category.intro}</p>
+      <div class="listing-facts">
+        <span>
+          <i class="status-dot"></i>{category.posts.length}
+          {category.posts.length === 1 ? " article" : " articles"}
+        </span>
+        <span><i class="status-dot"></i>Free to read</span>
+      </div>
+    </section>
+
+    <section class="frame listing-section journal" aria-labelledby="category-articles">
+      <div class="section-head">
+        <h2 id="category-articles">{category.name} articles</h2>
+        <p>Newest first</p>
+      </div>
+      <CategoryNav posts={posts} current={category.slug} />
+      <div class="card-grid">
+        {category.posts.map((post, i) => (
+          <ArticleCard post={post} index={i} headingLevel={3} />
+        ))}
+      </div>
+    </section>
+
+    <section class="frame newsletter-section listing-signup">
+      <div class="newsletter-copy">
+        <p class="section-index">[ NEWSLETTER ]</p>
+        <h2 class="display">Get the next {category.name} article.</h2>
+        <p>
+          One email when something new is published — a couple a month at most,
+          and one click to leave.
+        </p>
+      </div>
+      <div class="newsletter-form">
+        <SignupForm source={`category:${category.slug}`} topic={category.slug} />
+      </div>
+    </section>
+  </div>
+</Base>

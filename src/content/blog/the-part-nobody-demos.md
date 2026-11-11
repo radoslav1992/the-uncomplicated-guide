@@ -2,8 +2,8 @@
 title: The part of a voice agent nobody demos
 description: A demo answers a call in a browser tab. A live agent needs a phone number, a rule for what happens when it fails, and someone to pay for the minutes. That gap is where most projects stop.
 pubDate: 2026-08-12
+category: voice-ai
 tags: [Voice agents, Telephony]
-guide: ai-receptionist-guide
 ---
 
 Every voice agent demo goes the same way. Someone opens a browser tab, clicks a microphone, and has a short conversation with a machine that books an appointment at the end of it. It is genuinely impressive. It also proves less than it looks.

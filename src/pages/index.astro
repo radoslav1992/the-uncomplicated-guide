@@ -2,16 +2,23 @@
 import { Image } from "astro:assets";
 import Base from "../layouts/Base.astro";
 import ArticleCard from "../components/ArticleCard.astro";
-import GuideFeature from "../components/GuideFeature.astro";
+import FeaturedArticle from "../components/FeaturedArticle.astro";
 import SignupForm from "../components/SignupForm.astro";
 import portrait from "../assets/portrait.webp";
 import { site } from "../data/site";
-import { getPosts, isGuide, postUrl, readingTime } from "../lib/blog";
+import {
+  categoriesWithPosts,
+  getPosts,
+  postCategory,
+  postUrl,
+  readingTime,
+} from "../lib/blog";
 
 const posts = await getPosts();
-const guides = posts.filter(isGuide);
-const articles = posts.filter((post) => !isGuide(post));
-const latest = articles.slice(0, 6);
+const featured = posts.filter((post) => post.data.featured);
+// Featured articles already lead the page; the latest list shows the rest.
+const latest = posts.filter((post) => !post.data.featured).slice(0, 6);
+const categories = categoriesWithPosts(posts);
 
 const origin = site.url;
 const jsonLd = [
@@ -41,7 +48,7 @@ const jsonLd = [
 ---
 
 <Base
-  title="Free practical guides to AI, voice agents and AI video"
+  title="Practical articles on AI receptionists, AI video and AI side projects"
   description={site.description}
   current="Home"
   jsonLd={jsonLd}
@@ -76,12 +83,12 @@ const jsonLd = [
         <div class="hero-start">
           <span class="technical-label">[ START HERE ]</span>
           <ul class="start-list">
-            {guides.slice(0, 3).map((guide) => (
+            {featured.slice(0, 3).map((post) => (
               <li>
-                <a href={postUrl(guide)}>
-                  {guide.data.image && (
+                <a href={postUrl(post)}>
+                  {post.data.image && (
                     <img
-                      src={guide.data.image}
+                      src={post.data.image}
                       alt=""
                       width="160"
                       height="90"
@@ -91,9 +98,9 @@ const jsonLd = [
                   )}
                   <span>
                     <span class="start-kind">
-                      Free guide · {readingTime(guide.body)} min
+                      {postCategory(post).name} · {readingTime(post.body)} min
                     </span>
-                    <span class="start-title">{guide.data.title}</span>
+                    <span class="start-title">{post.data.title}</span>
                   </span>
                 </a>
               </li>
@@ -101,7 +108,7 @@ const jsonLd = [
           </ul>
         </div>
         <div class="hero-stat">
-          <span class="technical-label">GUIDES & ARTICLES</span>
+          <span class="technical-label">FREE ARTICLES</span>
           <span class="stat-number">
             {String(posts.length).padStart(2, "0")}
           </span>
@@ -114,11 +121,11 @@ const jsonLd = [
             Build something useful.
           </p>
           <p class="muted-copy">
-            Step-by-step guides and field notes on voice agents, AI video ads,
+            Step-by-step articles and field notes on AI receptionists, AI video ads,
             vibe coding and side projects: what to build, what it costs and
             what breaks before a client finds out.
           </p>
-          <a href="#guides" class="rr-btn-classic">
+          <a href="#featured" class="rr-btn-classic">
             Start reading{" "}
             <span class="button-arrow" aria-hidden="true">
               ↗
@@ -128,29 +135,29 @@ const jsonLd = [
       </div>
       <div class="hero-foot">
         <span>BY {site.author.name.toUpperCase()}</span>
-        <a href="#guides">
+        <a href="#featured">
           SCROLL TO EXPLORE <span aria-hidden="true">↓</span>
         </a>
         <span>SOFIA, BULGARIA / READ WORLDWIDE</span>
       </div>
     </section>
 
-    {guides.length > 0 && (
-      <section id="guides" class="frame agency-section">
+    {featured.length > 0 && (
+      <section id="featured" class="frame agency-section">
         <div class="agency-heading" data-reveal>
-          <p class="section-index">[ 01 / FREE GUIDES ]</p>
+          <p class="section-index">[ 01 / FEATURED ]</p>
           <h2>
             Long reads.
             <br />
             <em>No paywall.</em>
           </h2>
-          <a href="/guides" class="arrow-link">
-            All guides ↗
+          <a href="/blog" class="arrow-link">
+            All articles ↗
           </a>
         </div>
         <div class="collection-grid">
-          {guides.slice(0, 2).map((guide) => (
-            <GuideFeature post={guide} />
+          {featured.slice(0, 2).map((post) => (
+            <FeaturedArticle post={post} />
           ))}
         </div>
         <div class="collection-notes">
@@ -174,10 +181,38 @@ const jsonLd = [
       </div>
     </div>
 
+    {categories.length > 0 && (
+      <section id="categories" class="frame agency-section">
+        <div class="agency-heading" data-reveal>
+          <p class="section-index">[ 02 / CATEGORIES ]</p>
+          <h2>
+            Pick a
+            <br />
+            <em>topic.</em>
+          </h2>
+        </div>
+        <div class="category-grid">
+          {categories.map((category) => (
+            <a href={category.url} class="category-tile" data-reveal>
+              <span class="category-count">
+                {category.posts.length}
+                {category.posts.length === 1 ? " article" : " articles"}
+              </span>
+              <span class="category-name">{category.name}</span>
+              <span class="category-desc">{category.description}</span>
+              <span class="category-link">
+                Browse {category.name} <span aria-hidden="true">↗</span>
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
     {latest.length > 0 && (
       <section id="latest" class="frame agency-section journal">
         <div class="agency-heading" data-reveal>
-          <p class="section-index">[ 02 / LATEST ARTICLES ]</p>
+          <p class="section-index">[ 03 / LATEST ARTICLES ]</p>
           <h2>
             Ideas from
             <br />
@@ -213,7 +248,7 @@ const jsonLd = [
         </div>
       </div>
       <div class="author-copy" data-reveal>
-        <p class="section-index">[ 03 / ABOUT THE AUTHOR ]</p>
+        <p class="section-index">[ 04 / ABOUT THE AUTHOR ]</p>
         <h2>
           Built from work.
           <br />
@@ -226,7 +261,7 @@ const jsonLd = [
           Sofia, building voice agents, automations, and internal systems.
         </p>
         <p>
-          The guides here collect the decisions, checks and commercial
+          The articles here collect the decisions, checks and commercial
           considerations behind that work — the parts that rarely make it into
           a tutorial. They are free to read and free to use in your own
           projects.
@@ -244,12 +279,12 @@ const jsonLd = [
       <div class="newsletter-copy" data-reveal>
         <p class="section-index">[ STAY CURIOUS ]</p>
         <h2>
-          The next useful guide.
+          The next useful article.
           <br />
           <em>In your inbox.</em>
         </h2>
         <p>
-          One email when a new guide or article is published.
+          One email when a new article is published.
           <br />
           No sequences, no sales. Unsubscribe anytime.
         </p>
