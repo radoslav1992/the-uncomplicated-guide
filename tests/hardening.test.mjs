@@ -84,3 +84,45 @@ test('a confirmed subscriber who signs up again is re-sent the PDF link at most 
  assert.deepEqual(third,{status:'already-confirmed',resent:false});
  assert.equal(mails.length,2);
 });
+
+// ─── Bots and the signup form ───────────────────────────────────────────────
+test('Turnstile: off without a secret; with one, a signup needs a token that Cloudflare accepts',async()=>{
+ const {verifyTurnstile}=await import('../src/lib/turnstile.ts');
+ assert.equal(await verifyTurnstile({},''),true);
+ assert.equal(await verifyTurnstile({TURNSTILE_SECRET_KEY:'s'},''),false);
+ const realFetch=globalThis.fetch;const calls=[];
+ try{
+  globalThis.fetch=async(url,init)=>{calls.push([String(url),String(init.body)]);return {json:async()=>({success:calls.length===1})};};
+  assert.equal(await verifyTurnstile({TURNSTILE_SECRET_KEY:'s'},'good','203.0.113.5'),true);
+  assert.equal(await verifyTurnstile({TURNSTILE_SECRET_KEY:'s'},'bad'),false);
+  assert.match(calls[0][0],/challenges\.cloudflare\.com\/turnstile\/v0\/siteverify$/);
+  assert.match(calls[0][1],/secret=s&response=good&remoteip=203\.0\.113\.5/);
+  globalThis.fetch=async()=>{throw new Error('network');};
+  assert.equal(await verifyTurnstile({TURNSTILE_SECRET_KEY:'s'},'any'),false);
+ }finally{globalThis.fetch=realFetch;}
+});
+
+test('the signup endpoint and form use Turnstile; the script loads only when a form is used',()=>{
+ const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+ const endpoint=read('src/pages/api/newsletter/subscribe.ts');
+ assert.match(endpoint,/verifyTurnstile\(env, str\(form\.get\('cf-turnstile-response'\), 4000\), ctx\.clientAddress\)/);
+ // The check comes before the address is stored and the email is sent.
+ assert.ok(endpoint.indexOf('verifyTurnstile(env')<endpoint.indexOf('await subscribe(env'));
+ const form=read('src/components/SignupForm.astro');
+ assert.match(form,/data-turnstile-key=\{turnstileKey \|\| undefined\}/);
+ assert.match(form,/api\.js\?render=explicit/);
+ assert.doesNotMatch(form,/<script[^>]*src="https:\/\/challenges\.cloudflare\.com/,'no eager script tag');
+ assert.match(form,/addEventListener\('focusin', check\.start, \{ once: true \}\)/);
+});
+
+test('addresses that never confirm are deleted after seven days, confirmed ones are kept',async()=>{
+ const {purgeUnconfirmed,UNCONFIRMED_DAYS}=await import('../src/lib/newsletter.ts');
+ assert.equal(UNCONFIRMED_DAYS,7);
+ const {env,db}=environment();
+ const ago=d=>new Date(Date.now()-d*86_400_000).toISOString();
+ const add=(email,created,confirmed)=>db.prepare('INSERT INTO signups (email, guides, created_at, updated_at, confirmed_at, source) VALUES (?,?,?,?,?,?)').run(email,'[]',created,created,confirmed,'test');
+ add('old-bot@example.com',ago(8),null);add('new@example.com',ago(6),null);add('reader@example.com',ago(400),ago(399));
+ assert.equal(await purgeUnconfirmed(env),1);
+ assert.deepEqual(db.prepare('SELECT email FROM signups ORDER BY email').all().map(r=>r.email),['new@example.com','reader@example.com']);
+ assert.match(readFileSync(new URL('../src/pages/privacy.astro',import.meta.url),'utf8'),/unconfirmed addresses are deleted after seven days/);
+});

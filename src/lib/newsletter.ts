@@ -185,8 +185,12 @@ export async function removeSubscriber(env: Env, email: string) {
   ]);
 }
 
-/** Privacy policy promise: addresses that never confirmed are deleted after ninety days. */
-export async function purgeUnconfirmed(env: Env, days = 90) {
+/**
+ * Privacy policy promise: addresses that never confirmed are deleted after seven days.
+ * (A confirmation link is clicked within minutes or never; bot signups should not linger.)
+ */
+export const UNCONFIRMED_DAYS = 7;
+export async function purgeUnconfirmed(env: Env, days = UNCONFIRMED_DAYS) {
   const cutoff = new Date(Date.now() - days * 86_400_000).toISOString();
   const r = await env.DB.prepare('DELETE FROM signups WHERE confirmed_at IS NULL AND created_at < ?1').bind(cutoff).run();
   return r.meta.changes ?? 0;

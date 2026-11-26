@@ -3,6 +3,7 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { formResult, isEmail, safeRedirect, siteOrigin, str } from '../../../lib/http';
 import { subscribe } from '../../../lib/newsletter';
+import { verifyTurnstile } from '../../../lib/turnstile';
 
 export const prerender = false;
 
@@ -22,6 +23,10 @@ export const POST: APIRoute = async (ctx) => {
   const email = str(form.get('email'), 254).toLowerCase();
   if (!isEmail(email)) return fail('That email address does not look right.');
   if (!(await allowForm(env, ctx.request, 'newsletter', email))) return formResult(ctx, false, { redirect: '/newsletter', error: 'Too many attempts. Please try again in ten minutes.', status: 429 });
+  // Every signup sends an email to the address given, so a bot must not be able to submit the form.
+  // (Passes when Turnstile is not configured; see src/lib/turnstile.ts.)
+  if (!(await verifyTurnstile(env, str(form.get('cf-turnstile-response'), 4000), ctx.clientAddress)))
+    return fail('Could not verify that you are human. Please try again.', 403);
   // Optional interest tag (a topic or article slug); '*' means anything new.
   const topic = str(form.get('topic'), 80).toLowerCase().replace(/[^a-z0-9-]/g, '') || '*';
   const referer = ctx.request.headers.get('referer');

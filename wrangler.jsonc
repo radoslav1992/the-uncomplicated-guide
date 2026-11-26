@@ -29,7 +29,9 @@
     "PUBLIC_GTM_CONTAINER_ID": "GTM-M9K8ZPJC",
     //  - Google Analytics 4 measurement id (G-XXXXXXXXXX), loaded directly without Tag Manager.
     "PUBLIC_GA_MEASUREMENT_ID": "",
-    // Optional: Cloudflare Turnstile site key for the contact form. Leave empty to disable.
+    // Cloudflare Turnstile site key for the newsletter signup and contact forms (recommended: every
+    // signup sends an email, so bots abuse an unprotected form). Empty disables the check.
+    // Pairs with the secret TURNSTILE_SECRET_KEY: set both, or neither.
     "PUBLIC_TURNSTILE_SITE_KEY": ""
   },
 
@@ -37,7 +39,7 @@
   // AUTH_SECRET              required; a long random string. Signs newsletter confirmation and
   //                          unsubscribe links. Generate with: openssl rand -base64 48
   // ADMIN_TOKEN              required to use /admin/newsletter; any long random string.
-  // TURNSTILE_SECRET_KEY     optional, pairs with PUBLIC_TURNSTILE_SITE_KEY
+  // TURNSTILE_SECRET_KEY     recommended, pairs with PUBLIC_TURNSTILE_SITE_KEY (set both or neither)
 
   // ─── Storage ─────────────────────────────────────────────────────────────
   // D1: create the database in the dashboard (Storage & Databases → D1 → Create),

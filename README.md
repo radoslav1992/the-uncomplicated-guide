@@ -168,7 +168,7 @@ confirmation link and only confirmed addresses receive letters. `/admin/newslett
 `ADMIN_TOKEN` secret) composes a plain-text letter, sends a test, and queues it for every confirmed
 subscriber. Delivery runs in batches of 25: the first batch right away, the rest by the cron trigger
 every five minutes. Every letter carries a signed one-click unsubscribe link and `List-Unsubscribe`
-headers; unsubscribing deletes the address. Unconfirmed addresses are purged after ninety days.
+headers; unsubscribing deletes the address. Unconfirmed addresses are purged after seven days.
 
 ### The free PDF for subscribers
 
