@@ -1,6 +1,11 @@
 ---
 /**
  * Newsletter signup (double opt-in). Posts to /api/newsletter/subscribe; works without JS via redirect.
+ *
+ * Every signup sends an email, so the form is a target for bots that fill it with other people's
+ * addresses. When PUBLIC_TURNSTILE_SITE_KEY is set, Cloudflare Turnstile checks the visitor: its
+ * script loads only when someone starts using a form, and the widget shows only if Turnstile
+ * needs a click. The server refuses a signup without a valid token (TURNSTILE_SECRET_KEY).
  */
 interface Props {
   /** Optional topic or article slug, recorded with the address as the reader's interest. */
@@ -18,9 +23,16 @@ const {
   source = Astro.url.pathname,
   compact = false,
 } = Astro.props;
+const turnstileKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 ---
 
-<form method="post" action="/api/newsletter/subscribe" class:list={['signup', { compact }]} data-signup-form>
+<form
+  method="post"
+  action="/api/newsletter/subscribe"
+  class:list={['signup', { compact }]}
+  data-signup-form
+  data-turnstile-key={turnstileKey || undefined}
+>
   <input type="hidden" name="redirect" value={redirect} />
   <input type="hidden" name="source" value={source} />
   {topic && <input type="hidden" name="topic" value={topic} />}
@@ -34,6 +46,14 @@ const {
     </label>
     <button type="submit" class="btn btn-accent">{buttonLabel}</button>
   </div>
+  {turnstileKey && <div class="turnstile" data-turnstile />}
+  {
+    turnstileKey && (
+      <noscript>
+        <p class="notice-error">Subscribing needs JavaScript for the spam check. Please turn it on and reload the page.</p>
+      </noscript>
+    )
+  }
   <p class="notice" data-done hidden role="status">
     One more click: a confirmation email is on its way. The link to your free PDF follows as soon as you confirm.
   </p>
@@ -53,6 +73,10 @@ const {
   }
   .btn {
     justify-self: start;
+  }
+  /* Empty unless Turnstile asks for a click. */
+  .turnstile:empty {
+    display: none;
   }
   /* One line: a pill input with the button beside it. */
   .compact .fields {
@@ -78,7 +102,90 @@ const {
 </style>
 
 <script>
+  type Turnstile = {
+    render: (el: HTMLElement, options: Record<string, unknown>) => string;
+    reset: (id?: string) => void;
+  };
+
+  /** Loads Cloudflare's script once per page, the first time any signup form is used. */
+  let turnstileApi: Promise<Turnstile> | undefined;
+  function loadTurnstile(): Promise<Turnstile> {
+    turnstileApi ??= new Promise<Turnstile>((resolve, reject) => {
+      const w = window as unknown as { turnstile?: Turnstile };
+      if (w.turnstile) return resolve(w.turnstile);
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.onload = () => (w.turnstile ? resolve(w.turnstile) : reject(new Error('Turnstile did not load')));
+      script.onerror = () => reject(new Error('Turnstile did not load'));
+      document.head.appendChild(script);
+    }).catch((err) => {
+      turnstileApi = undefined; // let the next attempt try again
+      throw err;
+    });
+    return turnstileApi;
+  }
+
+  /** The spam check for one form, or null when Turnstile is not configured. */
+  function humanCheck(form: HTMLFormElement) {
+    const key = form.dataset.turnstileKey;
+    const box = form.querySelector<HTMLElement>('[data-turnstile]');
+    if (!key || !box) return null;
+    let token = '';
+    let waiting: Array<(token: string) => void> = [];
+    let widget: Promise<{ api: Turnstile; id: string }> | undefined;
+    const start = () => {
+      widget ??= loadTurnstile()
+        .then((api) => ({
+          api,
+          id: api.render(box, {
+            sitekey: key,
+            theme: 'auto',
+            size: 'flexible',
+            appearance: 'interaction-only',
+            callback: (t: string) => {
+              token = t;
+              waiting.splice(0).forEach((resolve) => resolve(t));
+            },
+            'expired-callback': () => (token = ''),
+            'error-callback': () => (token = ''),
+          }),
+        }))
+        .catch((err) => {
+          widget = undefined;
+          throw err;
+        });
+      return widget;
+    };
+    return {
+      start: () => void start().catch(() => {}),
+      /** Resolves once Turnstile has issued a token (it adds the token to the form itself). */
+      async ready(timeoutMs = 20_000) {
+        await start();
+        if (token) return;
+        await new Promise<void>((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error('Turnstile timed out')), timeoutMs);
+          waiting.push(() => {
+            clearTimeout(timer);
+            resolve();
+          });
+        });
+      },
+      /** A token works once: get a fresh one after every submission. */
+      reset() {
+        token = '';
+        void widget?.then(({ api, id }) => api.reset(id)).catch(() => {});
+      },
+    };
+  }
+
   document.querySelectorAll<HTMLFormElement>('[data-signup-form]').forEach((form) => {
+    const check = humanCheck(form);
+    if (check) {
+      // Start early, so the token is usually there by the time the reader presses the button.
+      form.addEventListener('focusin', check.start, { once: true });
+      form.addEventListener('pointerdown', check.start, { once: true });
+    }
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector<HTMLButtonElement>('button[type=submit]');
@@ -88,6 +195,13 @@ const {
       if (btn) btn.setAttribute('aria-busy', 'true');
       if (err) err.hidden = true;
       try {
+        if (check) {
+          try {
+            await check.ready();
+          } catch {
+            throw new Error('The spam check did not load. Please check your connection and try again.');
+          }
+        }
         const res = await fetch(form.action, {
           method: 'POST',
           body: new FormData(form),
@@ -117,6 +231,7 @@ const {
         }
       } finally {
         if (btn) btn.removeAttribute('aria-busy');
+        check?.reset();
       }
     });
   });

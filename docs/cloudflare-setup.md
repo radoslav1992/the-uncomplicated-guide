@@ -78,7 +78,7 @@ once in the dashboard and survive deploys.
 | ------------------------ | --------------------------------------------------------------- | -------- |
 | `AUTH_SECRET`            | Any long random string (`openssl rand -base64 48`); signs newsletter links | yes |
 | `ADMIN_TOKEN`            | Another long random string; unlocks `/admin/newsletter`          | yes      |
-| `TURNSTILE_SECRET_KEY`   | From step 7, if you use Turnstile                                | optional |
+| `TURNSTILE_SECRET_KEY`   | From step 7; protects the signup and contact forms from bots     | recommended |
 
 The site no longer takes payments, so it needs no Stripe secrets. If `STRIPE_SECRET_KEY` or
 `STRIPE_WEBHOOK_SECRET` are still set on the Worker, delete them (see `docs/LAUNCH.md`).
@@ -115,8 +115,11 @@ Redeploy (or push a commit) after adding secrets so the running Worker picks the
 
 ## 7. Optional
 
-- [ ] **Turnstile** (contact-form spam protection): **Turnstile → Add widget**, mode *Managed*, add your
-      domain. Site key → `wrangler.jsonc` `PUBLIC_TURNSTILE_SITE_KEY`; secret key → secret `TURNSTILE_SECRET_KEY`.
+- [ ] **Turnstile** (spam protection for the newsletter signup and contact forms; recommended, because
+      every signup sends an email and bots fill the form with other people's addresses):
+      **Turnstile → Add widget**, mode *Managed*, add your domain. Site key → `wrangler.jsonc`
+      `PUBLIC_TURNSTILE_SITE_KEY`; secret key → secret `TURNSTILE_SECRET_KEY`. Set **both, then deploy**:
+      with only the secret set, the forms have no widget and every submission is refused.
 - [x] **Analytics (Google Tag Manager)**: `PUBLIC_GTM_CONTAINER_ID` in `wrangler.jsonc` holds the
       container id (`GTM-M9K8ZPJC`). The site shows the cookie banner and loads the container only
       after a visitor allows analytics; nothing is requested from Google before that or after a
